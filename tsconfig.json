@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "declaration": true, // No debe estar en false
+    "jsx": "react-jsx",
+    "outDir": "./dist", // Asegúrate de que esté configurado
+    "strict": true
+  },
+    // "include": ["src/**/*"],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
