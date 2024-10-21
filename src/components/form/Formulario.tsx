@@ -109,7 +109,6 @@ const validate = (validations: Array<any>, errors: Record<string, string>, name:
             
                 // Validar el valor
                 if (!regex.test(value)) {
-                    console.log("Error: formato incorrecto", regex); // Muestra el regex para depuración
                     errors[name] = item.validations.matches.message; // Asigna el mensaje de error
                 } 
                 else{

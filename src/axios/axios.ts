@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from "axios";
 // Crear una instancia de Axios
 export const Axios = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  timeout: 1000, // Tiempo de espera en milisegundos
+  // timeout: 1000, // Tiempo de espera en milisegundos
   headers: {
     "Content-Type": "application/json",
   },
