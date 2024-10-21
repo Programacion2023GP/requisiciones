@@ -2,9 +2,9 @@ import React from "react";
 
 export interface ItemInterface<T = {}> {
   id: number;
-  Avatar: string;
+  Avatar?: string;
   Name: string;
-  Departamento: string;
+  Departamento?: string;
   loading?: boolean; // Hacer loading opcional
   
   buttons?: (item: T) => React.ReactNode;
@@ -19,5 +19,5 @@ export interface ListInterface {
   filter: boolean;
   data: Array<any>;
   buttons?: (item: any) => React.ReactNode;
-  reload: () => void;
+  reload?: () => void;
 }

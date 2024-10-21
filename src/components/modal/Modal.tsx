@@ -16,7 +16,7 @@ export const ModalComponent: React.FC<InterfaceModal> = ({
 
   return (
     <>
-      <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-60 backdrop-blur-sm transition-opacity duration-300 ease-out">
+{open &&(      <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-60 backdrop-blur-sm transition-opacity duration-300 ease-out">
         <div className="relative w-11/12 sm:w-5/6 lg:w-1/2 max-w-4xl mx-auto rounded-xl shadow-2xl bg-white transform transition-transform duration-300 ease-out scale-100">
           <div className="flex justify-between items-center p-6 bg-white border-b border-gray-100 rounded-t-xl">
             <p className="text-lg font-semibold text-gray-800">{title}</p>
@@ -39,7 +39,7 @@ export const ModalComponent: React.FC<InterfaceModal> = ({
 
           <div className="px-6 py-2 bg-white">{children}</div>
         </div>
-      </div>
+      </div>)}
     </>
   );
 };

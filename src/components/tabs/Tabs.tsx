@@ -41,7 +41,7 @@ export const TabsComponent: React.FC<TabsInterface> = ({ children }) => {
           ))}
         </ul>
       </div>
-      <div className="bg-white p-4 border border-gray-300 rounded-b-md">
+      <div className="bg-gray-50 p-4 border border-gray-300 rounded-b-md">
         {renderContent()}
       </div>
     </>

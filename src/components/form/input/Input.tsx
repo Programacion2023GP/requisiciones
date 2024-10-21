@@ -130,9 +130,14 @@ export const FInput: React.FC<Props> = ({
      <div className="relative mb-6">
      <input
        className={`block w-full px-3 py-2 text-sm text-gray-900 bg-transparent border-b-2 rounded-md appearance-none focus:outline-none focus:ring-0 
-         focus:border-blue-600 peer ${
+          peer ${
            data.errors?.[name] ? "border-red-600" : "border-gray-300"
-         }`}
+         }
+         ${data.initialValues?.[name] && !data.errors?.[name] && "border-teal-300"}
+         `
+
+        }
+        
        type={type}
        name={name}
        id={name}
@@ -151,10 +156,15 @@ export const FInput: React.FC<Props> = ({
      />
      <label
        htmlFor={name}
-       className={`absolute left-3 top-2 text-sm text-gray-500 transition-all duration-300 transform origin-[0] 
-         peer-placeholder-shown:scale-100 peer-placeholder-shown:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 
-         ${data.errors?.[name] ? "text-red-600" : "text-gray-500"}
-       `}
+       className={`absolute left-3 top-2 text-sm transition-all duration-300 transform origin-[0] 
+        ${data.initialValues?.[name] ? '-translate-y-4 scale-75' : 'scale-100 text-gray-500'} 
+        peer-placeholder-shown:top-2 
+        peer-focus:-translate-y-4 peer-focus:scale-75 ${
+          data.errors?.[name] ? "text-red-600" : ""
+        }
+                 ${data.initialValues?.[name] && !data.errors?.[name] && "text-teal-300"}
+
+        `}
      >
        {label}
      </label>

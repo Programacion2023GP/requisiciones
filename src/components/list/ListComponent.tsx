@@ -43,9 +43,9 @@ export const ListComponent = ({
         {filter && (
           <div className="mt-3">
             <div className="flex items-center">
-              <button className="mr-4">
+             {reload &&( <button className="mr-4">
                 <i className="ri-restart-line ri-2x"></i>
-              </button>
+              </button>)}
               <div className="flex-1">
                 <InputComponent
                   label="buscador"
@@ -84,21 +84,22 @@ export const ItemComponent = <T extends ItemInterface>({
   buttons?: (item: T) => React.ReactNode;
 }) => {
   return (
-    <div className="group flex items-center gap-x-5 rounded-md px-2.5 py-2 transition-all duration-75 hover:bg-green-100">
-      <div className="flex h-12 w-12 items-center rounded-lg bg-gray-200 text-black group-hover:bg-green-200">
+    <div className="group flex items-center gap-x-5 rounded-md px-2.5 py-2 transition-all duration-75 ">
+     {item.Avatar && ( <div className="flex h-12 w-12 items-center rounded-lg bg-gray-200 text-black group-hover:bg-green-200">
         <span className="tag w-full text-center text-2xl font-medium text-gray-700 group-hover:text-green-900">
-          {item.Avatar}{" "}
-          {/* Suponiendo que el item tiene la propiedad 'avatar' */}
+          {item.Avatar}
         </span>
-      </div>
+      </div>)}
       <div className="flex flex-col items-start justify-between font-light text-gray-600">
         <p className="text-[15px]">
-          {item.Name} {/* Suponiendo que el item tiene la propiedad 'name' */}
+          {item.Name} 
         </p>
-        <span className="text-xs font-light text-gray-400">
-          {item.Departamento}{" "}
-          {/* Suponiendo que el item tiene la propiedad 'departamento' */}
-        </span>
+       
+       {item.Departamento && (
+ <span className="text-xs font-light text-gray-400">
+ {item.Departamento}
+</span>
+       )}
       </div>
       <div className="ml-auto flex gap-x-2">
         {buttons && buttons(item)}{" "}
