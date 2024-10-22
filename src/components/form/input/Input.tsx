@@ -109,20 +109,23 @@ export const FInput: React.FC<Props> = ({
   ]);
 
   const handleChange = (e: { target: { value: any } }) => {
+    const upperCaseValue = e.target.value.toUpperCase();
+  
     setData({
       type: "initialValues",
       action: "add",
       name,
-      value: e.target.value,
+      value: upperCaseValue, // Convertir a mayúsculas
     });
-
+  
     setData({
       type: "errors",
       action: "add",
       name,
-      value: e.target.value,
+      value: upperCaseValue, // Convertir a mayúsculas
     });
   };
+  
 
   return (
     <>

@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import { InputComponet } from "./InputInterface";
 
 export const InputComponent:React.FC<InputComponet> = ({label,setValue,value}) => {
-    // const [value,setValue] = useState<string>("")
+    const [message,setMessage] = useState<string>("")
     return (
         <div className="relative w-full">
         <input
+
           onChange={
             (e) => {
-              setValue(e.target.value);
+              setMessage(e.target.value);
+              setValue(e.target.value)
             }
           }
           type="text"
@@ -19,7 +21,11 @@ export const InputComponent:React.FC<InputComponet> = ({label,setValue,value}) =
         />
         <label
           htmlFor="enhancedFloatingInput"
-          className="absolute left-2 top-2 text-sm text-gray-500 transition-all duration-300 transform scale-100 origin-[0] bg-white px-2 peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-4 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:scale-100 peer-focus:top-0 peer-focus:left-4 peer-focus:scale-75 peer-focus:-translate-y-1 peer-focus:text-blue-600"
+          className={`absolute left-2 top-2 text-sm text-gray-500 transition-all duration-300 transform scale-100 origin-[0] peer-focus:text-blue-600 bg-white px-2 ${
+            message
+              ? "top-0 left-4 scale-75 -translate-y-1 " // Si tiene valor, se mantiene levantado
+              : "peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-4 peer-placeholder-shown:scale-100 peer-focus:top-0 peer-focus:left-4 peer-focus:scale-75 peer-focus:-translate-y-1 peer-focus:text-blue-600"
+          }`}
         >
           {label}
         </label>

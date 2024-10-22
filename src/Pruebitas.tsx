@@ -9,7 +9,9 @@ import Sidebar from "./components/sidebar/Sidebar";
 import { useEffect } from "react";
 
 export const Pruebitas = () => {
-  
+  useEffect(()=>{
+    console.log("cargando inicio");
+  },[])
   return (
     <>
      <div className="flex h-screen">

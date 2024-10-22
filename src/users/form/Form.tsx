@@ -1,51 +1,101 @@
 // import React from "react";
-import { useContext } from "react";
-import { Formulario } from "../../components/form/Formulario";
+import { useContext, useRef } from "react";
+import { FormHandle, Formulario } from "../../components/form/Formulario";
 import { FInput } from "../../components/form/input/Input";
 import { FSelect } from "../../components/form/select/Select";
 import { ContextUsers } from "..";
 import { Axios } from "../../axios/axios";
 
 const FormUsers = ({}) => {
+  const ref = useRef<FormHandle>(null);
   const context = useContext(ContextUsers);
   if (!context) {
     throw new Error(
       "SomeChildComponent must be used within a ContextUsers.Provider"
     );
   }
-  const { departamentos,setOpen } = context;
+  const { departamentos, setOpen, setAlert, getUsers, edituser, modal } =
+    context;
   const submit = (values: Record<string, any>) => {
-    Axios.post("/users", values)
-      .then((s) => {
-        console.log(s.data);
-        setOpen(false)
-      })
-      .catch((e) => {console.log(e);});
-  };
+    if (!edituser) {
+      Axios.post("/users", values)
+        .then((s) => {
+          console.log(s.data);
+          ref.current?.resetForm();
+          setAlert({
+            loading: true,
+            title: s.data.title,
+            message: s.data.message,
+            type: "success",
+            icon: <i className="ri-shield-user-line ri-2x"></i>,
+          });
+          setOpen(false);
+          getUsers();
+        })
+        .catch((e) => {
+          setAlert({
+            loading: true,
+            title: e.response.data.title,
+            message: e.response.data.message,
+            type: "error",
+            icon: <i className="ri-shield-user-line ri-2x"></i>,
+          });
+        });
+    }
+    else{
+      Axios.put(`/users/${edituser.id}`, values)
+       .then((s) => {
+          console.log(s.data);
+          ref.current?.resetForm();
+          setAlert({
+            loading: true,
+            title: s.data.title,
+            message: s.data.message,
+            type: "success",
+            icon: <i className="ri-shield-user-line ri-2x"></i>,
+          });
+          setOpen(false);
+          getUsers();
+        })
+       .catch((e) => {
+          setAlert({
+            loading: true,
+            title: e.response.data.title,
+            message: e.response.data.message,
+            type: "error",
+            icon: <i className="ri-shield-user-line ri-2x"></i>,
+          });
+        });
+    }
+  }
 
   return (
-    <Formulario onSubmit={submit}>
+    <Formulario ref={ref} onSubmit={submit}>
       {({}) => (
         <>
           <FInput
             label="nombre"
-            name="Name"
+            name="name"
+            value={edituser?.name || null}
             required={{ condition: true, message: "es necesario el nombre" }}
           />
           <FInput
             label="Apellido Paterno"
-            name="PaternalName"
+            name="paternalname"
+            value={edituser?.paternalname || null}
             required={{ condition: true, message: "es necesario el nombre" }}
           />
           <FInput
             label="Apellido Materno"
-            name="MaternalName"
+            name="maternalname"
+            value={edituser?.maternalname || null}
             required={{ condition: true, message: "es necesario el nombre" }}
           />
           <FInput
             label="Correo electronico"
-            name="Email"
+            name="email"
             type="email"
+            value={edituser?.email || null}
             matches={{
               condition:
                 '^(([^<>()[\\]\\\\.,;:\\s@"]+(\\.[^<>()[\\]\\\\.,;:\\s@"]+)*)|(".+"))@(([^<>()[\\]\\\\.,;:\\s@"]+\\.)+[^<>()[\\]\\\\.,;:\\s@"]{2,})$',
@@ -57,10 +107,11 @@ const FormUsers = ({}) => {
             }}
           />
           <FSelect
-            name="Departamento"
+            name="id_group"
             label="Selecciona el departamento correspondiente"
-            keyLabel="Departamento"
+            keyLabel="group"
             keyValue="id"
+            value={edituser?.id_group || null}
             options={departamentos}
             required={{
               condition: true,
@@ -73,6 +124,12 @@ const FormUsers = ({}) => {
             name="Password"
             required={{ condition: true, message: "es necesario el nombre" }}
           /> */}
+          <button
+            type="submit"
+            className="w-24 h-10 bg-cyan-500 text-white font-semibold rounded-md shadow-md transition duration-300 ease-in-out transform hover:bg-cyan-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-opacity-50"
+          >
+            {modal?.messageButton}
+          </button>
         </>
       )}
     </Formulario>

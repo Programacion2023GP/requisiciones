@@ -1,4 +1,4 @@
-import { createContext, Dispatch, useEffect, useReducer } from "react";
+import { createContext, Dispatch, forwardRef, useEffect, useImperativeHandle, useReducer } from "react";
 import React from 'react';
 
 interface Form {
@@ -9,8 +9,8 @@ interface Form {
 }
 
 interface Action {
-  type: "initialValues"|"errors"|"touched"|"validation";
-  action: "add"| "delete"|"edit" | "view";
+  type: "initialValues"|"errors"|"touched"|"validation"|"reset";
+  action: "add"| "delete"|"edit" | "view"|"reset";
   name?:string,
   value?:any,
   validation?: Record<string, any>; // Asegúrate de que sea un arreglo de objetos
@@ -30,6 +30,10 @@ const form: Form = {
 
 const reducer =(state:Form,action:Action):Form=>{
     switch(action.type){
+        case "reset":
+            return form;
+            break
+
         case "initialValues":
                 switch (action.action) {
                   case "add":
@@ -182,10 +186,23 @@ interface FormContextType {
 interface IFormulario{
     children: (props: { values: Record<string, any> }) => React.ReactNode;
     onSubmit?: (values: Record<string, any>) => void; // Acepta un argumento
+    ref?: React.Ref<HTMLFormElement>; // Agrega esta línea
+
 }
+export interface FormHandle {
+    resetForm: () => void;
+  }
+  
 export const FormContext = createContext<FormContextType | undefined>(undefined);
-export const Formulario :React.FC<IFormulario>= ({children,onSubmit}) => {
-  const [data,setData] = useReducer(reducer,form)
+export const Formulario = forwardRef<FormHandle, IFormulario>(
+    ({ children, onSubmit }, ref) => { 
+        
+    const [data,setData] = useReducer(reducer,form)
+    useImperativeHandle(ref, () => ({
+        resetForm: () => {
+              setData({ type: "reset", action: "reset" });
+            }
+     }));
  useEffect(()=>{
  },[children])
  const submit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -230,17 +247,12 @@ export const Formulario :React.FC<IFormulario>= ({children,onSubmit}) => {
 
 
   return (  
-    <form onSubmit={submit}>
+    <form   onSubmit={submit} >
         <FormContext.Provider value={{data,setData}}>
          {children({values:data.initialValues})}
-         <button
-            type="submit"
-            className="w-24 h-10 bg-cyan-500 text-white font-semibold rounded-md shadow-md transition duration-300 ease-in-out transform hover:bg-cyan-600 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-opacity-50"
-          >
-            Registrar
-          </button>
+       
         </FormContext.Provider>
     </form>
   );
-};
+});
 

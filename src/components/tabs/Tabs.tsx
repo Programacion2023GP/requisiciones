@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TabsInterface } from './TabsInterface'; // Asegúrate de que la ruta sea correcta
 
-export const TabsComponent: React.FC<TabsInterface> = ({ children }) => {
+export const TabsComponent: React.FC<TabsInterface> = React.memo(({ children }) => {
   // Convierte children en un array y verifica que no esté vacío
   const childrenArray = React.Children.toArray(children);
   const firstChild = React.isValidElement(childrenArray[0]) ? childrenArray[0] : null;
-
+ useEffect(()=>{
+  console.log("rendering TabsComponent");
+ },[])
   // Si no hay hijos, puedes manejarlo como desees (por ejemplo, mostrando un mensaje)
   const [activeTab, setActiveTab] = useState(firstChild ? firstChild.props.title : '');
 
@@ -46,7 +48,7 @@ export const TabsComponent: React.FC<TabsInterface> = ({ children }) => {
       </div>
     </>
   );
-};
+});
 
 // Componente TabElement
 export const TabElement: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {

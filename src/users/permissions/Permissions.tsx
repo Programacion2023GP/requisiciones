@@ -134,6 +134,7 @@ export const PermissionComponent: React.FC = () => {
       </div>
         {items.map((item) => (
           <ListComponent
+          titleItem="Name"
             addIcon={
               <>
               <Tooltip content="Añadir todo">

@@ -1,19 +1,21 @@
 import React from "react";
 
-export interface ItemInterface<T = {}> {
-  id: number;
-  Avatar?: string;
-  Name: string;
-  Departamento?: string;
+export interface ItemInterface{
+  id?: string;
+  iconItem?: React.ReactNode;
+  titleItem: string;
+  subtitleItem?: string;
   loading?: boolean; // Hacer loading opcional
-  
-  buttons?: (item: T) => React.ReactNode;
+  item: Record<string,any>;
+  buttons?: (item: any) => React.ReactNode;
 }
 
 export interface ListInterface {
   loading: boolean;
   addIcon?:  React.ReactNode;
-
+  titleItem: string;
+  subtitleItem?: string;
+  iconItem?: React.ReactNode;
   title: string;
   button: React.ReactNode;
   filter: boolean;

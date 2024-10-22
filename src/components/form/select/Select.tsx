@@ -55,6 +55,15 @@ export const FSelect: React.FC<Props> = ({
 
   useEffect(() => {
     setData({ type: "initialValues", action: "add", name, value });
+    if (value) {
+    
+      const item = options.find((option) => option[keyValue] === value);
+    
+      if (item) {
+        setSearchTerm(item[keyLabel])
+      } 
+    }
+    
   }, [name, value, setData]);
  useEffect(() => {},[label]);
   useEffect(() => {

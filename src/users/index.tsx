@@ -5,22 +5,42 @@ import { ModalComponent } from "../components/modal/Modal";
 import FormUsers from "./form/Form";
 import { PermissionComponent } from "./permissions/Permissions";
 import { AxiosGet } from "../axios/axios";
+import ToastComponent, { ToastProps } from "../components/toast/Toast";
+import { UsersHook } from "./usersHook";
 interface ContextType {
   // open: boolean;
   setOpen: (open: boolean) => void;
-  departamentos:Array<Departamentos>
+  setAlert: (props: ToastProps) => void;
+  departamentos:Array<Departamentos>,
+  users:Array<any>,
+  setModal :(modal:MessageModal)=>void;
+  getUsers:()=>void,
+  edituser:Record<any,any>,
+  setEditUser:(user:any)=>void,
+  modal:MessageModal|undefined,
 }
 interface Departamentos {
   id: number;
-  Departamento: string;
+  group: string;
   // Dependencia: string;
  
 }
 
+interface MessageModal {
+  title: string;
+  messageButton: string;
+
+}
+
+
 export const ContextUsers = createContext<ContextType | null>(null);
 export const IndexUsers=()=>{
+  const {users,getUsers,edituser,setEditUser} =UsersHook()
   const [open,setOpen] = useState<boolean>(false);
+  const [toast,setToast] = useState<ToastProps>();
+  const [modal,setModal] = useState<MessageModal>()
   const [departamentos,setDepartamentos] = useState<Array<Departamentos>>([]);
+  
   useEffect(() => {
     console.log("cargando  index users....");
     const init = async()=>{
@@ -30,10 +50,17 @@ export const IndexUsers=()=>{
     init();
 
   }, []); 
+  const setAlert = (toast:ToastProps)=>{
+    setToast(toast);
+    setTimeout(() => {
+      setToast({ loading: false,message:"",title:"",type:"error" });
+    }, 2500);
+  }
 return (
  <>
-
- <ContextUsers.Provider value={{setOpen,departamentos}}>
+  {toast?.loading && (<ToastComponent loading={toast?.loading}  title={toast?.title} message={toast?.message} type={toast?.type} icon={toast?.icon}/>
+)}
+ <ContextUsers.Provider value={{setOpen,setAlert,departamentos,users,getUsers,setModal,edituser,setEditUser,modal}}>
     <TabsComponent>
         <TabElement title="Usuarios"><Users/></TabElement>
         <TabElement title="Permisos">
@@ -42,8 +69,8 @@ return (
 
         </TabElement>
   </TabsComponent>
-  <ModalComponent title={'usuarios'} open={open} setOpen={setOpen}messageButton="registrar" handleButton={()=>{}} >
-      <FormUsers/>
+  <ModalComponent title={modal?.title} open={open} setOpen={setOpen} handleButton={()=>{}} >
+      <FormUsers />
   </ModalComponent>
  </ContextUsers.Provider>
  </>
