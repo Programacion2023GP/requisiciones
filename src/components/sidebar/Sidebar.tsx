@@ -1,62 +1,110 @@
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
-const Sidebar :React.FC=()=>{
-    const [isOpen, setIsOpen] = useState(true); // Estado para colapsar o expandir el sidebar
 
-    return (
-      <aside className={`bg-cyan-500 h-screen ${isOpen ? 'w-64' : 'w-20'} transition-width duration-300 ease-in-out flex flex-col`}>
-        {/* Botón para colapsar/expandir el sidebar */}
-        <div className="flex justify-end p-4">
-          <button
-            className="text-white focus:outline-none"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            <i className={`ri-${isOpen ? 'menu-fold-line' : 'menu-unfold-line'} ri-xl`}></i>
-          </button>
-        </div>
+
+const SidebarItem: React.FC<{
+  icon: string;
+  label: string;
+  isOpen: boolean;
+  href: string;
+}> = ({ icon, label, isOpen, href }) => {
+  const location = useLocation(); // Hook para obtener la ruta actual
   
-        {/* Logo */}
-        <div className={`mb-8 ${isOpen ? 'px-6' : 'px-2'} transition-all duration-300`}>
-          <h2 className={`text-white font-bold text-2xl tracking-wide ${!isOpen && 'opacity-0'} transition-opacity duration-300`}>
-            Mi App
-          </h2>
-        </div>
-  
-        {/* Navegación */}
-        <nav className="flex-1">
-          <ul className="space-y-4">
-            <li>
-              <a href="#" className="flex items-center text-white px-6 py-3 hover:bg-cyan-600 rounded-md transition duration-300 ease-in-out">
-                <i className="ri-home-2-line ri-lg"></i>
-                {isOpen && <span className="ml-3">Inicio</span>}
-              </a>
+  useEffect(() => {
+    console.log('Ruta actual:', location.pathname);
+  }, [location.pathname]); // Monitorea los cambios de ruta
+
+  return (
+    <li>
+      <Link
+        to={href}
+        className={`flex items-center text-white px-6 py-3 hover:bg-cyan-600 rounded-md transition duration-300 ease-in-out ${location.pathname === href ? 'bg-cyan-600' : ''}`}
+      >
+        <i className={`${icon} ri-lg`}></i>
+        {isOpen && <span className="ml-3">{label}</span>}
+      </Link>
+    </li>
+  );
+};
+
+export default SidebarItem;
+
+ 
+
+ 
+
+
+// Componente dropdown
+
+
+const Dropdown: React.FC<{
+  isOpen: boolean;
+  label: string;
+  items: { label: string; href: string; icon: string }[];
+}> = ({ isOpen, label, items }) => {
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+
+  return (
+    <div>
+      <button
+        className="flex items-center text-white px-6 py-3 hover:bg-cyan-600 rounded-md transition duration-300 ease-in-out w-full text-left"
+        onClick={() => setDropdownOpen(!isDropdownOpen)}
+        aria-expanded={isDropdownOpen}
+        aria-controls="dropdown-list"
+      >
+        <i className="ri-folder-line ri-lg"></i>
+        {isOpen && <span className="ml-3">{label}</span>}
+        <i
+          className={`ri-arrow-${isDropdownOpen ? 'up' : 'down'}-line ml-auto`}
+        ></i>
+      </button>
+      {isDropdownOpen && (
+        <ul
+          id="dropdown-list"
+          className="pl-4 space-y-2"
+          aria-hidden={!isDropdownOpen}
+        >
+          {items.map((item, index) => (
+            <li key={index}>
+              <SidebarItem href={item.href} icon={item.icon} label={item.label} isOpen/>
+              {/* <Link
+                to={item.href}
+                className="flex items-center text-white hover:bg-cyan-600 rounded-md py-2 px-4 transition duration-300 ease-in-out"
+              >
+                <i className={`${item.icon} ri-lg`}></i>
+                {isOpen && <span className="ml-3">{item.label}</span>}
+              </Link> */}
             </li>
-            <li>
-              <a href="#" className="flex items-center text-white px-6 py-3 hover:bg-cyan-600 rounded-md transition duration-300 ease-in-out">
-                <i className="ri-user-line ri-lg"></i>
-                {isOpen && <span className="ml-3">Usuarios</span>}
-              </a>
-            </li>
-            <li>
-              <a href="#" className="flex items-center text-white px-6 py-3 hover:bg-cyan-600 rounded-md transition duration-300 ease-in-out">
-                <i className="ri-file-list-line ri-lg"></i>
-                {isOpen && <span className="ml-3">Reportes</span>}
-              </a>
-            </li>
-            <li>
-              <a href="#" className="flex items-center text-white px-6 py-3 hover:bg-cyan-600 rounded-md transition duration-300 ease-in-out">
-                <i className="ri-settings-3-line ri-lg"></i>
-                {isOpen && <span className="ml-3">Configuración</span>}
-              </a>
-            </li>
-          </ul>
-        </nav>
-  
-        {/* Footer */}
-        <div className="px-6 py-4 text-sm text-gray-300">
-          {/* <p className={`${isOpen ? '' : 'hidden'}`}>© 2024 Mi App</p> */}
-        </div>
-      </aside>
-    );
-}
-export default Sidebar;
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+
+
+// Componente Sidebar
+const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <aside
+      className={`bg-gradient-to-b from-cyan-500 to-cyan-600 h-screen ${
+        isOpen ? "w-64" : "w-14"
+      } transition-width duration-300 flex flex-col`}
+    >
+      <div className="flex justify-end p-4">
+        <button className="text-white" onClick={() => setIsOpen(!isOpen)}>
+          <i className="ri-menu-line"></i>
+        </button>
+      </div>
+      <nav className="flex-1">
+        <ul className="space-y-4">{children}</ul>
+      </nav>
+    </aside>
+  );
+};
+
+export { Sidebar, Dropdown, SidebarItem };

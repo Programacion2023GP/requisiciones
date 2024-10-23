@@ -2,6 +2,8 @@ import { useContext, useEffect, useReducer, useState } from "react";
 import { ListComponent } from "../../components/list/ListComponent";
 import { Axios, AxiosGet } from "../../axios/axios";
 import { ContextUsers } from "..";
+import Tooltip from "../../components/toltip/Toltip";
+import { SwitchComponent } from "../../components/switch/Switch";
 
 export const Users = () => {
   const context = useContext(ContextUsers)
@@ -33,14 +35,40 @@ export const Users = () => {
 
     })
   }
+  const handleSelectAllChange = (it:Record<string,any>)=>{
+    Axios.put(`/users/${it!!.id}`, {...it,active:!it.active})
+    .then((response) => {
+      getUsers();
+      setAlert({
+        loading: true,
+        title: response.data.title,
+        message: response.data.message,
+        type: "success",
+        icon: <i className="ri-information-line ri-2x"></i>,
+      });
+    })
+    .catch((error) => {
+      getUsers();
+  
+      setAlert({
+        loading: true,
+        title: error.response.data.title,
+        message: error.response.data.message,
+        type: "error",
+        icon: <i className="ri-information-line ri-2x"></i>,
+      });
+    });
+  } 
   return (
     <ListComponent
       title="Usuarios del sistema"
-      loading={false}
+      loading={users.length > 0 ?false : true}
       filter
       button
       titleItem="fullname"
       subtitleItem="departamento.group"
+      otherItems={['email']}
+      
       addIcon={
         <>
           <button
@@ -60,6 +88,18 @@ export const Users = () => {
       // loading={users.loading}
       buttons={(item) => (
         <>
+        <Tooltip content={`click para ${item.active?'desactivar':'activar'} status`}>
+              <div className="mt-1">
+                <SwitchComponent
+                  iconClass={item.active?'ri-check-line':'ri-close-line'} // Icono para "Todos"
+                  classChecked={item.active?'bg-green-500':'bg-red-500'} // Color para "Todos"
+                  checked={item.active} // Marca "Todos" si todos están seleccionados
+                  onChange={()=>{
+                    handleSelectAllChange(item)
+                  }}
+                />
+              </div>
+            </Tooltip>
           <button
             onClick={()=>{
               handleEdit(item)

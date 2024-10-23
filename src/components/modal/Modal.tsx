@@ -39,6 +39,7 @@ export const ModalComponent: React.FC<InterfaceModal> = ({
           </div>
 
           <div className="px-6 py-2 bg-white">{children}</div>
+       
         </div>
       </div>)}
     </>

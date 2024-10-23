@@ -37,14 +37,9 @@ const ProgressBar: React.FC<{ duration: number }> = ({ duration }) => {
 
 const ToastComponent: React.FC<ToastProps> = ({ icon, title, message, type, loading=false }) => {
   let bgColor, borderColor;
-  const [isvisible,setIsvisible] = useState<boolean>(false)
+  const [isvisible,setIsvisible] = useState<boolean>(loading)
   useEffect(() => {
-    setIsvisible(loading);
-    if (loading){
-        setTimeout(() => {
-            setIsvisible(false);    
-        }, 2500);
-    }
+    
 
   }, [loading]);
 

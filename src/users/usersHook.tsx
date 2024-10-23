@@ -4,20 +4,21 @@ import { AxiosGet } from "../axios/axios";
 export const UsersHook = () => {
   const [users, setUsers] = useState([]);
   const [edituser,setEditUser] = useState({});
+  const [loading,setLoading] = useState<boolean>(false);
   const getUsers = async () => {
+    setLoading(!loading);
+  };
+  const reloadUsers = async () => {
     try {
       const response = await AxiosGet("users");
       setUsers(response);
     } catch (error) {}
   };
   useEffect(() => {
-     
-
-    getUsers();
-    console.log("Users Hook");
-  }, [setUsers]);
+  
+    reloadUsers();
+  }, [loading]);
   useEffect(() => {
-    console.log(edituser);
   }, [edituser]);
   return {
     users,

@@ -24,7 +24,7 @@ export const TabsComponent: React.FC<TabsInterface> = React.memo(({ children }) 
 
   return (
     <>
-      <div className="border-b-2 border-gray-300">
+      <div className="border-b-2 border-gray-300 ">
         <ul className="flex cursor-pointer">
           {React.Children.map(children, (child) => (
             React.isValidElement(child) && (
@@ -53,7 +53,7 @@ export const TabsComponent: React.FC<TabsInterface> = React.memo(({ children }) 
 // Componente TabElement
 export const TabElement: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
   return (
-    <div>
+    <div className="">
       {children}
     </div>
   );

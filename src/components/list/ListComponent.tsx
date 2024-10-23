@@ -6,7 +6,7 @@ export const ListComponent = ({
   title,
   button,
   filter,
-  data=[],
+  data = [],
   buttons,
   reload,
   addIcon,
@@ -14,29 +14,36 @@ export const ListComponent = ({
   iconItem,
   subtitleItem,
   titleItem,
+  otherItems = [],
 }: ListInterface) => {
   const [value, setvalue] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Página actual
-  const itemsPerPage = 5; // Cantidad de elementos por página
- useEffect(()=>{
- },[data])
+  const itemsPerPage = 5;
+  useEffect(() => {}, [data]);
   const options = useMemo(() => {
     const normalizedSearchTerm = value
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "")
       .toLowerCase();
-   
-    return data.filter((item) =>
-      Object.values(item).some((prop) =>
-        String(prop)
+
+    const containsNormalizedTerm = (prop: any) => {
+      if (typeof prop === "object" && prop !== null) {
+        return Object.values(prop).some(containsNormalizedTerm);
+      } else {
+        const normalizedProp = String(prop)
           .normalize("NFD")
           .replace(/[\u0300-\u036f]/g, "")
           .replace(/\s+/g, "")
-          .toLowerCase()
-          .includes(normalizedSearchTerm)
-      )
-    );
+          .toLowerCase();
+
+        return normalizedProp.includes(normalizedSearchTerm);
+      }
+    };
+
+    return data.filter((item) => {
+      return Object.values(item).some(containsNormalizedTerm);
+    });
   }, [value, data]);
 
   // Calcular los elementos que deben mostrarse en la página actual
@@ -84,6 +91,7 @@ export const ListComponent = ({
 
             {currentItems.map((item, index) => (
               <ItemComponent
+                otherItems={otherItems}
                 key={index}
                 item={item}
                 titleItem={titleItem}
@@ -96,37 +104,38 @@ export const ListComponent = ({
         </div>
 
         {/* Paginación */}
-        <div className="flex justify-center mt-4 space-x-2">
-          <button
-            onClick={() => paginate(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="mx-1 px-3 py-1 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 disabled:border-gray-100 disabled:text-gray-300"
-          >
-            Anterior
-          </button>
-
-          {Array.from({ length: totalPages }, (_, i) => (
+        {data.length > itemsPerPage && (
+          <div className="flex justify-center mt-4 space-x-2">
             <button
-              key={i + 1}
-              onClick={() => paginate(i + 1)}
-              className={`mx-1 px-4 py-2 rounded-full border transition-all duration-200 ${
-                currentPage === i + 1
-                  ? "border-blue-500 bg-blue-500 text-white"
-                  : "border-gray-300 text-gray-500 hover:bg-gray-100"
-              }`}
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="mx-1 px-3 py-1 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 disabled:border-gray-100 disabled:text-gray-300"
             >
-              {i + 1}
+              Anterior
             </button>
-          ))}
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => paginate(i + 1)}
+                className={`mx-1 px-4 py-2 rounded-full border transition-all duration-200 ${
+                  currentPage === i + 1
+                    ? "border-blue-500 bg-blue-500 text-white"
+                    : "border-gray-300 text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
 
-          <button
-            onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="mx-1 px-3 py-1 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 disabled:border-gray-100 disabled:text-gray-300"
-          >
-            Siguiente
-          </button>
-        </div>
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="mx-1 px-3 py-1 rounded-full border border-gray-300 text-gray-500 hover:bg-gray-100 disabled:border-gray-100 disabled:text-gray-300"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -141,6 +150,7 @@ export const ItemComponent: React.FC<ItemInterface> = ({
   subtitleItem,
   titleItem,
   item,
+  otherItems = [],
 }) => {
   const getNestedValue = (
     obj: Record<string, any>,
@@ -163,10 +173,24 @@ export const ItemComponent: React.FC<ItemInterface> = ({
         <p className="text-[15px]">{getNestedValue(item, titleItem)}</p>
 
         {subtitleItem && (
-          <span className="text-xs font-light text-gray-400">
+          <span className="text-sm font-light text-gray-400">
             {getNestedValue(item, subtitleItem)}
           </span>
         )}
+        <div className="flex flex-col space-y-2">
+          {" "}
+          {/* Contenedor Flexbox */}
+          {otherItems.map((otherItem, index) => (
+            <div
+              key={index}
+              className="text-xs font-light text-gray-400 flex items-center"
+            >
+              {" "}
+              {/* Flex para cada item */}
+              {getNestedValue(item, otherItem)}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="ml-auto flex gap-x-2">{buttons && buttons(item)} </div>
     </div>
