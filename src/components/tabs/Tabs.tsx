@@ -4,7 +4,7 @@ import { TabsInterface } from './TabsInterface'; // Asegúrate de que la ruta se
 export const TabsComponent: React.FC<TabsInterface> = React.memo(({ children }) => {
   // Convierte children en un array y verifica que no esté vacío
   const childrenArray = React.Children.toArray(children);
-  const firstChild = React.isValidElement(childrenArray[0]) ? childrenArray[0] : null;
+  const firstChild = React.isValidElement(childrenArray[1]) ? childrenArray[1] : null;
  useEffect(()=>{
   console.log("rendering TabsComponent");
  },[])

@@ -8,11 +8,13 @@ export interface ItemInterface{
   loading?: boolean; // Hacer loading opcional
   item: Record<string,any>;
   otherItems?:Array<string>,
+  selected?:string,
 
   buttons?: (item: any) => React.ReactNode;
 }
 
 export interface ListInterface {
+  selected?:string,
   loading: boolean;
   addIcon?:  React.ReactNode;
   titleItem: string;

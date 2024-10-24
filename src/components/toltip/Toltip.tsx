@@ -16,12 +16,13 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
 >
   {children}
   <span
-    className={`absolute z-40 right-full w-40  top-1/2 transform -translate-y-1/2 mr-2 text-xs text-white bg-black rounded py-2 px-3 transition-opacity duration-300 ease-in-out 
-                ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
-    style={{ pointerEvents: 'none' }} // Evita interferencias con el hover del padre
-  >
-    {content}
-  </span>
+  className={`absolute z-40 right-full w-40 bottom-2/4 transform -translate-y-1/2 mr-2 text-xs text-white bg-black rounded py-2 px-3 transition-opacity duration-300 ease-in-out 
+            ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+  style={{ pointerEvents: 'none', display: isHovered ? 'block' : 'none' }} // Cambiar el display
+>
+  {content}
+</span>
+
 </div>
 
 

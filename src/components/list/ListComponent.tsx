@@ -15,7 +15,11 @@ export const ListComponent = ({
   subtitleItem,
   titleItem,
   otherItems = [],
+  selected="",
 }: ListInterface) => {
+  useEffect(()=>{
+    console.log("aquiiiiiii",selected)
+  },[selected])
   const [value, setvalue] = useState("");
   const [currentPage, setCurrentPage] = useState(1); // Página actual
   const itemsPerPage = 5;
@@ -98,6 +102,7 @@ export const ListComponent = ({
                 iconItem={iconItem}
                 subtitleItem={subtitleItem}
                 buttons={buttons}
+                selected={selected}
               />
             ))}
           </div>
@@ -151,6 +156,8 @@ export const ItemComponent: React.FC<ItemInterface> = ({
   titleItem,
   item,
   otherItems = [],
+  selected="",
+
 }) => {
   const getNestedValue = (
     obj: Record<string, any>,
@@ -159,9 +166,11 @@ export const ItemComponent: React.FC<ItemInterface> = ({
     const value = key.split(".").reduce((o, k) => (o || {})[k], obj);
     return value !== undefined && value !== null ? String(value) : null; // Retorna null si el valor no es válido
   };
-
+useEffect(()=>{
+  console.log("s",selected)
+},[selected])
   return (
-    <div className="group flex items-center gap-x-5 rounded-md px-2.5 py-2 transition-all duration-75 ">
+    <div className={`group flex items-center gap-x-5 rounded-md px-2.5 py-2 transition-all duration-75 ${selected ===getNestedValue(item, titleItem) && 'bg-cyan-100'}`}>
       {iconItem && (
         <div className="flex h-12 w-12 items-center rounded-lg bg-gray-200 text-black group-hover:bg-green-200">
           <span className="tag w-full text-center text-2xl font-medium text-gray-700 group-hover:text-green-900">
@@ -170,7 +179,7 @@ export const ItemComponent: React.FC<ItemInterface> = ({
         </div>
       )}
       <div className="flex flex-col items-start justify-between font-light text-gray-600">
-        <p className="text-[15px]">{getNestedValue(item, titleItem)}</p>
+        <p className="text-[15px] ">{getNestedValue(item, titleItem)}</p>
 
         {subtitleItem && (
           <span className="text-sm font-light text-gray-400">

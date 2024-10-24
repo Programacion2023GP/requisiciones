@@ -4,20 +4,28 @@ import { AxiosGet } from "../axios/axios";
 export const UsersHook = () => {
   const [users, setUsers] = useState([]);
   const [edituser,setEditUser] = useState({});
-  const [loading,setLoading] = useState<boolean>(false);
+  const [get,setGet] = useState<boolean>(false);
+  const [loading,setLoading] = useState<boolean>(true);
   const getUsers = async () => {
-    setLoading(!loading);
+    setLoading(true)
+    setUsers([])
+    setGet(!loading);
   };
   const reloadUsers = async () => {
     try {
       const response = await AxiosGet("users");
       setUsers(response);
-    } catch (error) {}
+      setLoading(false)
+
+    } catch (error) {
+      setLoading(false)
+
+    }
   };
   useEffect(() => {
   
     reloadUsers();
-  }, [loading]);
+  }, [get]);
   useEffect(() => {
   }, [edituser]);
   return {
@@ -25,5 +33,6 @@ export const UsersHook = () => {
     getUsers,
     edituser,
     setEditUser,
+    loading,
   }
 };

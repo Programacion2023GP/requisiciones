@@ -11,7 +11,7 @@ export const Users = () => {
     throw new Error("SomeChildComponent must be used within a ContextUsers.Provider");
   }
 
-  const { setOpen,users,setAlert,getUsers,setModal,setEditUser } = context;
+  const { setOpen,users,setAlert,getUsers,setModal,setEditUser,loading } = context;
 
   useEffect(() => {
   
@@ -62,7 +62,7 @@ export const Users = () => {
   return (
     <ListComponent
       title="Usuarios del sistema"
-      loading={users.length > 0 ?false : true}
+      loading={loading}
       filter
       button
       titleItem="fullname"
