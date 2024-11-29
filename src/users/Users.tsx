@@ -1,6 +1,13 @@
 import Button from "../components/form/Button";
 import { ColDef } from "ag-grid-community";
-import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   useMutation,
   useQueries,
@@ -29,32 +36,60 @@ import { MdDelete } from "react-icons/md";
 import { IoEyeSharp } from "react-icons/io5";
 import { FormikProps } from "formik";
 import Spinner from "../loading/Loading";
+import { MdMenu } from "react-icons/md"; // Importar el ícono de menú (hamburger)
+import MenuComponent from "../menus/Menus";
 
-const ActionButtons = ({ data, mutation, setOpen, handleEdit }: { data: Record<string, any>, mutation: any, setOpen: Dispatch<SetStateAction<boolean>>, handleEdit: (data: Record<string, any>) => void }) => {
+const ActionButtons = ({
+  data,
+  mutation,
+  setOpen,
+  handleEdit,
+  handleEditPermission,
+}: {
+  data: Record<string, any>;
+  mutation: any;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  handleEdit: (data: Record<string, any>) => void;
+  handleEditPermission: (data: Record<string, any>) => void;
+}) => {
   const handleDelete = () => {
     mutation.mutate({
       url: `/users/delete/${data.IDUsuario}`,
-      method: 'DELETE',
+      method: "DELETE",
     });
   };
 
 
-
   return (
-    <div className="flex gap-2">
-   
-      <Button color="yellow" size="small" variant="solid" onClick={()=>{
-        handleEdit(data)
-      }}>
-        <BiEdit />
-      </Button>
-      <Button color="red" size="small" variant="solid" onClick={handleDelete}>
-        <MdDelete />
-      </Button>
-    </div>
+    <>
+      <div className="flex gap-2">
+        <Button
+          color="yellow"
+          size="small"
+          variant="solid"
+          onClick={() => {
+            handleEdit(data);
+          }}
+        >
+          <BiEdit />
+        </Button>
+        <Button
+          color="indigo"
+          size="small"
+          variant="solid"
+          onClick={() => {
+            handleEditPermission(data);
+          }}
+        >
+          <MdMenu />
+        </Button>
+        <Button color="red" size="small" variant="solid" onClick={handleDelete}>
+          <MdDelete />
+        </Button>
+      </div>
+    </>
   );
 };
-
 
 const TypeRolUser = (data: Record<string, any>) => {
   const { Rol } = data.data;
@@ -98,7 +133,10 @@ const Users = () => {
   const toggleOpen = () => {
     setOpen(true);
   };
-
+  const [permissionEditUser, setPermissionEditUser] = useState({
+    Usuario: "",
+    fullName: "",
+  });
   const queryClient = useQueryClient(); // Inicializa el query client
 
   // Realizas las consultas
@@ -117,28 +155,45 @@ const Users = () => {
       // Puedes agregar más peticiones aquí
     ],
   });
-  const handleEdit = (data:Record<string,any>) => {
-    toggleOpen() // Optionally open the modal if you're editing
+  const handleEdit = (data: Record<string, any>) => {
+    toggleOpen(); // Optionally open the modal if you're editing
     if (formik) {
-      formik.current?.setValues(data);  // Directly setting form values using Formik methods
+      formik.current?.setValues(data); // Directly setting form values using Formik methods
     }
   };
+  const handleEditPermission = (data: Record<string, any>) => {
+    console.log("aqui info",data);
+    setPermissionEditUser({
+      fullName: data.NombreCompleto,
+      Usuario: data.Usuario,
+    });
+  };
+
   // Realizas la mutación
   const mutation = useMutation({
-    mutationFn: ({ url, method, data }: { url: string; method: 'POST' | 'PUT' | 'DELETE'; data?: any }) =>
-      AxiosRequest(url, method, data),
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
     onSuccess: (data) => {
       setOpen(false);
       showToast(data.message, data.status);
       queryClient.refetchQueries({
-        queryKey: ['users/index'],
+        queryKey: ["users/index"],
       });
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al realizar la acción', 'error');
+      showToast(
+        error.response?.data?.message || "Error al realizar la acción",
+        "error"
+      );
     },
   });
-  
 
   const [users, groups] = queries;
   const roles = [
@@ -200,9 +255,16 @@ const Users = () => {
       // field: "Rol", // Usamos colId para identificar la columna sin usar field
       // sortable: true,
       // filter: true,
-      cellRenderer: (params: any) => <ActionButtons data={params.data} mutation = {mutation} setOpen ={setOpen}    handleEdit={handleEdit} // Assert non-null, but make sure formikRef.current is initialized
-
-      />, // Usamos cellRendererFramework
+      cellRenderer: (params: any) => (
+        <ActionButtons
+          data={params.data}
+          mutation={mutation}
+          setOpen={setOpen}
+          handleEdit={handleEdit}
+          handleEditPermission={handleEditPermission}
+          // Assert non-null, but make sure formikRef.current is initialized
+        />
+      ), // Usamos cellRendererFramework
     },
   ]);
 
@@ -211,14 +273,13 @@ const Users = () => {
       <Tooltip content="Agregar Usuario">
         <div className="mb-4">
           <Button
-            onClick={()=>{
-              formik.current?.resetForm()
-              toggleOpen()
+            onClick={() => {
+              formik.current?.resetForm();
+              toggleOpen();
             }}
             size="medium"
             color="blue"
             variant="solid"
-            
           >
             <LuPlus />
           </Button>
@@ -248,14 +309,21 @@ const Users = () => {
   const onSumbit = (values: Record<string, any>) => {
     // Llamar a la función mutate para ejecutar la solicitud POST
     mutation.mutate({
-      url: '/users/createOrUpdate',
-      method: 'POST',
+      url: "/users/createOrUpdate",
+      method: "POST",
       data: values,
     });
-      };
+  };
+  const handlePermissions = () => {};
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
-            {mutation.status =='pending' && (<Spinner/>)}
+      {mutation.status == "pending" && <Spinner />}
+    {permissionEditUser.Usuario !="" && (
+        <MenuComponent
+        fullName={permissionEditUser?.fullName}
+        Usuario={permissionEditUser?.Usuario}
+      />
+    )}
 
       <ModalComponent
         title="Usuarios"
@@ -265,13 +333,12 @@ const Users = () => {
         }}
       >
         <FormikForm
-
-            ref={formik}
+          ref={formik}
           onSubmit={onSumbit}
           buttonMessage={"Registrar"}
           validationSchema={validationSchema}
           initialValues={{
-            IDUsuario:null,
+            IDUsuario: null,
             Nombre: null,
             Paterno: null,
             Materno: null,
@@ -370,7 +437,7 @@ const Users = () => {
                       sm: 12,
                     }}
                   />
-                  
+
                   <FormikSwitch
                     name="Permiso_Orden_Compra"
                     label="Orden de compra"

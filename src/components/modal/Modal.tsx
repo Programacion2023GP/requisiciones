@@ -49,9 +49,50 @@ export const ModalComponent: React.FC<ModalProps> = memo(({
         </div>
 
         <div className="px-6 py-4">
-          <div className="text-gray-800">{children}</div>
+          <div
+            className="overflow-y-auto max-h-[80vh] custom-scrollbar"
+            style={{
+              maxHeight: "calc(80vh - 60px)", // Ajusta la altura máxima del contenido del modal (80% de la pantalla)
+            }}
+          >
+            <div className="text-gray-800">{children}</div>
+          </div>
         </div>
       </div>
     </div>
   );
 });
+
+// Agregar CSS para estilizar el scroll
+const style = document.createElement("style");
+style.innerHTML = `
+  /* Estilizar el contenedor del scroll */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px; /* Ancho del scrollbar */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1); /* Fondo del track */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #0072ff, #00c6ff); /* Fondo del thumb con gradiente */
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Borde alrededor del thumb */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra para un efecto flotante */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #00c6ff, #0072ff); /* Efecto hover */
+  }
+
+  /* Estilo cuando el scroll está en uso */
+  .custom-scrollbar::-webkit-scrollbar:vertical {
+    transition: all 0.3s ease; /* Transición suave */
+  }
+`;
+
+document.head.appendChild(style);
+
+export default ModalComponent;

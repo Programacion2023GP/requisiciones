@@ -12,7 +12,7 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>((
     children,
     buttonMessage,
   }, ref) => {
- 
+
   return (
     <Formik
       innerRef={ref}  // Pasamos el ref al Formik usando innerRef
@@ -35,7 +35,7 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>((
           <button
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 text-sm rounded-lg shadow-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
-              disabled={isSubmitting}  // Añadimos disable cuando el formulario está enviando
+              // disabled={isSubmitting}  // Añadimos disable cuando el formulario está enviando
             >
               {buttonMessage}
             </button>

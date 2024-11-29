@@ -1,7 +1,7 @@
 import { FormikProps } from "formik";
 
 export type FormikType = {
-    validationSchema:any,
+    validationSchema?:any,
     initialValues:Record<string,any>,
     children:(values:Record<string,any>)=>React.ReactNode,
     buttonMessage?:string;
