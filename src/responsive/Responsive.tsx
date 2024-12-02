@@ -17,13 +17,14 @@ export const RowComponent: React.FC<RowProps> = ({ children }) => {
 export const ColComponent: React.FC<ColProps> = ({
   children,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
+  autoPadding=true,
   ...props
 }) => {
   // useEffect(()=>{
   // },[responsive])
   return (
     <div
-      className={`col sm-${responsive.sm} md-${responsive.md} lg-${responsive.lg} xl-${responsive.xl} xl2-${responsive["2xl"]} pl-4 pr-4 `}
+      className={`col sm-${responsive.sm} md-${responsive.md} lg-${responsive.lg} xl-${responsive.xl} xl2-${responsive["2xl"]} ${autoPadding && 'pl-4 pr-4'}  `}
       {...props}
     >
       {children}

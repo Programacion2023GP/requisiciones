@@ -11,5 +11,6 @@ export type RowProps = {
       '2xl'?: number;
     };
     children: React.ReactNode;
+    autoPadding?: boolean;
   };
   

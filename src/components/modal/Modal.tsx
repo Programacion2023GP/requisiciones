@@ -50,7 +50,7 @@ export const ModalComponent: React.FC<ModalProps> = memo(({
 
         <div className="px-6 py-4">
           <div
-            className="overflow-y-auto max-h-[80vh] custom-scrollbar"
+            className="overflow-y-auto overflow-x-hidden max-h-[80vh] custom-scrollbar"
             style={{
               maxHeight: "calc(80vh - 60px)", // Ajusta la altura máxima del contenido del modal (80% de la pantalla)
             }}

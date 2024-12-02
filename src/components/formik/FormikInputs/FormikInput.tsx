@@ -15,7 +15,49 @@ type InputWithLabelProps = {
     '2xl'?: number;
   };
 };
+export const FormikTextArea: React.FC<InputWithLabelProps> = ({ label, name, responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 } }) => {
+  return (
+    <ColComponent responsive={responsive} autoPadding>
+      <FastField name={name}>
+        {({ field, form: { errors, touched, values } }: any) => {
+          const error =
+            touched?.[name] && typeof errors?.[name] === "string"
+              ? (errors?.[name] as string)
+              : null;
 
+          return (
+            <div className="relative z-0 w-full mb-5">
+              <textarea
+                {...field}
+                value={values?.[name] || ""}
+                id={name}
+                placeholder=" "
+                autoComplete="off"
+                rows={4} // Número de filas que el textarea mostrará por defecto
+                cols={12}
+                className={`peer block w-full px-4 py-3 mt-2 bg-transparent border-2 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-black ${error ? 'border-red-500' : 'border-gray-300'} transition-all duration-300`}
+              />
+              <label
+                htmlFor={name}
+                className={`absolute left-4 -top-6 text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-6 peer-focus:text-sm peer-focus:text-black`}
+              >
+                {label}
+              </label>
+              {error && (
+                <span
+                  className="text-sm font-semibold text-red-600"
+                  id={`${name}-error`}
+                >
+                  {error}
+                </span>
+              )}
+            </div>
+          );
+        }}
+      </FastField>
+    </ColComponent>
+  );
+};
 export const FormikInput: React.FC<InputWithLabelProps> = ({ label, name,  responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
 }) => {
   // console.log("rendering input")

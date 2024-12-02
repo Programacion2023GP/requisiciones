@@ -7,6 +7,7 @@ import { UseAuth } from "../extras/useAuth";
 import MenuComponent from "../menus/Menus";
 const LazyLayout = React.lazy(() => import("../layout/Layout"));
 const LoginComponent = React.lazy(() => import("../auth/login"));
+const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
 
 // Ruta principal
 
@@ -79,11 +80,13 @@ const UsuariosRoute = createRoute({
   getParentRoute: () => Layout, 
   component: () => <Users/>, 
 });
-const MenusRoute = createRoute({
-  path: "/menus",
 
-  getParentRoute: () => Layout, 
-  component: () => <MenuComponent/>, 
+const RequisitionRoute = createRoute({
+  path: "/RequisicionesAdd",
+  getParentRoute: () =>Layout,
+  component: () => <RequisicionesAdd/>,
+
 });
+
 Route.addChildren([Layout,LoginRoute]);
-Layout.addChildren([UsuariosRoute,MenusRoute])
+Layout.addChildren([UsuariosRoute,RequisitionRoute])

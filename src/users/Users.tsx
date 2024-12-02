@@ -134,9 +134,11 @@ const Users = () => {
     setOpen(true);
   };
   const [permissionEditUser, setPermissionEditUser] = useState({
-    Usuario: "",
     fullName: "",
+    Usuario: "",
+    newKey: "", // Inicializado en 1
   });
+  
   const queryClient = useQueryClient(); // Inicializa el query client
 
   // Realizas las consultas
@@ -162,12 +164,25 @@ const Users = () => {
     }
   };
   const handleEditPermission = (data: Record<string, any>) => {
-    console.log("aqui info",data);
+    const generateRandomNumber = () => {
+      return Math.floor(Math.random() * 10);  // Genera un número entre 0 y 9
+    };
+  
+    const generateRandomKey = (length: number) => {
+      let key = '';
+      for (let i = 0; i < length; i++) {
+        key += generateRandomNumber();  // Concatenar números aleatorios
+      }
+      return key;
+    };
+  
     setPermissionEditUser({
       fullName: data.NombreCompleto,
       Usuario: data.Usuario,
+      newKey: generateRandomKey(50),  // Genera una clave con 30 números aleatorios
     });
   };
+  
 
   // Realizas la mutación
   const mutation = useMutation({
@@ -320,6 +335,7 @@ const Users = () => {
       {mutation.status == "pending" && <Spinner />}
     {permissionEditUser.Usuario !="" && (
         <MenuComponent
+        newKey={permissionEditUser?.newKey}
         fullName={permissionEditUser?.fullName}
         Usuario={permissionEditUser?.Usuario}
       />

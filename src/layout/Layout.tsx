@@ -15,6 +15,7 @@ const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
   return (
     <RowComponent>
       <ColComponent
+      autoPadding={false}
         responsive={{
           "2xl": open ? 2 : 0,
           xl: open ? 3 : 0,
@@ -26,6 +27,8 @@ const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
         {sidebar}
       </ColComponent>
       <ColComponent
+      autoPadding={false}
+
         responsive={{
           "2xl": open ? 10 : 12,
           xl: open ? 9 : 12,

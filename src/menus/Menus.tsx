@@ -3,84 +3,114 @@ import { ModalComponent } from "../components/modal/Modal";
 import Typography from "../components/typografy/Typografy";
 import FormikForm from "../components/formik/Formik";
 import { FormikSwitch } from "../components/formik/FormikInputs/FormikInput";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { GetAxios } from "../axios/Axios";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { AxiosRequest, GetAxios } from "../axios/Axios";
 import Spinner from "../loading/Loading";
 import { ColComponent, RowComponent } from "../responsive/Responsive";
 import Button from "../components/form/Button";
 import { BiSolidSend } from "react-icons/bi";
+import { showToast } from "../sweetalert/Sweetalert";
+import { MenuItem } from "../layout/sidebar/Sidebar";
 
 type MenuComponentType = {
   Usuario: string;
   fullName: string;
+  newKey:string;
 };
-interface MenuItem {
-  Id: number;
-  IdMenu: string;
-  Menu: string;
-  MenuPadre: number | null;
-  children?: MenuItem[]; // Los menús hijos, que pueden ser opcionales
-  State?:boolean;
-}
-const MenuComponent: React.FC<MenuComponentType> = ({ Usuario, fullName }) => {
+
+const MenuComponent: React.FC<MenuComponentType> = ({  newKey,Usuario, fullName }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [initialValues, setInitialValues] = useState<Record<string, any>>({});
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const queries = useQueries({
     queries: [
       {
-        queryKey: ["menu/index"],
-        queryFn: () => GetAxios(`menu/index/${Usuario}`),
+        queryKey: ["menuuser/index"],
+        queryFn: () => GetAxios(`menuuser/index/${Usuario}`),
         refetchOnWindowFocus: true,
-        
       },
     ],
+  });
+  const mutation = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
+    onSuccess: (data) => {
+      setOpen(false);
+      showToast(data.message, data.status);
+      // queryClient.refetchQueries({
+      //   queryKey: ["users/index"],
+      // });
+    },
+    onError: (error: any) => {
+      showToast(
+        error.response?.data?.message || "Error al realizar la acción",
+        "error"
+      );
+    },
   });
   const [menus] = queries;
   const groupMenuByParent = (data: any[]): MenuItem[] => {
     const menuMap: { [key: string]: any } = {};
+  
+    // Crear el mapa inicial de elementos
     data.forEach((item) => {
       menuMap[item.Id] = { ...item, children: [] };
     });
+  
     const result: any[] = [];
+  
+    // Construir el árbol de menús
     data.forEach((item) => {
-      if (item.MenuPadre) {
+      if (item.MenuPadre && menuMap[item.MenuPadre]) {
         menuMap[item.MenuPadre].children.push(menuMap[item.Id]);
-      } else {
+      } else if (!item.MenuPadre) {
         result.push(menuMap[item.Id]);
+      } else {
+        console.warn(`MenuPadre ${item.MenuPadre} no encontrado para el elemento:`, item);
       }
     });
-
+  console.log(`MenuPadre 0`,result);
     return result;
   };
+  
 
   useEffect(() => {
-    setInitialValues([])
+    setInitialValues([]);
     queryClient.resetQueries({
-        queryKey: ["menu/index"], // Especifica explícitamente queryKey
-      });
-        }, [Usuario]); // El efecto se ejecuta cuando cambia el Usuario
-  
+      queryKey: ["menuuser/index"], // Especifica explícitamente queryKey
+    });
+  }, [newKey]); // El efecto se ejecuta cuando cambia el Usuario
+
   useEffect(() => {
-    console.log("aqui  isSuccess");
     if (menus.isSuccess) {
-        setOpen(true)
-        const transformedMenus = groupMenuByParent(menus.data.data);
-        setMenuItems(transformedMenus);
-       
-        const menuEntries = transformedMenus.flatMap(
-          (item) =>
-              item.children?.map((child) => [child.IdMenu, child.State ]) || []
-        );
-        setInitialValues(Object.fromEntries(menuEntries));
-        
+      setOpen(true);
+      const transformedMenus = groupMenuByParent(menus.data.data);
+      setMenuItems(transformedMenus);
+
+      const menuEntries = transformedMenus.flatMap(
+        (item) =>
+          item.children?.map((child) => [child.IdMenu, child.EstadoPermiso]) || []
+      );
+      setInitialValues(Object.fromEntries(menuEntries));
     }
   }, [menus.isSuccess]);
 
   const onSumbit = (values: Record<string, any>) => {
-    console.log("valores", values);
+    mutation.mutate({
+      url: `/menuuser/create/${Usuario}`,
+      method: "POST",
+      data: values,
+    });
   };
+
   return (
     <>
       {menus.isLoading && <Spinner />}
@@ -142,16 +172,16 @@ const MenuComponent: React.FC<MenuComponentType> = ({ Usuario, fullName }) => {
                     </>
                   ))}
                 </RowComponent>
-              <div className="w-full px-10 text-center mt-2">
-              <Button
-                  type="submit"
-                  color={"blue"}
-                  variant={"solid"}
-                  size="small"
-                >
-                   Guardar cambios
-                </Button>
-              </div>
+                <div className="w-full px-10 text-center mt-2">
+                  <Button
+                    type="submit"
+                    color={"blue"}
+                    variant={"solid"}
+                    size="small"
+                  >
+                    Guardar cambios
+                  </Button>
+                </div>
               </>
             )}
           ></FormikForm>

@@ -1,11 +1,23 @@
 import axios from 'axios';
 
 // Configura la instancia de Axios
- const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,  // Puedes reemplazar con tu URL base
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,  // URL base
   headers: {
     'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`, // Obtener el token de localStorage
   },
+});
+
+// O si prefieres hacerlo dinámicamente en cada solicitud:
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');  // Obtén el token desde localStorage o el lugar que uses para guardarlo
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`; // Agregar el token a los encabezados
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
 });
 
 
