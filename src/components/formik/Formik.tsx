@@ -18,17 +18,18 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>((
       innerRef={ref}  // Pasamos el ref al Formik usando innerRef
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={async (values, { setSubmitting }) => {
+      onSubmit={async (values, { setSubmitting,setStatus }) => {
         // Llamamos a onSubmit del componente padre
         onSubmit(values as Record<string, any>);
-
+        setStatus(1)
+      
         // Después de enviar, cambiamos el estado de submitting a false
-        setSubmitting(false);
+        // setSubmitting(true);
       }}
     >
-      {({ isSubmitting, values }) => (
+      {({ isSubmitting, values,setFieldValue }) => (
         <Form className="space-y-4">
-          <RowComponent>{children(values)}</RowComponent>
+      <RowComponent>{children(values, setFieldValue)}</RowComponent>
           <div className="flex justify-end">
            {buttonMessage && (
 
