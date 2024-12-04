@@ -22,7 +22,6 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
   const handleMouseLeave = () => {
     setIsHovered(false);
   };
-console.log("toltip renders")
   return (
     <div
       className="inline-block"

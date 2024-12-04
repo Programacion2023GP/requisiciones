@@ -4,12 +4,12 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import { routeTree } from './routeTree.gen'
 import { RouterProvider, createRootRouteWithContext, createRouter } from '@tanstack/react-router'
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Route } from './routes/__root'
 import { AuthContext, UseAuth } from './extras/useAuth'
-
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 type RouterContext = {
   authentication: typeof UseAuth; // Usa `typeof` para capturar el tipo
 };

@@ -18,3 +18,24 @@ export const showToast = (message: string, icon: ToastIcon = 'success') => {
     }
   });
 };
+export const showConfirmationAlert = (title: string, text: string): Promise<boolean> => {
+  return new Promise((resolve, reject) => {
+    Swal.fire({
+      title: title,           // Título de la alerta
+      text: text,             // Mensaje de la alerta
+      icon: 'warning',        // Tipo de icono (advertencia)
+      showCancelButton: true, // Habilitar el botón "Cancelar"
+      confirmButtonText: 'Aceptar', // Texto del botón "Aceptar"
+      cancelButtonText: 'Cancelar', // Texto del botón "Cancelar"
+      reverseButtons: true,   // Invierte la posición de los botones
+    }).then((result) => {
+      if (result.isConfirmed) {
+        resolve(true); // Resuelve la promesa como "true" si el usuario hace clic en "Aceptar"
+      } else {
+        resolve(false); // Resuelve la promesa como "false" si el usuario hace clic en "Cancelar"
+      }
+    }).catch((error) => {
+      reject(error); // Si ocurre algún error, rechaza la promesa
+    });
+  });
+};

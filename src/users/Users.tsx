@@ -15,7 +15,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../axios/Axios";
-import { Response } from "../extras/response";
 import { TypeUsers } from "./types/TypeUsers";
 import { LuPlus } from "react-icons/lu";
 import Tooltip from "../components/toltip/Toltip";
@@ -29,11 +28,9 @@ import {
   FormikSwitch,
 } from "../components/formik/FormikInputs/FormikInput";
 import Typography from "../components/typografy/Typografy";
-import CardComponent from "../components/card/Card";
 import { showToast } from "../sweetalert/Sweetalert";
 import { BiEdit } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
-import { IoEyeSharp } from "react-icons/io5";
 import { FormikProps } from "formik";
 import Spinner from "../loading/Loading";
 import { MdMenu } from "react-icons/md"; // Importar el ícono de menú (hamburger)

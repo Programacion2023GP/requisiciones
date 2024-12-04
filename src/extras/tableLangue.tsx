@@ -80,6 +80,7 @@ export const localeText = {
     "collapseAllColumnGroups": "Colapsar todos los grupos de columnas"
   }
 export  const gridOptions = {
+  api:import.meta.env.VITE_API_URL,
   paginationPageSize: 10, // Esto podría estar anulando tu configuración
   paginationPageSizeSelector:[10, 25, 50, 100],// Opciones para cambiar el tamaño de la página
 

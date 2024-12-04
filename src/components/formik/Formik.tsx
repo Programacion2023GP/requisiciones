@@ -27,9 +27,9 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>((
         // setSubmitting(true);
       }}
     >
-      {({ isSubmitting, values,setFieldValue }) => (
+      {({ isSubmitting, values,setFieldValue,setTouched }) => (
         <Form className="space-y-4">
-      <RowComponent>{children(values, setFieldValue)}</RowComponent>
+      <RowComponent>{children(values, setFieldValue,setTouched)}</RowComponent>
           <div className="flex justify-end">
            {buttonMessage && (
 

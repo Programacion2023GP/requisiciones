@@ -146,12 +146,12 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
       ["I", 1],
     ];
     let roman = "";
-    for (let [letter, value] of romanNumeralMap) {
-      while (num >= value) {
-        roman += letter;
-        num -= value;
-      }
-    }
+    // for (let [letter, value] of romanNumeralMap) {
+    //   while (num >= value) {
+    //     roman += letter;
+    //     num -= value;
+    //   }
+    // }
     return roman;
   };
 
@@ -438,7 +438,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
             <input
               ref={inputRef}
               type="text"
-              autoComplete="false"
+              autoComplete="off"
               id={name}
               placeholder=" "
               value={
