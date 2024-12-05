@@ -1,3 +1,5 @@
+import { ColDef } from "ag-grid-community";
+
 export type TypeTable = {
     /** 
      * Indica si los datos están siendo cargados. 
@@ -9,7 +11,7 @@ export type TypeTable = {
      * Definición de las columnas de la tabla. 
      * Acepta un array de objetos que definen las columnas, como el nombre, el campo y otras configuraciones.
      */
-    columnDefs: any;
+    columnDefs: ColDef<any>[];
   
     /** 
      * Los datos que se mostrarán en la tabla.
@@ -23,17 +25,9 @@ export type TypeTable = {
     buttonElement: React.ReactNode;
     handlePropsChangePage?:(currentPage:number,pageSize:number,totalPages:number,totalRows:number)=>void; 
     /** 
-
-
-     * Determina si la paginación debe gestionarse desde el backend.
-     * Si es `true`, la paginación se manejará mediante consultas al servidor (por ejemplo, usando API paginadas).
-     * Si es `false` o no se define, se manejará en el cliente.
+     * Se colapsaran buscadores con clicks para busquedas con filtradores
      */
-  
-    /** 
-     * La URL a la que se realizarán las consultas de paginación si `paginateWithBackend` es `true`.
-     * Esta propiedad es obligatoria si `paginateWithBackend` es `true`, de lo contrario es opcional.
-     */
+    colapseFilters?: boolean;
   };
   
   // Definimos una versión más específica del tipo donde url es obligatoria si paginateWithBackend es true.

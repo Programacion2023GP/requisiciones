@@ -11,7 +11,7 @@ import React, {
 import { ColComponent, RowComponent } from "../responsive/Responsive";
 import ModalComponent from "../components/modal/Modal";
 import { AxiosRequest, GetAxios } from "../axios/Axios";
-import { useMutation, useQueries } from "@tanstack/react-query";
+import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import {
   FormikAutocomplete,
   FormikInput,
@@ -75,7 +75,7 @@ const ProductsComponent = memo(
       <>
 
       <ColComponent responsive={{"2xl":4,md:6}}>
-      <div className=" border-2 relative w-full  border-gray-300 rounded-lg shadow-lg p-4 my-4">
+      <div className=" border-2 relative w-full   border-gray-300 rounded-lg shadow-lg p-4 my-4">
           <div className="absolute top-2 right-0 mr-2">
             <Button  variant="outline" color="red" size="small" onClick={()=>{
               deleteField(cantidad,descripcion)
@@ -315,6 +315,11 @@ const RequisicionesAdd = () => {
       cont: 1
     },
   });
+  const [optionsPerPage, setOptionsPerPage] = useState({
+    page: 1,
+    paggination:10000000000,
+  }); // Número de elementos por página
+
   const responsive = {
     "2xl": 6,
     xl: 6,
@@ -346,14 +351,15 @@ const RequisicionesAdd = () => {
       );
     },
   });
- 
+  const queryClient = useQueryClient();
+
   const [open, setOpen] = useState<boolean>(false);
   const queries = useQueries({
     queries: [
 
       {
         queryKey: ["requisiciones/index"],
-        queryFn: () => GetAxios("requisiciones/index"),
+        queryFn: () => GetAxios(`requisiciones/index`),
         refetchOnWindowFocus: true,
       },
       {
@@ -369,6 +375,11 @@ const RequisicionesAdd = () => {
     ],
   });
   const [requisiciones,groups, types] = queries;
+  useEffect(()=>{
+    queryClient.resetQueries({
+      queryKey: ["requisiciones/index"], // Especifica explícitamente queryKey
+    });
+  },[optionsPerPage]);
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -410,11 +421,17 @@ const RequisicionesAdd = () => {
     },
 
     { headerName: "FechaCaptura", field: "FechaCaptura", sortable: true, filter: true },
-    // { headerName: "Rol", field: "Rol", sortable: true, filter: true },
+
     { headerName: "Status", field: "Status", sortable: true, filter: true },
-
-    
-
+    { headerName: "Tipo", field: "Tipo", sortable: true, filter: true },
+    { headerName: "Observaciones", field: "Observaciones", sortable: true, filter: true },
+    { headerName: "Usuario asignado", field: "UsuarioAS", sortable: true, filter: true },
+    { headerName: "Usuario UsuarioVoBo", field: "UsuarioVoBo", sortable: true, filter: true },
+    { headerName: "Motivo de cancelación", field: "Motivo_AutEspecial", sortable: true, filter: true },
+    { headerName: "Motivo de cancelación", field: "Motivo_AutEspecial", sortable: true, filter: true },
+    { headerName: "Orden compra", field: "Orden_Compra", sortable: true, filter: true },
+    { headerName: "Orden consolidada", field: "OC_Consolidada", sortable: true, filter: true },
+    { headerName: "Usuario captura", field: "UsuarioCaptura", sortable: true, filter: true },
     // {
     //   headerName: "Acciones",
     //   colId: "buttons",
@@ -455,22 +472,19 @@ const RequisicionesAdd = () => {
     ),
     []
   );
-  const handlePropsChangePage =(currentPage: number, pageSize: number, totalPages: number, totalRows: number)=>{
-console.log("Página actual:", currentPage);
-    console.log("Tamaño de página:", pageSize);
-    console.log("Número total de páginas:", totalPages);
-    console.log("Total de filas:", totalRows);
-  }
+
   return (
     <>
         <div className="container mx-auto shadow-lg p-6 border mt-12">
 
   <Agtable
+     
           isLoading={requisiciones.isLoading}
           columnDefs={columnDefs}
           buttonElement={buttonElement}
-          data={requisiciones.data?.data?.data}
-          handlePropsChangePage={handlePropsChangePage}
+          data={requisiciones.data?.data.data}
+          colapseFilters
+          // handlePropsChangePage={handlePropsChangePage}
         />
 </div>
 
