@@ -43,12 +43,12 @@ const ProductsComponent = memo(
     cantidad: string;
     descripcion: string;
     responsive: any;
-    deleteField: (cantidad: string, descripcion: string) => void,
-    formikSetValue: (name: string, value: any) => void,
-    values: Record<string, any>,
-    formikSetTouched: (touched: Record<string, boolean>) => void
+    deleteField: (cantidad: string, descripcion: string) => void;
+    formikSetValue: (name: string, value: any) => void;
+    values: Record<string, any>;
+    formikSetTouched: (touched: Record<string, boolean>) => void;
   }) => {
-    useEffect(()=>{
+    useEffect(() => {
       if (values?.values[cantidad]) {
         formikSetValue(cantidad, parseInt(values?.values[cantidad]));
       }
@@ -58,46 +58,48 @@ const ProductsComponent = memo(
       if (values?.touched[cantidad]) {
         formikSetTouched({
           ...values.touched,
-          [cantidad]: true,  // Marca este campo como tocado
+          [cantidad]: true, // Marca este campo como tocado
         });
       }
-      
+
       if (values?.touched[descripcion]) {
         formikSetTouched({
           ...values.touched,
-          [descripcion]: true,  // Marca este campo como tocado
+          [descripcion]: true, // Marca este campo como tocado
         });
       }
-      
-      
-    },[]);
+    }, []);
     return (
       <>
-
-      <ColComponent responsive={{"2xl":4,md:6}}>
-      <div className=" border-2 relative w-full   border-gray-300 rounded-lg shadow-lg p-4 my-4">
-          <div className="absolute top-2 right-0 mr-2">
-            <Button  variant="outline" color="red" size="small" onClick={()=>{
-              deleteField(cantidad,descripcion)
-            }}>
-              <CgCloseO className="cursor-pointer" />
-            </Button>
+        <ColComponent responsive={{ "2xl": 4, md: 6 }}>
+          <div className=" border-2 relative w-full   border-gray-300 rounded-lg shadow-lg p-4 my-4">
+            <div className="absolute top-2 right-0 mr-2">
+              <Button
+                variant="outline"
+                color="red"
+                size="small"
+                onClick={() => {
+                  deleteField(cantidad, descripcion);
+                }}
+              >
+                <CgCloseO className="cursor-pointer" />
+              </Button>
+            </div>
+            <div className="mt-6"></div>
+            <FormikNumberInput
+              name={cantidad}
+              label="Cantidad"
+              decimals={false}
+              min={0}
+              // responsive={{...responsive , "2xl":6}}
+            />
+            <FormikInput
+              name={descripcion}
+              label="Descripcion"
+              // responsive={{...responsive , "2xl":6}}
+            />
           </div>
-          <div className="mt-6"></div>
-          <FormikNumberInput
-            name={cantidad}
-            label="Cantidad"
-            decimals={false}
-            min={0}
-            // responsive={{...responsive , "2xl":6}}
-          />
-          <FormikInput
-            name={descripcion}
-            label="Descripcion"
-            // responsive={{...responsive , "2xl":6}}
-          />
-        </div>
-      </ColComponent>
+        </ColComponent>
       </>
     );
   }
@@ -127,27 +129,26 @@ type FormProductsComponentProps = {
     descripcion: string
   ) => Record<string, any>;
   setFormik: Dispatch<SetStateAction<ValuesFormik>>;
-  mutation:any
+  mutation: any;
 };
 
 const FormProductsComponent = forwardRef<
   FormikProps<any>,
   FormProductsComponentProps
->(({ responsive, NewValidations, setFormik, formik,mutation }, ref) => {
-  const [fRespaldFormikProducts,setfRespaldFormikProducts] = useState({
-    values:{},
+>(({ responsive, NewValidations, setFormik, formik, mutation }, ref) => {
+  const [fRespaldFormikProducts, setfRespaldFormikProducts] = useState({
+    values: {},
     touched: {},
-  })
+  });
 
   const handleMoreValues = () => {
-    if (ref && 'current' in ref && ref.current) {
-      setfRespaldFormikProducts((prev)=>({
-        touched: ref?.current?.touched||{},
-        values:ref?.current?.values || {},
+    if (ref && "current" in ref && ref.current) {
+      setfRespaldFormikProducts((prev) => ({
+        touched: ref?.current?.touched || {},
+        values: ref?.current?.values || {},
       }));
     }
     setFormik((prev) => ({
-      
       ...prev,
       valuesProducts: {
         validationSchema: {
@@ -169,53 +170,58 @@ const FormProductsComponent = forwardRef<
   const deleteFieldFormik = (cantidad: string, descripcion: string) => {
     setFormik((prev) => {
       // Si el ref es válido, obtenemos los valores actuales
-      if (ref && 'current' in ref && ref.current) {
-        setfRespaldFormikProducts((prev)=>({
+      if (ref && "current" in ref && ref.current) {
+        setfRespaldFormikProducts((prev) => ({
           ...prev,
-          values:ref?.current?.values || {},
+          values: ref?.current?.values || {},
         }));
       }
-  
+
       // Copiamos los objetos para que sean mutables
-      const newInitialValues = { ...prev.valuesProducts.initialValues,[cantidad]:false,[descripcion]:false };
+      const newInitialValues = {
+        ...prev.valuesProducts.initialValues,
+        [cantidad]: false,
+        [descripcion]: false,
+      };
       const newValidationSchema = { ...prev.valuesProducts.validationSchema };
-  
- 
+
       delete newValidationSchema[cantidad];
       delete newValidationSchema[descripcion];
-  
+
       const updatedState = {
         ...prev,
         valuesProducts: {
-          initialValues: newInitialValues,  // Estado actualizado sin las claves eliminadas
-          validationSchema: newValidationSchema,  // Validaciones actualizadas sin las claves eliminadas
-          cont: prev.valuesProducts.cont - 1,  // Reducimos el contador
+          initialValues: newInitialValues, // Estado actualizado sin las claves eliminadas
+          validationSchema: newValidationSchema, // Validaciones actualizadas sin las claves eliminadas
+          cont: prev.valuesProducts.cont - 1, // Reducimos el contador
         },
       };
-  
+
       return updatedState;
     });
   };
-  
-  const AddButton =useMemo(()=>(
-    <div className="flex justify-start w-fit ml-2 mb-6">
-    <Tooltip content="Agregar mas productos">
-      <Button
-        color="presidencia"
-        variant="outline"
-        onClick={handleMoreValues}
-      >
-        <LuPlus />
-      </Button>
-    </Tooltip>
-  </div>
-  )
-  ,[])
-  const onSubmit = (values:Record<string,any>)=>{
-    let data = {}
+
+  const AddButton = useMemo(
+    () => (
+      <div className="flex justify-start w-fit ml-2 mb-6">
+        <Tooltip content="Agregar mas productos">
+          <Button
+            color="presidencia"
+            variant="outline"
+            onClick={handleMoreValues}
+          >
+            <LuPlus />
+          </Button>
+        </Tooltip>
+      </div>
+    ),
+    []
+  );
+  const onSubmit = (values: Record<string, any>) => {
+    let data = {};
     setFormik((prev) => {
-      data = { ...prev.valuesRequisition,...values }; // Make a copy of the previous state
-      
+      data = { ...prev.valuesRequisition, ...values }; // Make a copy of the previous state
+
       return {
         ...prev,
         valuesProducts: {
@@ -225,25 +231,26 @@ const FormProductsComponent = forwardRef<
         },
       };
     });
-    
-      showConfirmationAlert('¿Estás seguro?', 'Esta acción no se puede deshacer.').then((isConfirmed) => {
-        if (isConfirmed) {
-          // console.log(data)
-          mutation.mutate({
-            method: "POST",
-            url: "/requisiciones/create",
-            data: data,
-          })
-        } else {
-          showToast("La acción fue cancelada.","error");
-        }
-      })
 
-   
-  }
+    showConfirmationAlert(
+      "¿Estás seguro?",
+      "Esta acción no se puede deshacer."
+    ).then((isConfirmed) => {
+      if (isConfirmed) {
+        // console.log(data)
+        mutation.mutate({
+          method: "POST",
+          url: "/requisiciones/create",
+          data: data,
+        });
+      } else {
+        showToast("La acción fue cancelada.", "error");
+      }
+    });
+  };
   return (
     <>
-     {AddButton}
+      {AddButton}
 
       <FormikForm
         key={formik.cont}
@@ -253,7 +260,7 @@ const FormProductsComponent = forwardRef<
         // buttonMessage={"Registrar"}
         validationSchema={Yup.object(formik.validationSchema)}
         initialValues={formik.initialValues}
-        children={(values, setValue,setTouched) => (
+        children={(values, setValue, setTouched) => (
           <>
             {Object.keys(values).map((item, index) => {
               if (index % 2 === 0) {
@@ -261,19 +268,20 @@ const FormProductsComponent = forwardRef<
                 const descripcionKey = `Descripcion${item.replace("Cantidad", "")}`;
                 return (
                   <>
-                  {  values[cantidadKey]!=false  && values[descripcionKey]!=false  && (
-                    <React.Fragment  key={index}>
-                    <ProductsComponent
-                    formikSetTouched={setTouched}
-                    values={fRespaldFormikProducts}
-                      formikSetValue={setValue}
-                      deleteField ={deleteFieldFormik}
-                      cantidad={cantidadKey}
-                      descripcion={descripcionKey}
-                      responsive={responsive}
-                    />
-                  </React.Fragment>
-                  )}
+                    {values[cantidadKey] != false &&
+                      values[descripcionKey] != false && (
+                        <React.Fragment key={index}>
+                          <ProductsComponent
+                            formikSetTouched={setTouched}
+                            values={fRespaldFormikProducts}
+                            formikSetValue={setValue}
+                            deleteField={deleteFieldFormik}
+                            cantidad={cantidadKey}
+                            descripcion={descripcionKey}
+                            responsive={responsive}
+                          />
+                        </React.Fragment>
+                      )}
                   </>
                 );
               }
@@ -312,12 +320,12 @@ const RequisicionesAdd = () => {
         Descripcion1: null,
       },
       validationSchema: { ...NewValidations(`Cantidad1`, `Descripcion1`) },
-      cont: 1
+      cont: 1,
     },
   });
   const [optionsPerPage, setOptionsPerPage] = useState({
     page: 1,
-    paggination:10000000000,
+    paggination: 10000000000,
   }); // Número de elementos por página
 
   const responsive = {
@@ -356,12 +364,11 @@ const RequisicionesAdd = () => {
   const [open, setOpen] = useState<boolean>(false);
   const queries = useQueries({
     queries: [
-
-      {
-        queryKey: ["requisiciones/index"],
-        queryFn: () => GetAxios(`requisiciones/index`),
-        refetchOnWindowFocus: true,
-      },
+      // {
+      //   queryKey: ["requisiciones/index"],
+      //   queryFn: () => GetAxios(`requisiciones/index`),
+      //   refetchOnWindowFocus: true,
+      // },
       {
         queryKey: ["departamentos/index"],
         queryFn: () => GetAxios("departamentos/index"),
@@ -374,21 +381,18 @@ const RequisicionesAdd = () => {
       },
     ],
   });
-  const [requisiciones,groups, types] = queries;
-  useEffect(()=>{
+  const [groups, types] = queries;
+  useEffect(() => {
     queryClient.resetQueries({
       queryKey: ["requisiciones/index"], // Especifica explícitamente queryKey
     });
-  },[optionsPerPage]);
+  }, [optionsPerPage]);
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
       valuesRequisition: values as ValuesRequisitonType, // Casting correcto
     }));
   };
-
-
-  
 
   const validationSchema = Yup.object({
     Solicitante: Yup.string().required("El solicitante es obligatorio"),
@@ -400,55 +404,151 @@ const RequisicionesAdd = () => {
       .required("El tipo  es obligatorio"),
   });
   const [columnDefs] = useState<ColDef<any>[]>([
-    { headerName: "Folio", field: "Folio", sortable: true, filter: true },
+    {
+      headerName: "Folio",
+      field: "Folio",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
     {
       headerName: "Ejercicio",
       field: "Ejercicio",
       sortable: true,
       filter: true,
+      floatingFilter: true,
+
+    
     },
     {
       headerName: "Departamento",
       field: "Nombre_Departamento",
       sortable: true,
       filter: true,
+      floatingFilter: true,
     },
     {
       headerName: "Solicitante",
       field: "Solicitante",
       sortable: true,
       filter: true,
+      floatingFilter: true,
     },
 
-    { headerName: "FechaCaptura", field: "FechaCaptura", sortable: true, filter: true },
+    {
+      headerName: "FechaCaptura",
+      field: "FechaCaptura",
+      filter: "agDateColumnFilter",
+      floatingFilter: true,
+      cellRenderer: (data: { value: string | number | Date }) => {
+        // Asegúrate de que la fecha se muestre en un formato adecuado
+        return data.value ? new Date(data.value).toLocaleDateString() : "";
+      },
+      filterParams: {
+        comparator: (dateFromFilter, cellValue) => {
+          if (cellValue == null) {
+            return 0;
+          }
 
-    { headerName: "Status", field: "Status", sortable: true, filter: true },
-    { headerName: "Tipo", field: "Tipo", sortable: true, filter: true },
-    { headerName: "Observaciones", field: "Observaciones", sortable: true, filter: true },
-    { headerName: "Usuario asignado", field: "UsuarioAS", sortable: true, filter: true },
-    { headerName: "Usuario UsuarioVoBo", field: "UsuarioVoBo", sortable: true, filter: true },
-    { headerName: "Motivo de cancelación", field: "Motivo_AutEspecial", sortable: true, filter: true },
-    { headerName: "Motivo de cancelación", field: "Motivo_AutEspecial", sortable: true, filter: true },
-    { headerName: "Orden compra", field: "Orden_Compra", sortable: true, filter: true },
-    { headerName: "Orden consolidada", field: "OC_Consolidada", sortable: true, filter: true },
-    { headerName: "Usuario captura", field: "UsuarioCaptura", sortable: true, filter: true },
-    // {
-    //   headerName: "Acciones",
-    //   colId: "buttons",
-    //   // field: "Rol", // Usamos colId para identificar la columna sin usar field
-    //   // sortable: true,
-    //   // filter: true,
-    //   // cellRenderer: (params: any) => (
-    //   //   <ActionButtons
-    //   //     data={params.data}
-    //   //     mutation={mutation}
-    //   //     setOpen={setOpen}
-    //   //     handleEdit={handleEdit}
-    //   //     handleEditPermission={handleEditPermission}
-    //   //     // Assert non-null, but make sure formikRef.current is initialized
-    //   //   />
-    //   // ), // Usamos cellRendererFramework
-    // },
+          // Convertir cellValue a un objeto Date
+          const cellDate = new Date(cellValue);
+
+          // Si la conversión a Date es incorrecta, retorna 0 (filtro no encontrado)
+          if (isNaN(cellDate.getTime())) {
+            return 0;
+          }
+
+          // Eliminar las horas, minutos, segundos y milisegundos de ambas fechas
+          const cellDateOnly = new Date(cellDate);
+          const filterDateOnly = new Date(dateFromFilter);
+
+          // Establecer la hora a las 00:00:00 para ambas fechas
+          cellDateOnly.setHours(0, 0, 0, 0);
+          filterDateOnly.setHours(0, 0, 0, 0);
+
+          // Comparar solo las fechas (sin considerar horas, minutos o segundos)
+          if (cellDateOnly < filterDateOnly) {
+            return -1;
+          } else if (cellDateOnly > filterDateOnly) {
+            return 1;
+          }
+
+          return 0; // Si son iguales
+        },
+      },
+    },
+
+    {
+      headerName: "Status",
+      field: "Status",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Tipo",
+      field: "Tipo",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Observaciones",
+      field: "Observaciones",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Usuario asignado",
+      field: "UsuarioAS",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Usuario UsuarioVoBo",
+      field: "UsuarioVoBo",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Motivo de cancelación",
+      field: "Motivo_AutEspecial",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Motivo de cancelación",
+      field: "Motivo_AutEspecial",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Orden compra",
+      field: "Orden_Compra",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Orden consolidada",
+      field: "OC_Consolidada",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    {
+      headerName: "Usuario captura",
+      field: "UsuarioCaptura",
+      sortable: true,
+      filter: true,
+      floatingFilter: true,
+    },
+    
   ]);
   const buttonElement = useMemo(
     () => (
@@ -475,18 +575,21 @@ const RequisicionesAdd = () => {
 
   return (
     <>
-        <div className="container mx-auto shadow-lg p-6 border mt-12">
-
-  <Agtable
-     
-          isLoading={requisiciones.isLoading}
+      <div className="container mx-auto shadow-lg p-6 border mt-12">
+        <Agtable
+         backUrl={{pathName: 'requisiciones/index',startSearchFilter: {
+          fieldName: 'Ejercicio',
+          operator: '=',
+          value: '2024',
+         }}}
+          // isLoading={requisiciones.isLoading}
           columnDefs={columnDefs}
           buttonElement={buttonElement}
-          data={requisiciones.data?.data.data}
+          // data={requisiciones.data?.data.data}
           colapseFilters
           // handlePropsChangePage={handlePropsChangePage}
         />
-</div>
+      </div>
 
       <ModalComponent
         open={open}
@@ -503,16 +606,14 @@ const RequisicionesAdd = () => {
                 {currentPage > 1 && (
                   <Button
                     onClick={() => {
-                
-                    setValues((prev) => ({
-                      ...prev,
-                      valuesProducts: {
-                        ...prev.valuesProducts,
-                        initialValues: formikProducts.current?.values ?? {},
-                      },
-                    }));
-                    handlePrevPage()
-                      
+                      setValues((prev) => ({
+                        ...prev,
+                        valuesProducts: {
+                          ...prev.valuesProducts,
+                          initialValues: formikProducts.current?.values ?? {},
+                        },
+                      }));
+                      handlePrevPage();
                     }}
                     color="blue"
                     variant="outline"
@@ -529,14 +630,15 @@ const RequisicionesAdd = () => {
                     }
                     if (currentPage == 1) {
                       formik.current?.handleSubmit();
-                      setTimeout(()=>{
+                      setTimeout(() => {
                         // console.log(formik.current?.touched )
 
-                        if (Object.keys(formik?.current?.errors || {}).length ==0) {
+                        if (
+                          Object.keys(formik?.current?.errors || {}).length == 0
+                        ) {
                           handleNextPage();
                         }
-                      },100)
-
+                      }, 100);
                     }
                   }}
                   color="blue"
@@ -580,7 +682,7 @@ const RequisicionesAdd = () => {
               )}
             />
             <FormProductsComponent
-            mutation={mutation}
+              mutation={mutation}
               formik={values.valuesProducts}
               responsive={responsive}
               ref={formikProducts}

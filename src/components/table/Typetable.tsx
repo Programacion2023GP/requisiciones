@@ -5,7 +5,7 @@ export type TypeTable = {
      * Indica si los datos están siendo cargados. 
      * Utilizado para mostrar un estado de carga mientras se obtienen los datos.
      */
-    isLoading: boolean;
+    isLoading?: boolean;
   
     /** 
      * Definición de las columnas de la tabla. 
@@ -17,7 +17,7 @@ export type TypeTable = {
      * Los datos que se mostrarán en la tabla.
      * Debe ser un array de objetos donde cada objeto representa una fila de datos.
      */
-    data: any;
+    data?: any;
   
     /** 
      * Un elemento JSX que puede ser un botón o cualquier otro componente que se mostrará junto a la tabla.
@@ -28,6 +28,14 @@ export type TypeTable = {
      * Se colapsaran buscadores con clicks para busquedas con filtradores
      */
     colapseFilters?: boolean;
+    backUrl?:{
+      pathName: string;
+      startSearchFilter?:{
+        fieldName: string;
+        value: string;
+        operator: string;
+      }
+    }
   };
   
   // Definimos una versión más específica del tipo donde url es obligatoria si paginateWithBackend es true.

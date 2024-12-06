@@ -232,33 +232,40 @@ const Users = () => {
   ];
 
   const [columnDefs] = useState<ColDef<TypeUsers>[]>([
-    { headerName: "Nombre", field: "Nombre", sortable: true, filter: true },
+    { headerName: "Nombre", field: "Nombre", sortable: true, filter: true,    
+  },
     {
       headerName: "Apellido Paterno",
       field: "Paterno",
       sortable: true,
-      filter: true,
+      filter: true,    
+
     },
     {
       headerName: "Apellido Materno",
       field: "Materno",
       sortable: true,
-      filter: true,
+      filter: true,    
+
     },
     {
       headerName: "Nombre Completo",
       field: "NombreCompleto",
       sortable: true,
-      filter: true,
+      filter: true,    
+
     },
 
-    { headerName: "Usuario", field: "Usuario", sortable: true, filter: true },
+    { headerName: "Usuario", field: "Usuario", sortable: true, filter: true,    
+  },
     // { headerName: "Rol", field: "Rol", sortable: true, filter: true },
     {
       headerName: "Rol",
       field: "Rol", // Usamos colId para identificar la columna sin usar field
       sortable: true,
       filter: true,
+      
+
       cellRenderer: (params: any) => <TypeRolUser data={params.data} />, // Usamos cellRendererFramework
     },
     {
@@ -485,10 +492,13 @@ const Users = () => {
           Usuarios del Sistema
         </p>
         <Agtable
+          backUrl={{
+            pathName:"users/index"
+          }}
           isLoading={users.isLoading}
           columnDefs={columnDefs}
           buttonElement={buttonElement}
-          data={users.data?.data}
+          // data={users.data?.data}
         />
       </div>
     </div>
