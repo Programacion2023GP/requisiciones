@@ -492,9 +492,7 @@ const Users = () => {
           Usuarios del Sistema
         </p>
         <Agtable
-          backUrl={{
-            pathName:"users/index"
-          }}
+          data={users?.data?.data}
           isLoading={users.isLoading}
           columnDefs={columnDefs}
           buttonElement={buttonElement}

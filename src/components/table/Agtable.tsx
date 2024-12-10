@@ -11,8 +11,8 @@ import ModalComponent from "../modal/Modal";
 import HelpModal from "./Helpinfo";
 import { ColDef } from "ag-grid-community";
 import Typography from "../typografy/Typografy";
-import { useQueries } from "@tanstack/react-query";
-import { GetAxios } from "../../axios/Axios";
+import { useMutation, useQueries } from "@tanstack/react-query";
+import { AxiosRequest, GetAxios } from "../../axios/Axios";
 
 type FiltersColapseOptions = {
   titles: string[];
@@ -30,10 +30,11 @@ export const Agtable: React.FC<TypeTable> = ({
   buttonElement,
   handlePropsChangePage,
   colapseFilters,
-  backUrl
+  backUrl,
 }) => {
   const [search, setSearch] = useState<SearchType>({
     text: "",
+
     includes: true,
     row: null,
     headerName: "",
@@ -46,6 +47,12 @@ export const Agtable: React.FC<TypeTable> = ({
   const [open, setOpen] = useState<boolean>(false);
   const [openColumns, setOpenColumns] = useState(false);
   const [columnDefsH, setColumnDefsH] = useState<ColDef<any>[]>(columnDefs);
+  const [dataTable, setDataTable] = useState({
+    previous: [],
+    data: [],
+    sql: "",
+    key: "",
+  });
   // const [expand,setExpa]
   const toggleColumnVisibility = (field: string | undefined) => {
     setColumnDefsH((prevState) =>
@@ -57,36 +64,109 @@ export const Agtable: React.FC<TypeTable> = ({
       )
     );
   };
-  const queries = useQueries({
-    queries: [
-      {
-        queryKey: [backUrl?.pathName],
-        queryFn: () => GetAxios(`${backUrl?.pathName}`),
-        refetchOnWindowFocus: true,
-      },
-  
-    ],
-  });
-  const [dataOfTable] = queries;
+  // const queries = useQueries({
+  //   queries: [
+  //     {
+  //       queryKey: [`${backUrl?.pathName}`],
+  //       queryFn: () => GetAxios(`${backUrl?.pathName}`),
+  //       refetchOnWindowFocus: true,
+  //     },
 
+  //   ],
+  // });
+  // const [dataOfTable] = queries;
   const [filtersColapseOptions, setFiltersColapseOptions] =
     useState<FiltersColapseOptions>({
       titles: [],
     });
+  const mutation = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
+    onMutate(variables) {
+      // Preparar la mutación
+      setDataTable((prev) => ({
+        data: [],
+        key: "",
+        sql: "",
+        previous: [],
+      }));
+    },
+    onSuccess: (data) => {
+      setDataTable((prev) => ({
+        previous: prev.previous,
+        data: data.data,
+        sql: "",
+        key: generateRandomKey(50),
+      }));
+    },
+    onError: (error: any) => {
+      //  console.log("errror",error)
+    },
+  });
+  const generateRandomNumber = () => {
+    return Math.floor(Math.random() * 10); // Genera un número entre 0 y 9
+  };
+  const generateRandomKey = (length: number) => {
+    let key = "";
+    for (let i = 0; i < length; i++) {
+      key += generateRandomNumber(); // Concatenar números aleatorios
+    }
+    return key;
+  };
+  useMemo(() => {
+    if (backUrl?.restart) {
+      console.log("restaurando busqueda");
+      mutation.mutate({
+        url: backUrl?.pathName ? backUrl.pathName : "",
+        method: "POST",
+        data: { sql: backUrl?.startSearchFilter?.where },
+      });
+    }
+  
+  }, [backUrl?.restart]);
+  useMemo(() => {
+ 
+    if (backUrl?.pathName && !backUrl?.restart) {
+      mutation.mutate({
+        url: backUrl?.pathName ? backUrl.pathName : "",
+        method: "POST",
+        data: { sql: backUrl?.startSearchFilter?.where },
+      });
+    }
+  }, []);
+  useEffect(() => {
+    if (data.length > 0) {
+      setDataTable((prev) => ({
+        ...prev,
+        data: data,
+      }));
+    }
+  }, [data]);
 
   useEffect(() => {
-    if (dataOfTable.data && dataOfTable.data.data.length > 0) {
+    if (
+      dataTable &&
+      Array.isArray(dataTable.data) &&
+      dataTable.data.length > 0
+    ) {
       let filtered = [];
       if (search.row) {
         // Filtro por una columna específica
-        filtered = dataOfTable.data.data.filter((item) =>
+        filtered = dataTable.data.filter((item) =>
           String(item[search.row] || "") // Validación de seguridad
             .toLowerCase()
             .includes(search.text.toLowerCase())
         );
       } else {
         // Filtro general
-        filtered = dataOfTable.data.data.filter((item: { [s: string]: unknown }) =>
+        filtered = dataTable.data.filter((item: { [s: string]: unknown }) =>
           Object.values(item).some((value) =>
             String(value || "") // Validación de valores nulos o indefinidos
               .toLowerCase()
@@ -96,15 +176,16 @@ export const Agtable: React.FC<TypeTable> = ({
       }
 
       setFilteredData(filtered);
-
       // Actualización de opciones de colapso de filtros
       setFiltersColapseOptions((prev) => ({
         ...prev,
-        titles: Object.keys(dataOfTable.data.data[0]), // Extrae las claves del primer elemento
+        titles: Object.keys(dataTable.data[0]), // Extrae las claves del primer elemento
       }));
     }
-  }, [search.text, search.row, dataOfTable.data]); // Agrega dependencias relevantes
-
+  }, [search.text, search.row, dataTable.data]); // Agrega dependencias relevantes
+  // useEffect(() =>{
+  //   console.log("nueva",filteredData)
+  // },[filteredData])
   const handleChange = (search: string) => {
     setSearch((prev) => ({
       ...prev,
@@ -121,64 +202,101 @@ export const Agtable: React.FC<TypeTable> = ({
       handlePropsChangePage(currentPage, pageSize, totalPages, totalRows);
     }
   };
-  const handleFilterChange = (params: { api: { getFilterModel: () => any } }) => {
+  const handleFilterChange = (params: {
+    api: { getFilterModel: () => any };
+  }) => {
     const filters = params.api.getFilterModel(); // Obtiene los filtros activos
-  
+
     const sqlWhereClause = Object.entries(filters)
       .map(([field, filter]: [string, any]) => {
-        const { filterType, type, filter: value, filterTo, operator, conditions } = filter;
-  
+        const {
+          filterType,
+          type,
+          filter: value,
+          filterTo,
+          operator,
+          conditions,
+        } = filter;
+
         if (conditions && Array.isArray(conditions)) {
           // Procesa condiciones múltiples (como AND o OR)
           const conditionExpressions = conditions.map((condition: any) => {
             const { type, filter, filterTo } = condition;
-            if (filterType === 'number') {
-              if (type === 'equals') return `${field} = ${filter}`;
-              if (type === 'notEqual') return `${field} != ${filter}`;
-              if (type === 'greaterThan') return `${field} > ${filter}`;
-              if (type === 'greaterThanOrEqual') return `${field} >= ${filter}`;
-              if (type === 'lessThan') return `${field} < ${filter}`;
-              if (type === 'lessThanOrEqual') return `${field} <= ${filter}`;
-              if (type === 'inRange') return `${field} BETWEEN ${filter} AND ${filterTo}`;
+            if (filterType === "number") {
+              if (type === "equals") return `${field} = ${filter}`;
+              if (type === "notEqual") return `${field} != ${filter}`;
+              if (type === "greaterThan") return `${field} > ${filter}`;
+              if (type === "greaterThanOrEqual") return `${field} >= ${filter}`;
+              if (type === "lessThan") return `${field} < ${filter}`;
+              if (type === "lessThanOrEqual") return `${field} <= ${filter}`;
+              if (type === "inRange")
+                return `${field} BETWEEN ${filter} AND ${filterTo}`;
             }
-            return ''; // Ignorar condiciones no válidas
+            return ""; // Ignorar condiciones no válidas
           });
-  
+
           // Une las condiciones usando el operador (AND/OR)
           return `(${conditionExpressions.join(` ${operator} `)})`;
         }
-  
+
         // Procesa filtros simples
         switch (filterType) {
-          case 'text':
-            if (type === 'contains') return `${field} LIKE '%${value}%'`;
-            if (type === 'equals') return `${field} = '${value}'`;
-            if (type === 'notEqual') return `${field} != '${value}'`;
-            if (type === 'startsWith') return `${field} LIKE '${value}%'`;
-            if (type === 'endsWith') return `${field} LIKE '%${value}'`;
+          case "text":
+            if (type === "contains") return `${field} LIKE '%${value}%'`;
+            if (type === "equals") return `${field} = '${value}'`;
+            if (type === "notEqual") return `${field} != '${value}'`;
+            if (type === "startsWith") return `${field} LIKE '${value}%'`;
+            if (type === "endsWith") return `${field} LIKE '%${value}'`;
             break;
-  
-          case 'number':
-            if (type === 'equals') return `${field} = ${value}`;
-            if (type === 'notEqual') return `${field} != ${value}`;
-            if (type === 'greaterThan') return `${field} > ${value}`;
-            if (type === 'greaterThanOrEqual') return `${field} >= ${value}`;
-            if (type === 'lessThan') return `${field} < ${value}`;
-            if (type === 'lessThanOrEqual') return `${field} <= ${value}`;
-            if (type === 'inRange') return `${field} BETWEEN ${value} AND ${filterTo}`;
+
+          case "number":
+            if (type === "equals") return `${field} = ${value}`;
+            if (type === "notEqual") return `${field} != ${value}`;
+            if (type === "greaterThan") return `${field} > ${value}`;
+            if (type === "greaterThanOrEqual") return `${field} >= ${value}`;
+            if (type === "lessThan") return `${field} < ${value}`;
+            if (type === "lessThanOrEqual") return `${field} <= ${value}`;
+            if (type === "inRange")
+              return `${field} BETWEEN ${value} AND ${filterTo}`;
             break;
-  
+
           default:
-            return ''; // Ignorar filtros desconocidos
+            return ""; // Ignorar filtros desconocidos
         }
       })
       .filter(Boolean) // Elimina cualquier filtro no válido o vacío
-      .join(' AND '); // Une las condiciones con AND
-  
-    console.log('Consulta SQL generada:', sqlWhereClause);
+      .join(" AND "); // Une las condiciones con
+
+    if (data.length > 0) {
+      return;
+    }
+    if (sqlWhereClause != "") {
+      setDataTable((prev) => ({
+        previous: prev.previous,
+        data: [],
+        sql: sqlWhereClause,
+        key: generateRandomKey(50),
+      }));
+      mutation.mutate({
+        url: backUrl?.pathName ? backUrl.pathName : "",
+        method: "POST",
+        data: { sql: sqlWhereClause },
+      });
+    } else {
+      mutation.mutate({
+        url: backUrl?.pathName ? backUrl.pathName : "",
+        method: "POST",
+        data: { sql: data.sql },
+      });
+      setDataTable((prev) => ({
+        previous: prev.previous,
+        data: [],
+        sql: prev.sql,
+        key: generateRandomKey(50),
+      }));
+    }
   };
-  
-  
+
   // Función para manejar valores de las celdas
   const handleCellValue = (value: unknown): React.ReactNode => {
     if (value === null || value === undefined) return "";
@@ -186,10 +304,11 @@ export const Agtable: React.FC<TypeTable> = ({
   };
   const defaulColDef = useMemo(
     () => ({
-      flex: 1,
       filterParams: {
         buttons: ["apply", "reset"],
       },
+      resizable: true, // Asegura que las columnas puedan ajustarse
+
     }),
     []
   );
@@ -223,16 +342,21 @@ export const Agtable: React.FC<TypeTable> = ({
             <div className="flex items-stretch">
               <div className="flex-1">
                 <AgGridReact
-
-onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
-
+                  // key={data.length>0?"key":dataTable?.key}
+                  onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
                   pagination={true}
                   paginationPageSize={10}
                   paginationPageSizeSelector={[10, 25, 50, 100]}
-                  loading={dataOfTable.isLoading}
-                  rowData={filteredData || []}
+                  loading={
+                    mutation.status === "pending" &&
+                    Array.isArray(dataTable.data) &&
+                    dataTable.data.length === 0
+                  }
+                  rowData={filteredData}
                   columnDefs={columnDefsH}
                   localeText={localeText}
+                  // 
+
                   rowSelection="multiple"
                   domLayout="autoHeight"
                   className="shadow-lg rounded-lg border border-gray-200"
@@ -256,7 +380,7 @@ onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
                         alignItems: "center",
                         textWrap: "wrap",
                       }}
-                      className="w-20 h-1/3 text-black px-4 py-2 rounded hover:bg-blue-600"
+                      className={`w-20 ${backUrl?.pathName ? "h-1/2" : "h-1/3"} text-black px-4 py-2 rounded hover:bg-blue-600`}
                     >
                       <span
                         style={{
@@ -272,33 +396,35 @@ onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
                         Columnas
                       </span>
                     </button>
-                    <button
-                      onClick={() => setColapse(true)}
-                      style={{
-                        background: "#F8F8F8",
-                        borderRight: "4px solid #c1c1c1",
-                        borderTop: "4px solid #c1c1c1",
-                        borderBottom: "4px solid #c1c1c1",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        textWrap: "wrap",
-                      }}
-                      className="w-20 h-1/3 text-black px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                      <span
+                    {!backUrl?.pathName && (
+                      <button
+                        onClick={() => setColapse(true)}
                         style={{
-                          transform: "rotate(90deg)",
-                          transformOrigin: "center",
-                          whiteSpace: "nowrap",
-                          display: "inline-block",
-                          marginLeft: "auto",
-                          marginRight: "auto",
+                          background: "#F8F8F8",
+                          borderRight: "4px solid #c1c1c1",
+                          borderTop: "4px solid #c1c1c1",
+                          borderBottom: "4px solid #c1c1c1",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          textWrap: "wrap",
                         }}
+                        className={` ${backUrl?.pathName ? "h-1/2" : "h-1/3"}  w-20  text-black px-4 py-2 rounded hover:bg-blue-600`}
                       >
-                        Buscador y filtros
-                      </span>
-                    </button>
+                        <span
+                          style={{
+                            transform: "rotate(90deg)",
+                            transformOrigin: "center",
+                            whiteSpace: "nowrap",
+                            display: "inline-block",
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                          }}
+                        >
+                          Buscador y filtros
+                        </span>
+                      </button>
+                    )}
                     <button
                       onClick={() => setOpen(true)}
                       style={{
@@ -311,7 +437,7 @@ onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
                         alignItems: "center",
                         textWrap: "wrap",
                       }}
-                      className="w-20 h-1/3 text-black px-4 py-2 rounded hover:bg-blue-600"
+                      className={` ${backUrl?.pathName ? "h-1/2" : "h-1/3"}  w-20 text-black px-4 py-2 rounded hover:bg-blue-600`}
                     >
                       <span
                         style={{
@@ -370,11 +496,7 @@ onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
                       value={selectedFilter}
                       onChange={(e) => {
                         const value = e.target.value;
-                        console.log(
-                          value,
-                          columnDefs.find((column) => column.field === value)
-                            ?.headerName
-                        );
+
                         setSelectedFilter(value);
                         setSearch((prev) => ({
                           ...prev,
@@ -398,84 +520,85 @@ onFilterChanged={handleFilterChange} // Maneja el cambio de filtros
                   </ColComponent>
                 </RowComponent>
               </div>
-              {/* <RowComponent>
-                {filtersColapseOptions.titles.map((title, id) => {
-                  const column = columnDefs.find(
-                    (column) => column.field === title
-                  );
-                  if (
-                    selectedFilter != "general" &&
-                    column &&
-                    column.field != selectedFilter
-                  )
-                    return null;
-                  if (!column?.headerName) return null;
-                  if (column?.type == "dateColumn") return null;
+              {!backUrl?.pathName && (
+                <RowComponent>
+                  {filtersColapseOptions.titles.map((title, id) => {
+                    const column = columnDefs.find(
+                      (column) => column.field === title
+                    );
+                    if (
+                      selectedFilter != "general" &&
+                      column &&
+                      column.field != selectedFilter
+                    )
+                      return null;
+                    if (!column?.headerName) return null;
+                    if (column?.type == "dateColumn") return null;
 
-                  const groupedData = data.reduce(
-                    (acc: { [key: string]: number }, item: any) => {
-                      const cellValue = String(item[title] || "");
-                      acc[cellValue] = (acc[cellValue] || 0) + 1;
-                      return acc;
-                    },
-                    {}
-                  );
+                    const groupedData = data.reduce(
+                      (acc: { [key: string]: number }, item: any) => {
+                        const cellValue = String(item[title] || "");
+                        acc[cellValue] = (acc[cellValue] || 0) + 1;
+                        return acc;
+                      },
+                      {}
+                    );
 
-             
-                  const filteredEntries = Object.entries(groupedData).filter(
-                    ([value]) =>
-                      value
-                        .toLowerCase()
-                        .includes(
-                          filtersColapseOptions[title]?.toLowerCase() || ""
-                        )
-                  );
+                    const filteredEntries = Object.entries(groupedData).filter(
+                      ([value]) =>
+                        value
+                          .toLowerCase()
+                          .includes(
+                            filtersColapseOptions[title]?.toLowerCase() || ""
+                          )
+                    );
 
-                  return (
-                    <ColComponent key={id}>
-                      <CollapseComponent title={column.headerName}>
-                        <div className="space-y-2">
-                          <InputComponent
-                            label={`Buscar por ${column.headerName}`}
-                            name={`search-${title}`}
-                            suscribeValue={(searchText: string) => {
-                              setFiltersColapseOptions((prev) => ({
-                                ...prev,
-                                [title]: searchText,
-                              }));
-                            }}
-                          />
-
-                          {filteredEntries.map(([value, count]) => (
-                            <div
-                              key={value}
-                              className="flex justify-between items-center p-2 border-b border-gray-300 hover:text-purple-500 hover:font-semibold text-gray-700 cursor-pointer"
-                              onClick={() => {
-                                setSelectedFilter(
-                                  column.field ? column.field : ""
-                                );
-                                setSearch({
-                                  text: value,
-                                  row: title,
-                                  includes: false,
-                                  headerName: column.headerName
-                                    ? column.headerName
-                                    : "",
-                                });
+                    return (
+                      <ColComponent key={id}>
+                        <CollapseComponent title={column.headerName}>
+                          <div className="space-y-2">
+                            <InputComponent
+                              label={`Buscar por ${column.headerName}`}
+                              name={`search-${title}`}
+                              suscribeValue={(searchText: string) => {
+                                setFiltersColapseOptions((prev) => ({
+                                  ...prev,
+                                  [title]: searchText,
+                                }));
                               }}
-                            >
-                              <div>{handleCellValue(value)}</div>
-                              <div className="bg-purple-300 px-2 py-1 text-xs text-gray-500 rounded-full">
-                                {count as number}
+                            />
+
+                            {filteredEntries.map(([value, count]) => (
+                              <div
+                                key={value}
+                                className="flex justify-between items-center p-2 border-b border-gray-300 hover:text-purple-500 hover:font-semibold text-gray-700 cursor-pointer"
+                                onClick={() => {
+                                  setSelectedFilter(
+                                    column.field ? column.field : ""
+                                  );
+                                  setSearch({
+                                    text: value,
+                                    row: title,
+                                    includes: false,
+                                    headerName: column.headerName
+                                      ? column.headerName
+                                      : "",
+                                  });
+                                }}
+                              >
+                                <div>{handleCellValue(value)}</div>
+                                <div className="bg-purple-300 px-2 py-1 text-xs text-gray-500 rounded-full">
+                                  {count as number}
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CollapseComponent>
-                    </ColComponent>
-                  );
-                })}
-              </RowComponent> */}
+                            ))}
+                          </div>
+                        </CollapseComponent>
+                      </ColComponent>
+                    );
+                  })}
+                </RowComponent>
+              )}
 
               <div className="w-fit absolute top-2 right-2 ">
                 <Button

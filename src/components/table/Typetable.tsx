@@ -6,7 +6,7 @@ export type TypeTable = {
      * Utilizado para mostrar un estado de carga mientras se obtienen los datos.
      */
     isLoading?: boolean;
-  
+    filtersActive?:Record<string,any>,
     /** 
      * Definición de las columnas de la tabla. 
      * Acepta un array de objetos que definen las columnas, como el nombre, el campo y otras configuraciones.
@@ -31,10 +31,9 @@ export type TypeTable = {
     backUrl?:{
       pathName: string;
       startSearchFilter?:{
-        fieldName: string;
-        value: string;
-        operator: string;
+       where:string,
       }
+      restart:boolean;
     }
   };
   

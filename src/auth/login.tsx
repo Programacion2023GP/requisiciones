@@ -27,7 +27,9 @@ const LoginComponent = () => {
       AxiosRequest(url, method, data),
     
     onSuccess: (data) => {
-      console.log('my infooo');
+      console.log(data);
+      localStorage.setItem('permisos', JSON.stringify(data.data.permisos));
+
       localStorage.setItem('token', data.data.token);
       window.location.href = '/usuarios'
       showToast(data.message, data.status);

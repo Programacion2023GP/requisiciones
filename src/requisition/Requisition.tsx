@@ -21,7 +21,9 @@ import {
 import FormikForm from "../components/formik/Formik";
 import * as Yup from "yup";
 import { showConfirmationAlert, showToast } from "../sweetalert/Sweetalert";
-import PageTransition from "../components/stepper/Stepper";
+import PageTransition, {
+  PageTransitionRef,
+} from "../components/stepper/Stepper";
 import Button from "../components/form/Button";
 import { FormikProps } from "formik";
 import { LuPlus } from "react-icons/lu";
@@ -29,6 +31,9 @@ import Tooltip from "../components/toltip/Toltip";
 import { CgCloseO } from "react-icons/cg";
 import { Agtable } from "../components/table/Agtable";
 import { ColDef } from "ag-grid-community";
+import Typography from "../components/typografy/Typografy";
+import Actions from "./actions/Actions";
+import Chip from "../components/chip/Chip";
 
 const ProductsComponent = memo(
   ({
@@ -295,6 +300,8 @@ const FormProductsComponent = forwardRef<
 });
 
 const RequisicionesAdd = () => {
+  const pageTransitionRef = useRef<PageTransitionRef>(null);
+
   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
   const formikProducts = useRef<FormikProps<Record<string, any>> | null>(null);
   const NewValidations = (
@@ -323,11 +330,7 @@ const RequisicionesAdd = () => {
       cont: 1,
     },
   });
-  const [optionsPerPage, setOptionsPerPage] = useState({
-    page: 1,
-    paggination: 10000000000,
-  }); // Número de elementos por página
-
+  const [reloadTable, setReloadTable] = useState(false);
   const responsive = {
     "2xl": 6,
     xl: 6,
@@ -345,9 +348,35 @@ const RequisicionesAdd = () => {
       method: "POST" | "PUT" | "DELETE";
       data?: any;
     }) => AxiosRequest(url, method, data),
+    onMutate(variables) {
+      setReloadTable(false);
+    },
     onSuccess: (data) => {
+      // mutation.reset()
       setOpen(false);
+      setReloadTable(true);
+      setValues({
+        valuesRequisition: {
+          IDDepartamento: 0,
+          Observaciones: "",
+          Solicitante: "",
+          IDTipo: 0,
+        },
+        valuesProducts: {
+          initialValues: {
+            Cantidad1: null,
+            Descripcion1: null,
+          },
+          validationSchema: {
+            ...NewValidations(`Cantidad1`, `Descripcion1`),
+          },
+          cont: 1,
+        },
+      });
       showToast(data.message, data.status);
+      if (mutation.status === "success") {
+        mutation.reset();
+      }
       //   queryClient.refetchQueries({
       //     queryKey: ["users/index"],
       //   });
@@ -359,6 +388,7 @@ const RequisicionesAdd = () => {
       );
     },
   });
+
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState<boolean>(false);
@@ -382,11 +412,7 @@ const RequisicionesAdd = () => {
     ],
   });
   const [groups, types] = queries;
-  useEffect(() => {
-    queryClient.resetQueries({
-      queryKey: ["requisiciones/index"], // Especifica explícitamente queryKey
-    });
-  }, [optionsPerPage]);
+
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -409,37 +435,34 @@ const RequisicionesAdd = () => {
       field: "Folio",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Ejercicio",
       field: "Ejercicio",
       sortable: true,
       filter: true,
-      floatingFilter: true,
-
-    
+      filterParams: {
+        defaultValue: "2024",
+      },
     },
     {
       headerName: "Departamento",
       field: "Nombre_Departamento",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Solicitante",
       field: "Solicitante",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
 
     {
       headerName: "FechaCaptura",
       field: "FechaCaptura",
       filter: "agDateColumnFilter",
-      floatingFilter: true,
+      resizable: true,
       cellRenderer: (data: { value: string | number | Date }) => {
         // Asegúrate de que la fecha se muestre en un formato adecuado
         return data.value ? new Date(data.value).toLocaleDateString() : "";
@@ -483,72 +506,69 @@ const RequisicionesAdd = () => {
       field: "Status",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Tipo",
       field: "Tipo",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Observaciones",
       field: "Observaciones",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Usuario asignado",
       field: "UsuarioAS",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Usuario UsuarioVoBo",
       field: "UsuarioVoBo",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Motivo de cancelación",
       field: "Motivo_AutEspecial",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Motivo de cancelación",
       field: "Motivo_AutEspecial",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Orden compra",
       field: "Orden_Compra",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Orden consolidada",
       field: "OC_Consolidada",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
     {
       headerName: "Usuario captura",
       field: "UsuarioCaptura",
       sortable: true,
       filter: true,
-      floatingFilter: true,
     },
-    
+    {
+      headerName: "Acciones",
+      colId: "buttons",
+      // field: "Rol", // Usamos colId para identificar la columna sin usar field
+      // sortable: true,
+      // filter: true,
+      cellRenderer: (params: any) => <Actions data={params.data} />, // Usamos cellRendererFramework
+    },
   ]);
   const buttonElement = useMemo(
     () => (
@@ -556,8 +576,20 @@ const RequisicionesAdd = () => {
         <div className="mb-4">
           <Button
             onClick={() => {
-              formik.current?.resetForm();
-              formikProducts.current?.resetForm();
+              pageTransitionRef.current?.reset();
+
+              formikProducts.current?.resetForm({
+                values: { Cantidad1: null, Descripcion1: null },
+              });
+              formik.current?.resetForm({
+                values: {
+                  IDDepartamento: 0,
+                  Observaciones: "",
+                  Solicitante: "",
+                  IDTipo: 0,
+                },
+              });
+
               setOpen(true);
               // toggleOpen();
             }}
@@ -576,18 +608,39 @@ const RequisicionesAdd = () => {
   return (
     <>
       <div className="container mx-auto shadow-lg p-6 border mt-12">
+        <Typography
+          className="w-full text-center py-2"
+          variant="h2"
+          color="black"
+          size="3xl"
+        >
+          la tabla empieza consultando el ejercicio del año actual
+          {" " + new Date().getFullYear()}
+        </Typography>
+        <div className="flex w-full flex-row justify-center mb-6">
+          <Chip message="Captura (CA)" className="bg-gray-400" />
+          <Chip message="Autorizada (AU)" className="bg-black" />
+          <Chip message="Asignado  (AS)" className="bg-purple-500" />
+          <Chip message="Cotizado  (CO)" className="bg-orange-500" />
+          <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
+          <Chip message="Rechazada  (RE)" className="bg-red-500" />
+          <Chip message="Realizada  (RE)" className="bg-cyan-500" />
+          <Chip message="Surtida  (SU)" className="bg-lime-500" />
+        </div>
         <Agtable
-         backUrl={{pathName: 'requisiciones/index',startSearchFilter: {
-          fieldName: 'Ejercicio',
-          operator: '=',
-          value: '2024',
-         }}}
-          // isLoading={requisiciones.isLoading}
+          backUrl={{
+            pathName: "requisiciones/index",
+            startSearchFilter: {
+              where: `Ejercicio = '${new Date().getFullYear()}'`,
+            },
+            restart: reloadTable,
+          }}
+          filtersActive={{
+            Ejercicio: "2024",
+          }}
           columnDefs={columnDefs}
           buttonElement={buttonElement}
-          // data={requisiciones.data?.data.data}
           colapseFilters
-          // handlePropsChangePage={handlePropsChangePage}
         />
       </div>
 
@@ -600,6 +653,7 @@ const RequisicionesAdd = () => {
       >
         <div className="py-6">
           <PageTransition
+            ref={pageTransitionRef}
             variant="push"
             renderButtons={(handlePrevPage, handleNextPage, currentPage) => (
               <div className="flex space-x-2">
@@ -627,6 +681,9 @@ const RequisicionesAdd = () => {
                   onClick={() => {
                     if (currentPage == 2) {
                       formikProducts.current?.handleSubmit();
+                      setTimeout(() => {
+                        // console.log(formik.current?.touched )
+                      }, 100);
                     }
                     if (currentPage == 1) {
                       formik.current?.handleSubmit();

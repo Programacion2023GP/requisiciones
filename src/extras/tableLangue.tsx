@@ -83,12 +83,21 @@ export const localeText = {
     "expandAllColumnGroups": "Expandir todos los grupos de columnas",
     "collapseAllColumnGroups": "Colapsar todos los grupos de columnas"
   }
-export  const gridOptions = {
-  api:import.meta.env.VITE_API_URL,
-  paginationPageSize: 10, // Esto podría estar anulando tu configuración
-  paginationPageSizeSelector:[10, 25, 50, 100],// Opciones para cambiar el tamaño de la página
-
+  export const gridOptions = {
+    api: import.meta.env.VITE_API_URL, // URL de la API
+    paginationPageSize: 10, // Tamaño de página inicial
+    paginationPageSizeSelector: [10, 25, 50, 100], // Opciones para cambiar el tamaño de página
+    defaultColDef: {
+      resizable: true, // Permite ajustar manualmente el tamaño de las columnas
+      filterParams: {
+        buttons: ["apply", "reset"],
+      },
+      flex: 1, // Ajuste proporcional por defecto
+    },
     onFirstDataRendered: (params: { api: { sizeColumnsToFit: () => void; }; }) => {
-      params.api.sizeColumnsToFit();  // Ajusta automáticamente las columnas
+      params.api.sizeColumnsToFit(); // Ajustar al contenedor
+      // Si prefieres ajustar al contenido:
+      // params.api.autoSizeColumns(params.columnApi.getAllColumns().map(col => col.getColId()));
     },
   };
+  
