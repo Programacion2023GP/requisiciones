@@ -248,6 +248,7 @@ const FormProductsComponent = forwardRef<
           url: "/requisiciones/create",
           data: data,
         });
+        
       } else {
         showToast("La acción fue cancelada.", "error");
       }
@@ -403,6 +404,8 @@ const RequisicionesAdd = () => {
         queryKey: ["departamentos/index"],
         queryFn: () => GetAxios("departamentos/index"),
         refetchOnWindowFocus: true,
+        
+
       },
       {
         queryKey: ["tipos/index"],
@@ -412,7 +415,7 @@ const RequisicionesAdd = () => {
     ],
   });
   const [groups, types] = queries;
-
+  
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -567,7 +570,7 @@ const RequisicionesAdd = () => {
       // field: "Rol", // Usamos colId para identificar la columna sin usar field
       // sortable: true,
       // filter: true,
-      cellRenderer: (params: any) => <Actions data={params.data} />, // Usamos cellRendererFramework
+      cellRenderer: (params: any) => <Actions data={params.data} setReloadTable={setReloadTable} />, // Usamos cellRendererFramework
     },
   ]);
   const buttonElement = useMemo(
@@ -604,7 +607,31 @@ const RequisicionesAdd = () => {
     ),
     []
   );
-
+  const getRowClass = (params: { node: { rowIndex: number; },data:Record<string,any>; }) => {
+    const {Status} = params?.data 
+    if (Status =="CA") {
+      return "class_ca";
+    }
+    if (Status =="AU") {
+      return "class_au";
+    }
+    if (Status =="AS") {
+      return "class_as";
+    }
+    if (Status =="CO") {
+      return "class_co";
+    }
+    if (Status =="OC") {
+      return "class_oc";
+    }
+    if (Status =="RE") {
+      return "class_re";
+    }
+    if (Status =="SU") {
+      return "class_su";
+    }
+}
+  
   return (
     <>
       <div className="container mx-auto shadow-lg p-6 border mt-12">
@@ -628,6 +655,7 @@ const RequisicionesAdd = () => {
           <Chip message="Surtida  (SU)" className="bg-lime-500" />
         </div>
         <Agtable
+        getRowClass={getRowClass}
           backUrl={{
             pathName: "requisiciones/index",
             startSearchFilter: {

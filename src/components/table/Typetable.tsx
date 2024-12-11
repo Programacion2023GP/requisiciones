@@ -12,7 +12,7 @@ export type TypeTable = {
      * Acepta un array de objetos que definen las columnas, como el nombre, el campo y otras configuraciones.
      */
     columnDefs: ColDef<any>[];
-  
+    getRowClass?: (params: any) => string | undefined;
     /** 
      * Los datos que se mostrarán en la tabla.
      * Debe ser un array de objetos donde cada objeto representa una fila de datos.

@@ -4,6 +4,9 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'bg-red-500', // Asegúrate de incluir clases dinámicas
+  ],
   theme: {
     extend: {
       colors:{

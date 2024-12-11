@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.class_ca{
+    background-color: #9ca3af !important;
+}
+.class_au{
+    background-color: #000000 !important;
+    color:white !important;
+   
+}
+.class_as{
+    background-color: #a855f7 !important;
+   
+}
+.class_co{
+    background-color: #f97316 !important;
+   
+}
+.class_oc{
+    background-color: #ec4899 !important;
+   
+}
+.class_rec{
+    background-color: #ef4444 !important;
+   
+}
+.class_re{
+    background-color: #06b6d4 !important;
+   
+}
+.class_su{
+    background-color: #8bce26 !important;
+   
+}

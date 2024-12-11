@@ -9,7 +9,7 @@ import CollapseComponent from "../colapse/Colapse";
 import { FiChevronDown } from "react-icons/fi"; // Asegúrate de instalar React Icons si no lo tienes
 import ModalComponent from "../modal/Modal";
 import HelpModal from "./Helpinfo";
-import { ColDef } from "ag-grid-community";
+import { ColDef, RowClassRules } from "ag-grid-community";
 import Typography from "../typografy/Typografy";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
@@ -31,6 +31,8 @@ export const Agtable: React.FC<TypeTable> = ({
   handlePropsChangePage,
   colapseFilters,
   backUrl,
+  getRowClass,
+  
 }) => {
   const [search, setSearch] = useState<SearchType>({
     text: "",
@@ -312,6 +314,7 @@ export const Agtable: React.FC<TypeTable> = ({
     }),
     []
   );
+
   return (
     <div>
       <div
@@ -356,7 +359,7 @@ export const Agtable: React.FC<TypeTable> = ({
                   columnDefs={columnDefsH}
                   localeText={localeText}
                   // 
-
+                  getRowClass={getRowClass}
                   rowSelection="multiple"
                   domLayout="autoHeight"
                   className="shadow-lg rounded-lg border border-gray-200"

@@ -1,5 +1,6 @@
 import React, { memo, useEffect, ReactNode } from "react";
 import { InterfaceModal } from "./InterfaceModal"; // Asegúrate de que la ruta sea correcta
+import ReactDOM from 'react-dom';
 
 interface ModalProps extends InterfaceModal {
   children: ReactNode;
@@ -11,15 +12,13 @@ export const ModalComponent: React.FC<ModalProps> = memo(({
   title,
   children,
 }) => {
-  // useEffect(() => {
-  //   // No es necesario hacer nada aquí por ahora
-  // }, [open]);
-
   useEffect(() => {
     // Puedes manejar aquí otros efectos si es necesario
   }, [title, children]);
 
-  return (
+  if (!open) return null; // No renderizar nada si el modal no está abierto
+
+  return ReactDOM.createPortal(
     <div
       className={`fixed inset-0 flex items-center justify-center z-[300] bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-out ${
         open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -59,7 +58,8 @@ export const ModalComponent: React.FC<ModalProps> = memo(({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body // Renderiza el modal en el DOM de la página principal
   );
 });
 
