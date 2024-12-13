@@ -8,8 +8,11 @@ import { create } from "zustand";
 import OpenHook from "../hooks/open";
 import { LayoutType } from "./types/LayoutTypes";
 import { LuMenu } from "react-icons/lu";
+import { Document, PDFViewer, Page, Text, View } from "@react-pdf/renderer";
+import { createTw } from "react-pdf-tailwind";
 
 // Definir el tipo de estado para el store de Zustand
+const tw = createTw({});
 
 const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
   return (
@@ -37,6 +40,7 @@ const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
           sm: open ? 0 : 12,
         }}
       >
+       
         {outlet}
       </ColComponent>
     </RowComponent>

@@ -34,6 +34,7 @@ import { ColDef } from "ag-grid-community";
 import Typography from "../components/typografy/Typografy";
 import Actions from "./actions/Actions";
 import Chip from "../components/chip/Chip";
+import { createTw } from "react-pdf-tailwind";
 
 const ProductsComponent = memo(
   ({

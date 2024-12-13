@@ -54,7 +54,7 @@ export const ModalComponent: React.FC<ModalProps> = memo(({
               maxHeight: "calc(80vh - 60px)", // Ajusta la altura máxima del contenido del modal (80% de la pantalla)
             }}
           >
-            <div className="text-gray-800">{children}</div>
+            <div className="text-gray-800 ">{children}</div>
           </div>
         </div>
       </div>
