@@ -8,9 +8,32 @@ import { create } from "zustand";
 import OpenHook from "../hooks/open";
 import { LayoutType } from "./types/LayoutTypes";
 import { LuMenu } from "react-icons/lu";
-import { Document, PDFViewer, Page, Text, View } from "@react-pdf/renderer";
+import { Document, PDFViewer, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
-
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: "white",
+    padding: 16,
+    borderRadius: 8,
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+  header: {
+    marginBottom: 20,
+    paddingBottom: 10,
+    borderBottom: "2px solid #e2e8f0",
+    textAlign: "center",
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#007bff",
+  },
+  companyInfo: {
+    fontSize: 12,
+    color: "#4a5568",
+    marginBottom: 4,
+  },
+});
 // Definir el tipo de estado para el store de Zustand
 const tw = createTw({});
 

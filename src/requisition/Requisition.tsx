@@ -35,6 +35,7 @@ import Typography from "../components/typografy/Typografy";
 import Actions from "./actions/Actions";
 import Chip from "../components/chip/Chip";
 import { createTw } from "react-pdf-tailwind";
+import Observable from "../extras/observable";
 
 const ProductsComponent = memo(
   ({
@@ -392,15 +393,11 @@ const RequisicionesAdd = () => {
   });
 
   const queryClient = useQueryClient();
-
+  const {ObservablePost} = Observable()
   const [open, setOpen] = useState<boolean>(false);
   const queries = useQueries({
     queries: [
-      // {
-      //   queryKey: ["requisiciones/index"],
-      //   queryFn: () => GetAxios(`requisiciones/index`),
-      //   refetchOnWindowFocus: true,
-      // },
+   
       {
         queryKey: ["departamentos/index"],
         queryFn: () => GetAxios("departamentos/index"),
@@ -413,9 +410,26 @@ const RequisicionesAdd = () => {
         queryFn: () => GetAxios("tipos/index"),
         refetchOnWindowFocus: true,
       },
+      {
+        queryKey: ["autorizadoresRequisition/cotizadores"],
+        queryFn: () => GetAxios(`autorizadores/cotizadores`),
+        refetchOnWindowFocus: true,
+      },
     ],
   });
-  const [groups, types] = queries;
+  const [groups, types,autorizadores] = queries;
+  useEffect(() => {
+    // first
+   if (autorizadores.data && autorizadores.data.data) {
+  
+
+    ObservablePost("autorizadoresSelect",{
+        autorizadores: autorizadores.data.data
+      })
+
+   }
+    
+  }, [autorizadores.data]);
   
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
@@ -435,8 +449,8 @@ const RequisicionesAdd = () => {
   });
   const [columnDefs] = useState<ColDef<any>[]>([
     {
-      headerName: "Folio",
-      field: "Folio",
+      headerName: "IDRequisicion",
+      field: "IDRequisicion",
       sortable: true,
       filter: true,
     },
@@ -576,7 +590,7 @@ const RequisicionesAdd = () => {
   ]);
   const buttonElement = useMemo(
     () => (
-      <Tooltip content="Agregar Usuario">
+      <Tooltip content="Agregar Requisición">
         <div className="mb-4">
           <Button
             onClick={() => {
@@ -645,7 +659,7 @@ const RequisicionesAdd = () => {
           la tabla empieza consultando el ejercicio del año actual
           {" " + new Date().getFullYear()}
         </Typography>
-        <div className="flex w-full flex-row justify-center mb-6">
+        <div className="flex w-full flex-row flex-wrap justify-center mb-6">
           <Chip message="Captura (CA)" className="bg-gray-400" />
           <Chip message="Autorizada (AU)" className="bg-black" />
           <Chip message="Asignado  (AS)" className="bg-purple-500" />

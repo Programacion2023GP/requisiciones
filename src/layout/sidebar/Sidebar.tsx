@@ -52,7 +52,7 @@ const SidebarComponent = () => {
   const queries = useQueries({
     queries: [
       {
-        queryKey: ["menuuser/index"],
+        queryKey: ["menuuserlayout/index"],
         queryFn: () => GetAxios(`menuuser/index`),
         refetchOnWindowFocus: true,
       },

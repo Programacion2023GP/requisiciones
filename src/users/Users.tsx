@@ -60,6 +60,8 @@ const ActionButtons = ({
   return (
     <>
       <div className="flex gap-2">
+      <Tooltip content="editar al usuario">
+
         <Button
           color="yellow"
           size="small"
@@ -70,7 +72,9 @@ const ActionButtons = ({
         >
           <BiEdit />
         </Button>
-        <Button
+        </Tooltip>
+     <Tooltip content="asignar permisos al usuario">
+     <Button
           color="indigo"
           size="small"
           variant="solid"
@@ -80,9 +84,14 @@ const ActionButtons = ({
         >
           <MdMenu />
         </Button>
+     </Tooltip>
+     <Tooltip content="eliminar al usuario">
+
         <Button color="red" size="small" variant="solid" onClick={handleDelete}>
           <MdDelete />
         </Button>
+        </Tooltip>
+
       </div>
     </>
   );
@@ -97,7 +106,7 @@ const TypeRolUser = (data: Record<string, any>) => {
     case "REQUISITOR":
       classNames = "border-blue-500 text-blue-500 border-2 p-2 rounded-md"; // Borde y texto azul para 'REQUISITOR'
       break;
-    case "PRESUPUESTOS":
+    case "AUTORIZADOR":
       classNames = "border-green-500 text-green-500 border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
       break;
     case "CAPTURA":
@@ -209,25 +218,19 @@ const Users = () => {
 
   const [users, groups] = queries;
   const roles = [
+  
+  
     {
       id: "REQUISITOR",
       value: "REQUISITOR",
     },
+    // {
+    //   id: "DIRECTOR",
+    //   value: "DIRECTOR",
+    // },
     {
-      id: "PRESUPUESTOS",
-      value: "PRESUPUESTOS",
-    },
-    {
-      id: "CAPTURA",
-      value: "CAPTURA",
-    },
-    {
-      id: "DIRECTOR",
-      value: "DIRECTOR",
-    },
-    {
-      id: "COMPRAS",
-      value: "COMPRAS",
+      id: "AUTORIZADOR",
+      value: "AUTORIZADOR",
     },
   ];
 
@@ -352,6 +355,7 @@ const Users = () => {
           setOpen(false);
         }}
       >
+        <div className="mt-4"></div>
         <FormikForm
           ref={formik}
           onSubmit={onSumbit}
@@ -412,7 +416,7 @@ const Users = () => {
                 idKey={"id"}
                 labelKey={"value"}
               />
-              {values.Rol == "COMPRAS" && (
+              {(values.Rol == "AUTORIZADOR" )&& (
                 <>
                   <div className="w-full text-start mb-2 ml-3">
                     <Typography

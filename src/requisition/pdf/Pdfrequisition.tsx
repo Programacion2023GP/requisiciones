@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ModalComponent from "../../components/modal/Modal";
 import {
   Document,
@@ -9,9 +9,10 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
-// import { PDFViewer } from '@react-pdf/renderer';
-import ReactPDF from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
+import Observable from "../../extras/observable";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 type PdfRequisitionType = {
   open: boolean;
@@ -50,10 +51,15 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
   setOpen,
   filePath,
 }) => {
+  const data = Observable().ObservableGet("PdfRequisicion");
+
+  useEffect(() => {
+    // Aquí puedes manejar la lógica de la solicitud de datos
+  }, []);
+
   return (
     <ModalComponent title="Requisición" open={open} setOpen={setOpen}>
-      {/* <div className="container mx-auto p-5"> */}
-      <PDFViewer width={"100%"} height={"600px"}>
+      <PDFViewer width="100%" height="100%">
         <Document>
           <Page
             size="A4"
@@ -63,31 +69,19 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
               ...tw("w-full flex flex-col bg-gray-50 p-6"),
             }}
           >
-            {/* Header Corporativo */}
             <View
               style={tw(
                 "w-full flex flex-col items-center bg-blue-100 rounded-lg p-4 mb-6 shadow-lg"
               )}
             >
-              {/* Imagen de la empresa */}
-              <Image
-
-                src="https://static-cse.canva.com/blob/951803/2650logotiposqueteinspiraran.jpg" // Cambia esta ruta a la URL o ubicación de tu imagen
-                style={tw("w-24 h-24 rounded-full mb-2")} // Ajusta el tamaño y estilo de la imagen
-              />
-
               <Text
                 style={tw("text-3xl font-bold text-blue-800 text-center mb-1")}
               >
-               R. AYUNTAMIENTO DE GOMEZ PALACIO, DGO 2022-2025
-
+                R. AYUNTAMIENTO DE GOMEZ PALACIO, DGO 2022-2025
               </Text>
-           
             </View>
 
-            {/* Contenido Principal */}
             <View style={tw("w-full flex flex-row gap-6")}>
-              {/* Sección de Detalles de Requisición */}
               <View
                 style={tw(
                   "w-1/2 bg-white rounded-xl shadow-md overflow-hidden"
@@ -100,17 +94,17 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                     Detalles de la Requisición
                   </Text>
                 </View>
-
                 <View style={tw("p-4")}>
                   {[
-                    { label: "Fecha de impresión", value: "REQ-2024-0001" },
-                    { label: "IdRequisición", value: "13/12/2024" },
-                    { label: "Centro de Costos", value: "DEPT-COMPRAS" },
-                    { label: "Aplicación", value: "María González" },
                     {
-                      label: "Fecha de asignación",
-                      value: "Equipamiento Tecnológico",
+                      label: "Fecha de impresión",
+                      value: ` ${new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`,
                     },
+                    { label: "IdRequisición", value: data.data.pdfData.IDRequisicion },
+
+                    { label: "Centro de Costos", value: "DEPT-COMPRAS" },
+                    { label: "Aplicación", value: "" },
+                    { label: "Fecha de asignación", value: "" },
                   ].map((item, index) => (
                     <View
                       key={index}
@@ -143,9 +137,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                       Detalle de Productos
                     </Text>
                   </View>
-
                   <View wrap style={tw("p-4")}>
-                    {/* Encabezados */}
                     <View
                       style={tw(
                         "flex flex-row mb-2 pb-2 border-b border-gray-200"
@@ -165,25 +157,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         Clave
                       </Text>
                     </View>
-
-                    {/* Filas de Productos */}
-                    {[
-                      {
-                        cantidad: 2,
-                        descripcion: "Laptop Profesional de Alto Rendimiento",
-                        clave: "TECH-LP-001",
-                      },
-                      {
-                        cantidad: 1,
-                        descripcion: "Monitor 4K Ultrawide",
-                        clave: "DISP-MON-004",
-                      },
-                      {
-                        cantidad: 3,
-                        descripcion: "Teclado Ergonómico Inalámbrico",
-                        clave: "ACC-KBD-002",
-                      },
-                    ].map((producto, index) => (
+                     {data?.data?.products && data.data.products.map((producto, index) => (
                       <View
                         key={index}
                         style={tw(
@@ -191,21 +165,21 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         )}
                       >
                         <Text
-                          style={tw("w-1/4 text-sm text-gray-800 text-center")}
+                          style={tw("w-1/4 text-sm text-gray-800 text-center text-wrap")}
                         >
-                          {producto.cantidad}
+                          {producto.Cantidad}
                         </Text>
-                        <Text style={tw("w-1/2 text-sm text-gray-800")}>
-                          {producto.descripcion}
+                        <Text style={tw("w-1/2 text-sm text-gray-800 text-wrap")}>
+                          {producto.Descripcion}
                         </Text>
                         <Text
                           style={tw("w-1/4 text-sm text-gray-800 text-right")}
                         >
-                          {producto.clave}
+                          {producto.ClavePresupestal}
                         </Text>
                       </View>
                     ))}
-                    <View style={tw(`flex flex-row justify-between py-3 `)}>
+                    <View style={tw("flex flex-row justify-between py-3")}>
                       <Text
                         style={tw("text-sm font-semibold text-gray-600 w-1/2")}
                       >
@@ -216,11 +190,10 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                           "text-sm text-gray-800 font-bold text-right w-1/2"
                         )}
                       >
-                        aqui
+                        {data.data.pdfData.Observaciones}
                       </Text>
                     </View>
-                    {/* Total */}
-                    <View
+                    {/* <View
                       style={tw(
                         "mt-4 pt-4 border-t border-gray-200 flex flex-row justify-between"
                       )}
@@ -231,12 +204,11 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                       <Text style={tw("text-sm font-bold text-blue-800")}>
                         6 Unidades
                       </Text>
-                    </View>
+                    </View> */}
                   </View>
                 </View>
               </View>
 
-              {/* Sección de Proveedores */}
               <View
                 style={tw(
                   "w-1/2 bg-white rounded-xl shadow-md overflow-hidden"
@@ -249,10 +221,9 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                     Información de Proveedores
                   </Text>
                 </View>
-
                 {[
                   {
-                    nombre: "TechProveedores S.A.",
+                    nombre: data.data.pdfData.proveedor1,
                     productos: [
                       {
                         descripcion: "Laptop Profesional",
@@ -261,11 +232,11 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         total: "$3,000.00",
                       },
                     ],
-                    contacto: "Juan Pérez",
+                    contacto: data.data.pdfData.proveedor1,
                     telefono: "(55) 9876-5432",
                   },
                   {
-                    nombre: "Displays México",
+                    nombre: data.data.pdfData.proveedor2,
                     productos: [
                       {
                         descripcion: "Monitor 4K",
@@ -274,11 +245,11 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         total: "$450.00",
                       },
                     ],
-                    contacto: "Ana Rodríguez",
+                    contacto: data.data.pdfData.proveedor2,
                     telefono: "(55) 1122-3344",
                   },
                   {
-                    nombre: "Accesorios Ergonómicos",
+                    nombre: data.data.pdfData.proveedor3,
                     productos: [
                       {
                         descripcion: "Teclado Ergonómico",
@@ -287,7 +258,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         total: "$360.00",
                       },
                     ],
-                    contacto: "Carlos Sánchez",
+                    contacto: data.data.pdfData.proveedor3,
                     telefono: "(55) 5555-7777",
                   },
                 ].map((proveedor, provIndex) => (
@@ -296,15 +267,16 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                     key={provIndex}
                     style={tw("p-4 border-b border-gray-200")}
                   >
-                    <View style={tw("flex flex-row justify-between mb-2")}>
-                      <Text style={tw("text-base font-bold text-gray-800")}>
-                        {proveedor.nombre}
-                      </Text>
+                    <View style={tw("flex flex-row justify-between mb-2 ")}>
+                      <Text
+                        style={tw(
+                          "text-base font-bold text-gray-800 text-wrap"
+                        )}
+                      >Provedor</Text>
                       <Text style={tw("text-sm text-gray-600")}>
                         {proveedor.contacto}
                       </Text>
                     </View>
-
                     <View style={tw("bg-gray-50 rounded p-3 mb-2")}>
                       {proveedor.productos.map((producto, prodIndex) => (
                         <View
@@ -329,33 +301,63 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         </View>
                       ))}
                     </View>
-
                     <Text style={tw("text-sm text-gray-600")}>
                       {proveedor.telefono}
                     </Text>
                   </View>
                 ))}
-
-                <View
-                  style={tw("p-4 bg-blue-50 flex flex-row justify-between")}
-                >
-                  <Text style={tw("text-base font-bold text-blue-800")}>
-                    Total General
+                <View style={tw("p-4")}>
+                  <Text
+                    style={tw(
+                      "text-xl font-bold text-blue-800 text-center mb-2"
+                    )}
+                  >
+                    Total a Proveedores
                   </Text>
-                  <Text style={tw("text-base font-bold text-blue-800")}>
-                    $3,810.00
-                  </Text>
+                  <View
+                    style={tw(
+                      "flex flex-row justify-between py-2 border-t border-gray-200 mt-4"
+                    )}
+                  >
+                    <Text style={tw("text-sm font-bold text-gray-800")}>
+                      Sub-total
+                    </Text>
+                    <Text style={tw("text-sm font-bold text-gray-800")}>
+                      $4,650.00
+                    </Text>
+                  </View>
+                  <View
+                    style={tw(
+                      "flex flex-row justify-between py-2 border-t border-gray-200"
+                    )}
+                  >
+                    <Text style={tw("text-sm font-bold text-gray-800")}>
+                      IVA (16%)
+                    </Text>
+                    <Text style={tw("text-sm font-bold text-gray-800")}>
+                      $744.00
+                    </Text>
+                  </View>
+                  <View
+                    style={tw(
+                      "flex flex-row justify-between py-2 border-t border-gray-200"
+                    )}
+                  >
+                    <Text style={tw("text-lg font-bold text-gray-800")}>
+                      Total
+                    </Text>
+                    <Text style={tw("text-lg font-bold text-blue-800")}>
+                      $5,394.00
+                    </Text>
+                  </View>
                 </View>
               </View>
             </View>
           </Page>
         </Document>
       </PDFViewer>
-
-      {/* </div> */}
     </ModalComponent>
   );
 };
-// ReactPDF.render(<MyDocument />, `${__dirname}/example.pdf`);
 
 export default PdfRequisition;
