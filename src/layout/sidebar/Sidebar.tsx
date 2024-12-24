@@ -1,5 +1,5 @@
 import { useMutation, useQueries } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { memo, useEffect, useState } from "react";
 import { LuUser, LuSettings, LuFileText } from "react-icons/lu";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
@@ -14,6 +14,7 @@ import * as GiIcons from "react-icons/gi";
 import * as RiIcons from "react-icons/ri";
 import { CiLogout } from "react-icons/ci";
 import { showToast } from "../../sweetalert/Sweetalert";
+import { customLog } from "../../extras/consoles";
 
 const IconLibraries = {
   ...AiIcons,
@@ -38,14 +39,25 @@ export interface MenuItem {
 const SidebarComponent = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const mutation = useMutation({
-    mutationFn: ({ url, method, data }: { url: string; method: "POST" | "PUT" | "DELETE"; data?: any }) => AxiosRequest(url, method, data),
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
     onSuccess: (data) => {
       showToast(data.message, data.status);
       localStorage.clear();
       window.location.href = "/";
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || "Error al realizar la acción", "error");
+      showToast(
+        error.response?.data?.message || "Error al realizar la acción",
+        "error"
+      );
     },
   });
 
@@ -102,29 +114,33 @@ const SidebarComponent = () => {
     <div className="w-64 shadow-lg h-screen overflow-auto bg-presidencia text-white p-4 transition-all ease-in-out duration-300">
       <div className="flex items-center justify-center mb-8">
         {/* Logo Section */}
-        <div className="text-3xl font-bold text-center text-white hover:text-green-500 transition-all duration-300">Logo</div>
+        <div className="text-3xl font-bold text-center text-white hover:text-green-500 transition-all duration-300">
+          Logo
+        </div>
       </div>
 
       <div className="mt-4 space-y-2">
-        {menuItems.map((menu) => (
-          <div key={menu.Id}>
-            {Array.isArray(menu.children) && menu.children.length > 0 && addSectionMenu(menu.children) && (
-              <Dropdown label={menu.Menu}>
-                {menu.children.map((childMenu) => {
-                  const IconComponent = childMenu.Icon && IconLibraries[childMenu.Icon as keyof typeof IconLibraries];
-                  return childMenu.EstadoPermiso ? (
-                    <Item
-                      key={childMenu.IdMenu}
-                      href={childMenu.IdMenu}
-                      label={childMenu.Menu}
-                      icon={IconComponent ? <IconComponent size={24} /> : null}
-                    />
-                  ) : null;
-                })}
-              </Dropdown>
-            )}
-          </div>
-        ))}
+        {menuItems.map((menu) => {
+          // Asegúrate de que `IconLibraries` y `menu.Icon` existan y sean válidos
+          const IconComponent = menu.Icon
+            ? IconLibraries[menu.Icon as keyof typeof IconLibraries]
+            : null;
+
+          return (
+            <div key={menu.Id}>
+              {Array.isArray(menu.children) &&
+              menu.children.length > 0 &&
+              addSectionMenu(menu.children) ? (
+                <Item
+                  key={menu.IdMenu}
+                  href={menu.IdMenu}
+                  label={menu.Menu}
+                  icon={IconComponent ? <IconComponent size={24} /> : null}
+                />
+              ) : null}
+            </div>
+          );
+        })}
 
         {menus.status === "pending" && (
           <div className="w-full h-full flex justify-center items-center">
@@ -153,13 +169,30 @@ type LinkItem = {
 };
 
 const Item: React.FC<LinkItem> = ({ href, label, icon }) => {
+  const location = useLocation();
+  const [currentLocation, setCurrentLocation] = useState<string | null>(null);
+
+  // Retraso en la actualización de la ubicación para animación más fluida
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentLocation(location.pathname.split('/')[1]);
+    }, 100); // Retraso de 100ms
+    return () => clearTimeout(timer); // Limpieza del temporizador
+  }, [location]);
+
+  const isActive = currentLocation === href;
+
   return (
     <Link
-      href={href || "#"}
-      className="flex items-center text-lg text-white hover:bg-green-700 p-3 rounded-lg transition-all duration-300 space-x-3"
+      to={href || "#"}
+      className={`
+        flex items-center text-lg text-white 
+        ${isActive ? "bg-green-600" : "bg-transparent"} 
+        hover:bg-green-700 p-3 rounded-lg transition-all duration-500 space-x-3 ease-in-out
+      `}
     >
       {icon && <span className="text-2xl">{icon}</span>}
-      <span className="text-sm">{label}</span>
+      <span className="text-md">{label}</span>
     </Link>
   );
 };
@@ -183,7 +216,9 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children }) => {
         className="flex items-center text-lg text-white hover:bg-green-700 p-2 rounded-lg transition-all duration-300 cursor-pointer space-x-3"
         onClick={toggleDropdown}
       >
-        <span className="text-md">{isOpen ? <FaFolderOpen /> : <FaFolder />}</span>
+        <span className="text-md">
+          {isOpen ? <FaFolderOpen /> : <FaFolder />}
+        </span>
         <span className="text-md">{label}</span>
         <span className="ml-auto text-md">
           {isOpen ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}

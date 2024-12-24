@@ -10,6 +10,7 @@ import { showToast } from "../sweetalert/Sweetalert";
 import Spinner from "../loading/Loading";
 
 const LoginComponent = () => {
+  
   const colComponents = {
     "2xl": 6,
     xl: 6,
@@ -29,9 +30,10 @@ const LoginComponent = () => {
     onSuccess: (data) => {
       console.log(data);
       localStorage.setItem('permisos', JSON.stringify(data.data.permisos));
+      localStorage.setItem('menuPermiso', JSON.stringify(data.data.menuPermiso));
 
       localStorage.setItem('token', data.data.token);
-      window.location.href = '/usuarios'
+      window.location.href = '/MnuSeguridad'
       showToast(data.message, data.status);
      
     },

@@ -66,27 +66,27 @@ const LoginRoute = createRoute({
   beforeLoad: ({ context: { authentication } }) => {
     if (authentication.isLoggedIn()) {
     
-      if (window.location.pathname !== "/usuarios") {
-        return redirect({ to: "/usuarios" });
+      if (window.location.pathname !== "/MnuSeguridad") {
+        return redirect({ to: "/MnuSeguridad" });
       }
     }
   },
   getParentRoute: () => Route, 
   component: () => <LoginComponent/>, 
 });
-const UsuariosRoute = createRoute({
-  path: "/usuarios",
+const MnuSeguridadRoute = createRoute({
+  path: "/MnuSeguridad",
 
   getParentRoute: () => Layout, 
   component: () => <Users/>, 
 });
 
 const RequisitionRoute = createRoute({
-  path: "/RequisicionesAdd",
+  path: "/MnuRequisiciones",
   getParentRoute: () =>Layout,
   component: () => <RequisicionesAdd/>,
 
 });
 
 Route.addChildren([Layout,LoginRoute]);
-Layout.addChildren([UsuariosRoute,RequisitionRoute])
+Layout.addChildren([MnuSeguridadRoute,RequisitionRoute])

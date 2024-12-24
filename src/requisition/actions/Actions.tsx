@@ -12,6 +12,7 @@ import Observable from "../../extras/observable";
 import { PiPersonArmsSpreadThin } from "react-icons/pi";
 import AutorizedComponent from "../autorized/Autorized";
 import { customLog } from "../../extras/consoles";
+import { PermissionMenu } from "../../extras/menupermisos";
 
 const Actions: React.FC<{
   data: Record<string, any>;
@@ -138,18 +139,22 @@ const Actions: React.FC<{
     }
     return color;
   };
-  const AutorizedEspecial =(autorized:boolean,can:boolean,status:string ):boolean => {
-    if(status!="AS") {
-      return true
+  const AutorizedEspecial = (
+    autorized: boolean,
+    can: boolean,
+    status: string
+  ): boolean => {
+    if (status != "AS") {
+      return true;
     }
-    if(!autorized) {
-      return true
+    if (!autorized) {
+      return true;
     }
     if (autorized && can) {
-        return true
+      return true;
     }
-    return false
-  }
+    return false;
+  };
   const Autorized = (permission: string): boolean => {
     const depencePermissions: { [key: string]: string } = {
       Permiso_Autorizar: "AU",
@@ -170,7 +175,7 @@ const Actions: React.FC<{
     <>
       {open.autorized && (
         <AutorizedComponent
-        setReloadTable={setReloadTable}
+          setReloadTable={setReloadTable}
           open={open.autorized}
           setOpen={() => {
             setOpen((prev) => ({
@@ -182,22 +187,28 @@ const Actions: React.FC<{
       )}
 
       {open.pdf && (
-        <Pdfrequisition
-          open={open.pdf}
-          setOpen={() => {
-            setOpen((prev) => ({
-              autorized: false,
-              pdf: false,
-            }));
-          }}
-        />
+        <PermissionMenu IdMenu="SeguimientoRequis">
+          <Pdfrequisition
+            open={open.pdf}
+            setOpen={() => {
+              setOpen((prev) => ({
+                autorized: false,
+                pdf: false,
+              }));
+            }}
+          />
+        </PermissionMenu>
       )}
       {/* </> */}
       <div className="flex flex-row gap-2">
         {newStatus(data.Status) !== "CP" &&
           newStatus(data.Status) !== "SU" &&
           newStatus(data.Status) !== "AS" &&
-          AutorizedEspecial(data.RequiereAut,data.AutEspecial,newStatus(data.Status)) &&
+          AutorizedEspecial(
+            data.RequiereAut,
+            data.AutEspecial,
+            newStatus(data.Status)
+          ) &&
           autorized && (
             <Tooltip
               content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}
@@ -221,14 +232,13 @@ const Actions: React.FC<{
                 }}
                 className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
               >
-
                 <span>{data.Status}</span>
                 <LiaExchangeAltSolid className="text-whitecursor-pointer" />
-                <span>{newStatus(data.Status)}  </span>
+                <span>{newStatus(data.Status)} </span>
               </div>
             </Tooltip>
           )}
-        {data.Status !== "SU"  && (
+        {data.Status !== "SU" && (
           <div className="w-fit">
             <Tooltip content="Cancelar">
               <Button color="red" variant="solid" size="small">
@@ -238,6 +248,8 @@ const Actions: React.FC<{
           </div>
         )}
         <div className="w-fit">
+        <PermissionMenu IdMenu="SeguimientoRequis">
+
           <Tooltip content="Descargar archivo adjunto">
             <Button
               color="blue"
@@ -259,11 +271,11 @@ const Actions: React.FC<{
               <BsFiletypePdf />
             </Button>
           </Tooltip>
-          </div>
+</PermissionMenu>
+        </div>
 
-          {!data.UsuarioAS && newStatus(data.Status) == "AS" &&(
-        <div className="w-fit">
-            
+        {!data.UsuarioAS && newStatus(data.Status) == "AS" && (
+          <div className="w-fit">
             <Tooltip content="Asignar requisitor">
               <Button
                 color="indigo"
@@ -275,7 +287,6 @@ const Actions: React.FC<{
                   try {
                     await ObservablePost("IdRequisicion", {
                       id: data.Id,
-                      
                     });
                   } catch (e) {
                   } finally {
@@ -289,9 +300,8 @@ const Actions: React.FC<{
                 <PiPersonArmsSpreadThin />
               </Button>
             </Tooltip>
-            </div>
-
-          )}
+          </div>
+        )}
       </div>
     </>
   );

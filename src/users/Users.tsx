@@ -35,6 +35,7 @@ import { FormikProps } from "formik";
 import Spinner from "../loading/Loading";
 import { MdMenu } from "react-icons/md"; // Importar el ícono de menú (hamburger)
 import MenuComponent from "../menus/Menus";
+import { PermissionMenu } from "../extras/menupermisos";
 
 const ActionButtons = ({
   data,
@@ -73,6 +74,8 @@ const ActionButtons = ({
           <BiEdit />
         </Button>
         </Tooltip>
+        <PermissionMenu IdMenu={''} >
+
      <Tooltip content="asignar permisos al usuario">
      <Button
           color="indigo"
@@ -85,6 +88,7 @@ const ActionButtons = ({
           <MdMenu />
         </Button>
      </Tooltip>
+     </PermissionMenu>
      <Tooltip content="eliminar al usuario">
 
         <Button color="red" size="small" variant="solid" onClick={handleDelete}>
@@ -496,6 +500,10 @@ const Users = () => {
           Usuarios del Sistema
         </p>
         <Agtable
+        permissionsUserTable={{
+          buttonElement:"Usuarios",
+          table:"Usuarios"
+        }}
           data={users?.data?.data}
           isLoading={users.isLoading}
           columnDefs={columnDefs}

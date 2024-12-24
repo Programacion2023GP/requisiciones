@@ -36,6 +36,7 @@ import Actions from "./actions/Actions";
 import Chip from "../components/chip/Chip";
 import { createTw } from "react-pdf-tailwind";
 import Observable from "../extras/observable";
+import { PermissionMenu } from "../extras/menupermisos";
 
 const ProductsComponent = memo(
   ({
@@ -250,7 +251,6 @@ const FormProductsComponent = forwardRef<
           url: "/requisiciones/create",
           data: data,
         });
-        
       } else {
         showToast("La acción fue cancelada.", "error");
       }
@@ -393,17 +393,14 @@ const RequisicionesAdd = () => {
   });
 
   const queryClient = useQueryClient();
-  const {ObservablePost} = Observable()
+  const { ObservablePost } = Observable();
   const [open, setOpen] = useState<boolean>(false);
   const queries = useQueries({
     queries: [
-   
       {
         queryKey: ["departamentos/index"],
         queryFn: () => GetAxios("departamentos/index"),
         refetchOnWindowFocus: true,
-        
-
       },
       {
         queryKey: ["tipos/index"],
@@ -417,20 +414,16 @@ const RequisicionesAdd = () => {
       },
     ],
   });
-  const [groups, types,autorizadores] = queries;
+  const [groups, types, autorizadores] = queries;
   useEffect(() => {
     // first
-   if (autorizadores.data && autorizadores.data.data) {
-  
-
-    ObservablePost("autorizadoresSelect",{
-        autorizadores: autorizadores.data.data
-      })
-
-   }
-    
+    if (autorizadores.data && autorizadores.data.data) {
+      ObservablePost("autorizadoresSelect", {
+        autorizadores: autorizadores.data.data,
+      });
+    }
   }, [autorizadores.data]);
-  
+
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -585,213 +578,228 @@ const RequisicionesAdd = () => {
       // field: "Rol", // Usamos colId para identificar la columna sin usar field
       // sortable: true,
       // filter: true,
-      cellRenderer: (params: any) => <Actions data={params.data} setReloadTable={setReloadTable} />, // Usamos cellRendererFramework
+      cellRenderer: (params: any) => (
+        <Actions data={params.data} setReloadTable={setReloadTable} />
+      ), // Usamos cellRendererFramework
     },
   ]);
   const buttonElement = useMemo(
     () => (
-      <Tooltip content="Agregar Requisición">
-        <div className="mb-4">
-          <Button
-            onClick={() => {
-              pageTransitionRef.current?.reset();
+        <Tooltip content="Agregar Requisición">
+          <div className="mb-4">
+            <Button
+              onClick={() => {
+                pageTransitionRef.current?.reset();
 
-              formikProducts.current?.resetForm({
-                values: { Cantidad1: null, Descripcion1: null },
-              });
-              formik.current?.resetForm({
-                values: {
-                  IDDepartamento: 0,
-                  Observaciones: "",
-                  Solicitante: "",
-                  IDTipo: 0,
-                },
-              });
+                formikProducts.current?.resetForm({
+                  values: { Cantidad1: null, Descripcion1: null },
+                });
+                formik.current?.resetForm({
+                  values: {
+                    IDDepartamento: 0,
+                    Observaciones: "",
+                    Solicitante: "",
+                    IDTipo: 0,
+                  },
+                });
 
-              setOpen(true);
-              // toggleOpen();
-            }}
-            size="medium"
-            color="blue"
-            variant="solid"
-          >
-            <LuPlus />
-          </Button>
-        </div>
-      </Tooltip>
+                setOpen(true);
+                // toggleOpen();
+              }}
+              size="medium"
+              color="blue"
+              variant="solid"
+            >
+              <LuPlus />
+            </Button>
+          </div>
+        </Tooltip>
     ),
     []
   );
-  const getRowClass = (params: { node: { rowIndex: number; },data:Record<string,any>; }) => {
-    const {Status} = params?.data 
-    if (Status =="CA") {
+  const getRowClass = (params: {
+    node: { rowIndex: number };
+    data: Record<string, any>;
+  }) => {
+    const { Status } = params?.data;
+    if (Status == "CA") {
       return "class_ca";
     }
-    if (Status =="AU") {
+    if (Status == "AU") {
       return "class_au";
     }
-    if (Status =="AS") {
+    if (Status == "AS") {
       return "class_as";
     }
-    if (Status =="CO") {
+    if (Status == "CO") {
       return "class_co";
     }
-    if (Status =="OC") {
+    if (Status == "OC") {
       return "class_oc";
     }
-    if (Status =="RE") {
+    if (Status == "RE") {
       return "class_re";
     }
-    if (Status =="SU") {
+    if (Status == "SU") {
       return "class_su";
     }
-}
-  
+  };
+
   return (
     <>
-      <div className="container mx-auto shadow-lg p-6 border mt-12">
-        <Typography
-          className="w-full text-center py-2"
-          variant="h2"
-          color="black"
-          size="3xl"
-        >
-          la tabla empieza consultando el ejercicio del año actual
-          {" " + new Date().getFullYear()}
-        </Typography>
-        <div className="flex w-full flex-row flex-wrap justify-center mb-6">
-          <Chip message="Captura (CA)" className="bg-gray-400" />
-          <Chip message="Autorizada (AU)" className="bg-black" />
-          <Chip message="Asignado  (AS)" className="bg-purple-500" />
-          <Chip message="Cotizado  (CO)" className="bg-orange-500" />
-          <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
-          <Chip message="Rechazada  (RE)" className="bg-red-500" />
-          <Chip message="Realizada  (RE)" className="bg-cyan-500" />
-          <Chip message="Surtida  (SU)" className="bg-lime-500" />
+      <PermissionMenu IdMenu={["Listado", "SeguimientoRequis",'RequisicionesAdd']}>
+        <div className="container mx-auto shadow-lg p-6 border mt-12">
+          <Typography
+            className="w-full text-center py-2"
+            variant="h2"
+            color="black"
+            size="3xl"
+          >
+            la tabla empieza consultando el ejercicio del año actual
+            {" " + new Date().getFullYear()}
+          </Typography>
+            <div className="flex w-full flex-row flex-wrap justify-center mb-6">
+              <Chip message="Captura (CA)" className="bg-gray-400" />
+              <Chip message="Autorizada (AU)" className="bg-black" />
+              <Chip message="Asignado  (AS)" className="bg-purple-500" />
+              <Chip message="Cotizado  (CO)" className="bg-orange-500" />
+              <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
+              <Chip message="Rechazada  (RE)" className="bg-red-500" />
+              <Chip message="Realizada  (RE)" className="bg-cyan-500" />
+              <Chip message="Surtida  (SU)" className="bg-lime-500" />
+            </div>
+            <Agtable
+            permissionsUserTable={{
+              table:"Listado",
+              buttonElement:"RequisicionesAdd"
+            }}
+              getRowClass={getRowClass}
+              backUrl={{
+                pathName: "requisiciones/index",
+                startSearchFilter: {
+                  where: `Ejercicio = '${new Date().getFullYear()}'`,
+                },
+                restart: reloadTable,
+              }}
+              filtersActive={{
+                Ejercicio: "2024",
+              }}
+              columnDefs={columnDefs}
+              buttonElement={buttonElement}
+              colapseFilters
+            />
         </div>
-        <Agtable
-        getRowClass={getRowClass}
-          backUrl={{
-            pathName: "requisiciones/index",
-            startSearchFilter: {
-              where: `Ejercicio = '${new Date().getFullYear()}'`,
-            },
-            restart: reloadTable,
-          }}
-          filtersActive={{
-            Ejercicio: "2024",
-          }}
-          columnDefs={columnDefs}
-          buttonElement={buttonElement}
-          colapseFilters
-        />
-      </div>
 
-      <ModalComponent
-        open={open}
-        title="Requisicion"
-        setOpen={() => {
-          setOpen(false);
-        }}
-      >
-        <div className="py-6">
-          <PageTransition
-            ref={pageTransitionRef}
-            variant="push"
-            renderButtons={(handlePrevPage, handleNextPage, currentPage) => (
-              <div className="flex space-x-2">
-                {currentPage > 1 && (
+        <ModalComponent
+          open={open}
+          title="Requisicion"
+          setOpen={() => {
+            setOpen(false);
+          }}
+        >
+          <div className="py-6">
+            <PageTransition
+              ref={pageTransitionRef}
+              variant="push"
+              renderButtons={(handlePrevPage, handleNextPage, currentPage) => (
+                <div className="flex space-x-2">
+                  {currentPage > 1 && (
+                    <Button
+                      onClick={() => {
+                        setValues((prev) => ({
+                          ...prev,
+                          valuesProducts: {
+                            ...prev.valuesProducts,
+                            initialValues: formikProducts.current?.values ?? {},
+                          },
+                        }));
+                        handlePrevPage();
+                      }}
+                      color="blue"
+                      variant="outline"
+                      size="small"
+                    >
+                      Anterior
+                    </Button>
+                  )}
                   <Button
+                    type="submit"
                     onClick={() => {
-                      setValues((prev) => ({
-                        ...prev,
-                        valuesProducts: {
-                          ...prev.valuesProducts,
-                          initialValues: formikProducts.current?.values ?? {},
-                        },
-                      }));
-                      handlePrevPage();
+                      if (currentPage == 2) {
+                        formikProducts.current?.handleSubmit();
+                        setTimeout(() => {
+                          // console.log(formik.current?.touched )
+                        }, 100);
+                      }
+                      if (currentPage == 1) {
+                        formik.current?.handleSubmit();
+                        setTimeout(() => {
+                          // console.log(formik.current?.touched )
+
+                          if (
+                            Object.keys(formik?.current?.errors || {}).length ==
+                            0
+                          ) {
+                            handleNextPage();
+                          }
+                        }, 100);
+                      }
                     }}
                     color="blue"
-                    variant="outline"
+                    variant="solid"
                     size="small"
                   >
-                    Anterior
+                    {currentPage == 1 ? "Continuar" : "Registrar"}
                   </Button>
-                )}
-                <Button
-                  type="submit"
-                  onClick={() => {
-                    if (currentPage == 2) {
-                      formikProducts.current?.handleSubmit();
-                      setTimeout(() => {
-                        // console.log(formik.current?.touched )
-                      }, 100);
-                    }
-                    if (currentPage == 1) {
-                      formik.current?.handleSubmit();
-                      setTimeout(() => {
-                        // console.log(formik.current?.touched )
-
-                        if (
-                          Object.keys(formik?.current?.errors || {}).length == 0
-                        ) {
-                          handleNextPage();
-                        }
-                      }, 100);
-                    }
-                  }}
-                  color="blue"
-                  variant="solid"
-                  size="small"
-                >
-                  {currentPage == 1 ? "Continuar" : "Registrar"}
-                </Button>
-              </div>
-            )}
-          >
-            <FormikForm
-              onSubmit={onSumbit}
-              ref={formik}
-              // buttonMessage={"Registrar"}
-              validationSchema={validationSchema}
-              initialValues={values.valuesRequisition}
-              children={(values) => (
-                <>
-                  <FormikAutocomplete
-                    responsive={responsive}
-                    loading={groups.isLoading}
-                    name="IDDepartamento"
-                    label={"selecciona el departamento"}
-                    options={groups.data?.data}
-                    idKey={"IDDepartamento"}
-                    labelKey={"Nombre_Departamento"}
-                  />
-                  <FormikAutocomplete
-                    responsive={responsive}
-                    loading={types.isLoading}
-                    name="IDTipo"
-                    label={"selecciona el tipo"}
-                    options={types.data?.data}
-                    idKey={"IDTipo"}
-                    labelKey={"Descripcion"}
-                  />
-                  <FormikInput name="Solicitante" label="Solicitante" />
-                  <FormikTextArea label="Observaciones" name="Observaciones" />
-                </>
+                </div>
               )}
-            />
-            <FormProductsComponent
-              mutation={mutation}
-              formik={values.valuesProducts}
-              responsive={responsive}
-              ref={formikProducts}
-              NewValidations={NewValidations}
-              setFormik={setValues}
-            />
-          </PageTransition>
-        </div>
-      </ModalComponent>
+            >
+              <FormikForm
+                onSubmit={onSumbit}
+                ref={formik}
+                // buttonMessage={"Registrar"}
+                validationSchema={validationSchema}
+                initialValues={values.valuesRequisition}
+                children={(values) => (
+                  <>
+                    <FormikAutocomplete
+                      responsive={responsive}
+                      loading={groups.isLoading}
+                      name="IDDepartamento"
+                      label={"selecciona el departamento"}
+                      options={groups.data?.data}
+                      idKey={"IDDepartamento"}
+                      labelKey={"Nombre_Departamento"}
+                    />
+                    <FormikAutocomplete
+                      responsive={responsive}
+                      loading={types.isLoading}
+                      name="IDTipo"
+                      label={"selecciona el tipo"}
+                      options={types.data?.data}
+                      idKey={"IDTipo"}
+                      labelKey={"Descripcion"}
+                    />
+                    <FormikInput name="Solicitante" label="Solicitante" />
+                    <FormikTextArea
+                      label="Observaciones"
+                      name="Observaciones"
+                    />
+                  </>
+                )}
+              />
+              <FormProductsComponent
+                mutation={mutation}
+                formik={values.valuesProducts}
+                responsive={responsive}
+                ref={formikProducts}
+                NewValidations={NewValidations}
+                setFormik={setValues}
+              />
+            </PageTransition>
+          </div>
+        </ModalComponent>
+      </PermissionMenu>
     </>
   );
 };

@@ -13,6 +13,7 @@ import { ColDef, RowClassRules } from "ag-grid-community";
 import Typography from "../typografy/Typografy";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
+import { PermissionMenu } from "../../extras/menupermisos";
 
 type FiltersColapseOptions = {
   titles: string[];
@@ -32,6 +33,7 @@ export const Agtable: React.FC<TypeTable> = ({
   colapseFilters,
   backUrl,
   getRowClass,
+  permissionsUserTable
   
 }) => {
   const [search, setSearch] = useState<SearchType>({
@@ -329,8 +331,19 @@ export const Agtable: React.FC<TypeTable> = ({
             borderLeft: "2px solid #c1c1c1",
           }}
         >
-          <div className="mx-2 mt-1">{buttonElement}</div>
+          <div className="mx-2 mt-1">
+                    {permissionsUserTable?.buttonElement ?
+                    <PermissionMenu IdMenu={permissionsUserTable?.buttonElement}>
+                    {buttonElement}
+                    </PermissionMenu>
+                    :
+                    {buttonElement}
+                    
+                    }
+
+          </div>
         </div>
+        <PermissionMenu IdMenu={permissionsUserTable?.table}>
         <RowComponent>
           <ColComponent
             autoPadding={false}
@@ -686,6 +699,9 @@ export const Agtable: React.FC<TypeTable> = ({
         >
           <HelpModal />
         </ModalComponent>
+        </PermissionMenu>
+
+    
       </div>
     </div>
   );
