@@ -21,10 +21,21 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 
-export const GetAxios = async (url:string) => {
-    const response = await axiosInstance.get(url); // Endpoint para obtener posts
-    return response.data;  // Devuelve los datos de la respuesta
-  };
+export const GetAxios = async (url: string) => {
+  try {
+    const response = await axiosInstance.get(url);
+    return response.data;  
+  } catch (error: any) {
+    console.error('Error en la solicitud:', error);
+    if (error.response && error.response.status === 401) {
+     
+      localStorage.clear();
+      window.location.href = "/";
+    
+
+    }
+  }
+};
 
 // Define el tipo genérico T para la respuesta
 // Define el tipo genérico T para la respuesta
@@ -33,19 +44,30 @@ export const AxiosRequest = async (
   method: 'POST' | 'PUT' | 'DELETE',
   values?: Record<string, any>
 ) => {
-  let response;
-  
-  // Realizar la solicitud según el método
-  if (method === 'POST') {
-    response = await axiosInstance.post(url, values);
-  } else if (method === 'PUT') {
-    response = await axiosInstance.put(url, values);
-  } else if (method === 'DELETE') {
-    response = await axiosInstance.delete(url)
-  } else {
-    throw new Error('Método no soportado');
-  }
+  try {
+    let response;
 
-  return response.data;
+    // Realizar la solicitud según el método
+    if (method === 'POST') {
+      response = await axiosInstance.post(url, values);
+    } else if (method === 'PUT') {
+      response = await axiosInstance.put(url, values);
+    } else if (method === 'DELETE') {
+      response = await axiosInstance.delete(url);
+    } else {
+      throw new Error('Método no soportado');
+    }
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response && error.response.status === 401) {
+      localStorage.clear();
+      window.location.href = "/";
+    
+    }
+
+    // Manejo de otros errores
+  }
 };
+
 

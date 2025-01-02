@@ -622,6 +622,7 @@ const RequisicionesAdd = () => {
     data: Record<string, any>;
   }) => {
     const { Status } = params?.data;
+    
     if (Status == "CA") {
       return "class_ca";
     }
@@ -644,7 +645,9 @@ const RequisicionesAdd = () => {
       return "class_su";
     }
   };
+// const year =2024
 
+const year =new Date().getFullYear()
   return (
     <>
       <PermissionMenu IdMenu={["Listado", "SeguimientoRequis",'RequisicionesAdd']}>
@@ -656,7 +659,7 @@ const RequisicionesAdd = () => {
             size="3xl"
           >
             la tabla empieza consultando el ejercicio del año actual
-            {" " + new Date().getFullYear()}
+            {" " + year}
           </Typography>
             <div className="flex w-full flex-row flex-wrap justify-center mb-6">
               <Chip message="Captura (CA)" className="bg-gray-400" />
@@ -677,7 +680,9 @@ const RequisicionesAdd = () => {
               backUrl={{
                 pathName: "requisiciones/index",
                 startSearchFilter: {
-                  where: `Ejercicio = '${new Date().getFullYear()}'`,
+                  where: `Ejercicio = '${year}'`,
+                  // where: `Ejercicio = '2024'`,
+
                 },
                 restart: reloadTable,
               }}

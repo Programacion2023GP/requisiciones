@@ -13,6 +13,7 @@ import { PiPersonArmsSpreadThin } from "react-icons/pi";
 import AutorizedComponent from "../autorized/Autorized";
 import { customLog } from "../../extras/consoles";
 import { PermissionMenu } from "../../extras/menupermisos";
+import { MdOutlineCheckBox } from "react-icons/md";
 
 const Actions: React.FC<{
   data: Record<string, any>;
@@ -90,7 +91,8 @@ const Actions: React.FC<{
     },
   });
 
-  const newStatus = (status: string): string => {
+  const newStatus = (status: string
+  ): string => {
     let state = "";
     switch (status) {
       case "CP":
@@ -143,6 +145,8 @@ const Actions: React.FC<{
     autorized: boolean,
     can: boolean,
     status: string
+    // idEspecial:number,
+    // :number
   ): boolean => {
     if (status != "AS") {
       return true;
@@ -164,11 +168,32 @@ const Actions: React.FC<{
       Permiso_Surtir: "SU",
     };
 
+    if (!permisos) {
+      // console.error("La variable 'permisos' es null o undefined.");
+      return false;
+    }
+
     return Object.entries(depencePermissions).some(
       ([key, value]) => value === permission && permisos[key] === 1
     );
   };
+  const buttonVobo =(idTipo:number):boolean => {
+    const group = localStorage.getItem('group');
+    if (group === null) {
+      return false;  
+    }
+    
+    let idGroup = parseInt(group, 10);  
+   if (idGroup ==84 && idTipo ==5 || idGroup ==83 && idTipo ==7 || idGroup ==27 && idTipo ==6) {
+      return true;
+   } 
+
+    return false;
+  }
   useEffect(() => {
+    customLog(`${data.Status}`, "blue", "medium");
+
+    customLog(`${Autorized(newStatus(data.Status))}`, "orange", "medium");
     SetAutorized(Autorized(newStatus(data.Status)));
   }, [data]);
   return (
@@ -247,34 +272,56 @@ const Actions: React.FC<{
             </Tooltip>
           </div>
         )}
-        <div className="w-fit">
-        <PermissionMenu IdMenu="SeguimientoRequis">
+        
+        {data.Status == "AU" && data.AutEspecial == 1 && !data.UsuarioVoBo && buttonVobo(data.IDTipo) && (
+          <PermissionMenu IdMenu={"VoBo"}>
+            <Tooltip content="Visto bueno">
+              <Button
+                color="teal"
+                variant="solid"
+                size="small"
+                onClick={() => {
+                  mutation.mutate({
+                    method: "PUT",
+                    url: "/requisiciones/vobo",
+                    data: { id: data.Id },
+                  });
+                }}
+              >
+                <MdOutlineCheckBox />
+                {data.UsuarioVoBo}
+              </Button>
+            </Tooltip>
+          </PermissionMenu>
+        )}
 
-          <Tooltip content="Descargar archivo adjunto">
-            <Button
-              color="blue"
-              variant="solid"
-              size="small"
-              onClick={async () => {
-                console.log(data);
-                mutationPdf.mutate({
-                  method: "POST",
-                  url: "/requisiciones/products",
-                  pdfData: data,
-                  data: {
-                    IDRequisicion: data.IDRequisicion,
-                    Ejercicio: data.Ejercicio,
-                  },
-                });
-              }}
-            >
-              <BsFiletypePdf />
-            </Button>
-          </Tooltip>
-</PermissionMenu>
+        <div className="w-fit">
+          <PermissionMenu IdMenu="SeguimientoRequis">
+            <Tooltip content="Descargar archivo adjunto">
+              <Button
+                color="blue"
+                variant="solid"
+                size="small"
+                onClick={async () => {
+                  console.log(data);
+                  mutationPdf.mutate({
+                    method: "POST",
+                    url: "/requisiciones/products",
+                    pdfData: data,
+                    data: {
+                      IDRequisicion: data.IDRequisicion,
+                      Ejercicio: data.Ejercicio,
+                    },
+                  });
+                }}
+              >
+                <BsFiletypePdf />
+              </Button>
+            </Tooltip>
+          </PermissionMenu>
         </div>
 
-        {!data.UsuarioAS && newStatus(data.Status) == "AS" && (
+        {!data.UsuarioAS && newStatus(data.Status) == "AS" && permisos.Permiso_Asignar ==1 &&   (
           <div className="w-fit">
             <Tooltip content="Asignar requisitor">
               <Button
@@ -282,7 +329,6 @@ const Actions: React.FC<{
                 variant="solid"
                 size="small"
                 onClick={async () => {
-                  customLog(`${JSON.stringify(data)}`, "purple", "large");
 
                   try {
                     await ObservablePost("IdRequisicion", {

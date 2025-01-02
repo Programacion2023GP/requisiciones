@@ -74,7 +74,7 @@ const ActionButtons = ({
           <BiEdit />
         </Button>
         </Tooltip>
-        <PermissionMenu IdMenu={''} >
+        <PermissionMenu IdMenu={'Permisos'} >
 
      <Tooltip content="asignar permisos al usuario">
      <Button
@@ -150,7 +150,21 @@ const Users = () => {
   });
   
   const queryClient = useQueryClient(); // Inicializa el query client
-
+const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
+  IDUsuario: null,
+  Nombre: null,
+  Paterno: null,
+  Materno: null,
+  IDDepartamento: 0,
+  Rol: 0,
+  Usuario: "",
+  Password: "123456",
+  Permiso_Autorizar: false,
+  Permiso_Asignar: false,
+  Permiso_Cotizar: false,
+  Permiso_Surtir: false,
+  Permiso_Orden_Compra: false,
+})
   // Realizas las consultas
   const queries = useQueries({
     queries: [
@@ -169,9 +183,8 @@ const Users = () => {
   });
   const handleEdit = (data: Record<string, any>) => {
     toggleOpen(); // Optionally open the modal if you're editing
-    if (formik) {
-      formik.current?.setValues(data); // Directly setting form values using Formik methods
-    }
+    setUsersFormik(data)
+    
   };
   const handleEditPermission = (data: Record<string, any>) => {
     const generateRandomNumber = () => {
@@ -193,6 +206,9 @@ const Users = () => {
     });
   };
   
+  // useEffect(()=>{
+  //   console.log("my info",usersFormik)
+  // },[usersFormik])
 
   // Realizas la mutación
   const mutation = useMutation({
@@ -228,10 +244,10 @@ const Users = () => {
       id: "REQUISITOR",
       value: "REQUISITOR",
     },
-    // {
-    //   id: "DIRECTOR",
-    //   value: "DIRECTOR",
-    // },
+    {
+      id: "DIRECTOR",
+      value: "DIRECTOR",
+    },
     {
       id: "AUTORIZADOR",
       value: "AUTORIZADOR",
@@ -300,7 +316,22 @@ const Users = () => {
         <div className="mb-4">
           <Button
             onClick={() => {
-              formik.current?.resetForm();
+              setUsersFormik({
+                IDUsuario: null,
+                Nombre: null,
+                Paterno: null,
+                Materno: null,
+                IDDepartamento: 0,
+                Rol: 0,
+                Usuario: "",
+                Password: "123456",
+                Permiso_Autorizar: false,
+                Permiso_Asignar: false,
+                Permiso_Cotizar: false,
+                Permiso_Surtir: false,
+                Permiso_Orden_Compra: false,
+              });
+              // formik.current?.resetForm();
               toggleOpen();
             }}
             size="medium"
@@ -361,25 +392,11 @@ const Users = () => {
       >
         <div className="mt-4"></div>
         <FormikForm
-          ref={formik}
+          // ref={formik}
           onSubmit={onSumbit}
-          buttonMessage={"Registrar"}
+          buttonMessage={usersFormik.IDUsuario>0 ? 'Actualizar':'Registrar'}
           validationSchema={validationSchema}
-          initialValues={{
-            IDUsuario: null,
-            Nombre: null,
-            Paterno: null,
-            Materno: null,
-            IDDepartamento: 0,
-            Rol: 0,
-            Usuario: "",
-            Password: "123456",
-            Permiso_Autorizar: false,
-            Permiso_Asignar: false,
-            Permiso_Cotizar: false,
-            Permiso_Surtir: false,
-            Permiso_Orden_Compra: false,
-          }}
+          initialValues={usersFormik}
           children={(values) => (
             <>
               <FormikInput
@@ -496,9 +513,11 @@ const Users = () => {
       </ModalComponent>
 
       <div className="ag-theme-alpine w-full mx-auto container p-6">
-        <p className="text-center font-semibold text-2xl md:text-3xl text-gray-700 mb-4">
+    <PermissionMenu IdMenu={'Usuarios'}>
+    <p className="text-center font-semibold text-2xl md:text-3xl text-gray-700 mb-4">
           Usuarios del Sistema
         </p>
+    </PermissionMenu>
         <Agtable
         permissionsUserTable={{
           buttonElement:"Usuarios",

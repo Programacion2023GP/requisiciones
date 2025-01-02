@@ -31,8 +31,10 @@ const LoginComponent = () => {
       console.log(data);
       localStorage.setItem('permisos', JSON.stringify(data.data.permisos));
       localStorage.setItem('menuPermiso', JSON.stringify(data.data.menuPermiso));
-
+      localStorage.setItem('group', data.data.group);
       localStorage.setItem('token', data.data.token);
+      localStorage.setItem('name', data.data.name);
+
       window.location.href = '/MnuSeguridad'
       showToast(data.message, data.status);
      

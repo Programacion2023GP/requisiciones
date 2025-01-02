@@ -105,10 +105,11 @@ export const Agtable: React.FC<TypeTable> = ({
     onSuccess: (data) => {
       setDataTable((prev) => ({
         previous: prev.previous,
-        data: data.data,
+        data: data?.data,
         sql: "",
         key: generateRandomKey(50),
       }));
+      mutation.reset();
     },
     onError: (error: any) => {
       //  console.log("errror",error)
@@ -364,9 +365,7 @@ export const Agtable: React.FC<TypeTable> = ({
                   paginationPageSize={10}
                   paginationPageSizeSelector={[10, 25, 50, 100]}
                   loading={
-                    mutation.status === "pending" &&
-                    Array.isArray(dataTable.data) &&
-                    dataTable.data.length === 0
+                    mutation.status === "pending"
                   }
                   rowData={filteredData}
                   columnDefs={columnDefsH}

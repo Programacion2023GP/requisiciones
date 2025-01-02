@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import Typography from "../../components/typografy/Typografy";
 
 type HeaderComponentProps = {
   button?: React.ReactNode;
@@ -13,7 +14,12 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({ button }) => {
       {button}
       </div>
 
-   
+      <div className="flex items-end space-x-3">
+      <Typography className="shadow-md" color="white" size="4xl" variant="h2">
+        {localStorage.getItem('name')}
+      </Typography>
+      
+      </div>
     
     </div>
   );
