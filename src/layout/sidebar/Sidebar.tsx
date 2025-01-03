@@ -120,27 +120,49 @@ const SidebarComponent = () => {
       </div>
 
       <div className="mt-4 space-y-2">
-        {menuItems.map((menu) => {
-          // Asegúrate de que `IconLibraries` y `menu.Icon` existan y sean válidos
-          const IconComponent = menu.Icon
-            ? IconLibraries[menu.Icon as keyof typeof IconLibraries]
+      {menuItems.map((menu) => {
+  // Asegúrate de que `IconLibraries` y `menu.Icon` existan y sean válidos
+  const IconComponent = menu.Icon
+    ? IconLibraries[menu.Icon as keyof typeof IconLibraries]
+    : null;
+
+  if (menu.IdMenu === "MnuCatalogos" && menu.children?.length) {
+    return (
+      <Dropdown key={menu.Id} label={menu.Menu}>
+        {menu.children.map((child) => {
+          const ChildIcon = child.Icon
+            ? IconLibraries[child.Icon as keyof typeof IconLibraries]
             : null;
 
           return (
-            <div key={menu.Id}>
-              {Array.isArray(menu.children) &&
-              menu.children.length > 0 &&
-              addSectionMenu(menu.children) ? (
-                <Item
-                  key={menu.IdMenu}
-                  href={menu.IdMenu}
-                  label={menu.Menu}
-                  icon={IconComponent ? <IconComponent size={24} /> : null}
-                />
-              ) : null}
-            </div>
+            <Item
+              key={child.IdMenu}
+              href={child.IdMenu}
+              label={child.Menu}
+              icon={ChildIcon ? <ChildIcon size={24} /> : null}
+            />
           );
         })}
+      </Dropdown>
+    );
+  }
+
+  return (
+    <div key={menu.Id}>
+      {Array.isArray(menu.children) &&
+      menu.children.length > 0 &&
+      addSectionMenu(menu.children) ? (
+        <Item
+          key={menu.IdMenu}
+          href={menu.IdMenu}
+          label={menu.Menu}
+          icon={IconComponent ? <IconComponent size={24} /> : null}
+        />
+      ) : null}
+    </div>
+  );
+})}
+
 
         {menus.status === "pending" && (
           <div className="w-full h-full flex justify-center items-center">
@@ -211,9 +233,9 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children }) => {
   };
 
   return (
-    <div>
+    <div className="ml-2">
       <div
-        className="flex items-center text-lg text-white hover:bg-green-700 p-2 rounded-lg transition-all duration-300 cursor-pointer space-x-3"
+        className="flex items-center text-lg text-white hover:bg-green-700  p-2 rounded-lg transition-all duration-300 cursor-pointer space-x-3"
         onClick={toggleDropdown}
       >
         <span className="text-md">

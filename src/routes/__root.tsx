@@ -5,6 +5,7 @@ import Spinner from "../loading/Loading";
 import Users from "../users/Users";
 import { UseAuth } from "../extras/useAuth";
 import MenuComponent from "../menus/Menus";
+import SuppliersComponent from "../catalogues/suppliers/Suppliers";
 const LazyLayout = React.lazy(() => import("../layout/Layout"));
 const LoginComponent = React.lazy(() => import("../auth/login"));
 const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
@@ -88,5 +89,12 @@ const RequisitionRoute = createRoute({
 
 });
 
+const SuppliersRoute = createRoute({
+  path: "/CatProveedores",
+
+  getParentRoute: () => Layout, 
+  component: () => <SuppliersComponent/>,  // Implement this component
+});
+
 Route.addChildren([Layout,LoginRoute]);
-Layout.addChildren([MnuSeguridadRoute,RequisitionRoute])
+Layout.addChildren([MnuSeguridadRoute,RequisitionRoute,SuppliersRoute])
