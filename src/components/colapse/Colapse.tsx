@@ -29,7 +29,7 @@ const CollapseComponent: React.FC<{ children: React.ReactNode; title: string }> 
           isOpen ? "max-h-screen" : "max-h-0"
         }`}
       >
-        <div className="p-4 bg-gray-50 rounded-lg h-40 overflow-auto py-2">{children}</div>
+        <div className="p-4 bg-gray-50 rounded-lg h-60 overflow-auto py-2">{children}</div>
       </div>
     </div>
   );

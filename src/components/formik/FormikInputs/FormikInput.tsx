@@ -14,24 +14,35 @@ type InputWithLabelProps = {
     xl?: number;
     "2xl"?: number;
   };
+  type?: "number" | "text" | "date";
+  disabled?: boolean;
+  handleModified?: (
+    values: Record<string, any>,
+    setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void
+  ) => void;
 };
 export const FormikTextArea: React.FC<InputWithLabelProps> = ({
   label,
   name,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
+  handleModified,
+  disabled = false,
 }) => {
   return (
     <ColComponent responsive={responsive} autoPadding>
       <FastField name={name}>
-        {({ field, form: { errors, touched, values } }: any) => {
+        {({ field, form: { errors, touched, values,setFieldValue } }: any) => {
           const error =
             touched?.[name] && typeof errors?.[name] === "string"
               ? (errors?.[name] as string)
               : null;
-
+          if (handleModified) {
+            handleModified(values,setFieldValue);
+          }
           return (
-            <div className="relative z-0 w-full mb-5">
+            <div className={`relative z-0 w-full mb-5 ${disabled && 'cursor-not-allowed opacity-40'}`}>
               <textarea
+              disabled={disabled}
                 {...field}
                 value={values?.[name] || ""}
                 id={name}
@@ -66,27 +77,35 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
   label,
   name,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
+  type = "text",
+  disabled = false,
+  handleModified,
 }) => {
   // console.log("rendering input")
   return (
     <ColComponent responsive={responsive}>
       <FastField name={name}>
-        {({ field, form: { errors, touched, values } }: any) => {
+        {({ field, form: { errors, touched, values, setFieldValue } }: any) => {
           const error =
             touched?.[name] && typeof errors?.[name] === "string"
               ? (errors?.[name] as string)
               : null;
-
+          if (handleModified) {
+            handleModified(values, setFieldValue);
+          }
           return (
-            <div className="relative z-0 w-full mb-5">
+            <div
+              className={`relative z-0 w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
+            >
               <input
                 {...field}
-                type="text"
-                value={values?.[name] || ""}
+                disabled={disabled} // Si el input está desabilitado, no se puede editar
+                type={type}
+                value={values?.[name] !== undefined && values?.[name] !== null ? values?.[name] : ""}
                 id={name}
                 placeholder=" "
                 autoComplete="off"
-                className="peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
+                className={`peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200 `}
               />
               <label
                 htmlFor={name}
@@ -331,6 +350,7 @@ type AutocompleteProps<T extends Record<string, any>> = {
     xl?: number;
     "2xl"?: number;
   };
+  disabled?: boolean;
 };
 
 export const FormikAutocomplete = <T extends Record<string, any>>({
@@ -341,6 +361,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   labelKey,
   loading,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
+  disabled = false,
 }: AutocompleteProps<T>) => {
   const formik = useFormikContext();
   if (!formik) {
@@ -465,13 +486,14 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
             touched?.[name] && typeof errors?.[name] === "string"
               ? (errors?.[name] as string)
               : null;
-              // console.log(name,values[name]);
-          if ( values[name] == 0) {
-            setTextSearch("")
-          }
+          // console.log(name,values[name]);
+          // if ( values[name] == 0) {
+          //   setTextSearch("")
+          // }
           return (
-            <div className="relative  w-full mb-5">
+            <div className={`relative  w-full mb-5 ${disabled && 'cursor-not-allowed opacity-40'}`}>
               <input
+              disabled={disabled}
                 ref={inputRef}
                 type="text"
                 autoComplete="off"
@@ -485,10 +507,13 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                   textSearch
                 }
                 onClick={() => {
+                  if (disabled) {
+                    return
+                  }
                   setFieldValue(name, ""); // Establecer el valor vacío al hacer clic
                   handleInputFocus();
                 }}
-                // onBlur={handleInputBlur}
+                // onBlur={handleInputFocus}
                 onChange={(e) => {
                   handleFilter(e.target.value);
                   setFieldValue(name, e.target.value); // Actualizar el valor en Formik

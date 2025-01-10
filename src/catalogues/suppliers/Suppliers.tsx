@@ -15,6 +15,28 @@ import { BiEdit } from "react-icons/bi";
 import { PermissionMenu } from "../../extras/menupermisos";
 import { MdDelete } from "react-icons/md";
 import { showToast } from "../../sweetalert/Sweetalert";
+import CardComponent from "../../components/card/Card";
+import Typography from "../../components/typografy/Typografy";
+
+const TypeVigencia=({
+  data,
+  // mutation,
+  // setOpen,
+  // handleEdit,
+}: {
+  data: Record<string, any>;
+  // mutation: any;
+  // setOpen: Dispatch<SetStateAction<boolean>>;
+  // handleEdit: (data: Record<string, any>) => void;
+})=>{
+  return (
+    <div className="flex gap-2">
+        {data.vigencia}
+     
+
+    </div>
+  );
+}
 const ActionButtons = ({
   data,
   handleEdit,
@@ -50,7 +72,7 @@ const ActionButtons = ({
             <BiEdit />
           </Button>
         </Tooltip>
-{/* 
+        {/* 
         <Tooltip content="eliminar al usuario">
           <Button
             color="red"
@@ -66,7 +88,7 @@ const ActionButtons = ({
   );
 };
 const SuppliersComponent = () => {
-  const [open, setOpen] = useState<boolean>(true);
+  const [open, setOpen] = useState<boolean>(false);
   const [initialValues, setInitialValues] = useState<ProvedorType>({
     IDProveedor: 0,
     Nombre_RazonSocial: "",
@@ -182,7 +204,7 @@ const SuppliersComponent = () => {
       data?: any;
     }) => AxiosRequest(url, method, data),
     onSuccess: (data) => {
-        console.log(data);
+      console.log(data);
       setOpen(false);
       showToast(data.message, data.status);
       queryClient.refetchQueries({
@@ -190,13 +212,12 @@ const SuppliersComponent = () => {
       });
     },
     onError: (error: any) => {
-        console.log(error);
+      console.log(error);
       const message =
         error.response?.data?.message || "Error al realizar la acción";
       showToast(message, "error");
     },
   });
-  
 
   const [columnDefs] = useState<ColDef<ProvedorType>[]>([
     {
@@ -245,14 +266,14 @@ const SuppliersComponent = () => {
     },
 
     // { headerName: "Rol", field: "Rol", sortable: true, filter: true },
-    // {
-    //   headerName: "Rol",
-    //   field: "Rol", // Usamos colId para identificar la columna sin usar field
-    //   sortable: true,
-    //   filter: true,
+    {
+      headerName: "Status",
+      field: "vigencia", // Usamos colId para identificar la columna sin usar field
+      sortable: true,
+      filter: true,
 
-    //   cellRenderer: (params: any) => <TypeRolUser data={params.data} />, // Usamos cellRendererFramework
-    // },
+      cellRenderer: (params: any) => <TypeVigencia data={params.data} />, // Usamos cellRendererFramework
+    },
     {
       headerName: "Acciones",
       colId: "buttons",
@@ -272,10 +293,86 @@ const SuppliersComponent = () => {
       ), // Usamos cellRendererFramework
     },
   ]);
+  const getRowClass = (params: {
+    node: { rowIndex: number };
+    data: Record<string, any>;
+  }) => {
+    const { vigencia } = params?.data;
+    if (vigencia === "Certificado") {
+      console.log("ac");
+      return "provedor_accepted";
+    }
+    if (vigencia === "Vencido") {
+      console.log("ca");
+
+      return "provedor_canceled";
+    }
+    if (vigencia === "Nuevo") {
+      console.log("ne");
+
+      return "provedor_new";
+    }
+  };
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
       <div className="ag-theme-alpine w-full mx-auto container p-6">
+        <div className="w-full justify-center flex flex-row flex-wrap gap-4 mb-2">
+          {[
+            { title: "Certificado vencido", bg: "#f8d7da" },
+            { title: "Certificado Aprobado", bg: "#d4f4dd" },
+            {
+              title: "Nuevo provedor",
+              bg: "#edff9f",
+              tooltip:
+                "Solo se le puede comprar una vez hasta que sea registrado en el sistema de provedores con su certificado",
+            },
+          ].map((item, index) => 
+          {
+            if (item.tooltip) {
+              return (
+                <Tooltip content={item.tooltip}>
+                  <div
+                    key={index}
+                    className=" cursor-pointer relative shadow-lg w-64 h-fit p-4 border border-gray-300 rounded-lg"
+                  >
+                    <div
+                      className="flex justify-center items-center h-16 w-full rounded-md"
+                      style={{ backgroundColor: item.bg }}
+                    >
+                      <span className="text-center font-semibold text-gray-800 text-lg">
+                        {item.title}
+                      </span>
+                    </div>
+                  
+                  </div>
+                </Tooltip>
+              )
+            }
+            else{
+              return (
+                <div
+                key={index}
+                className="relative shadow-lg w-64 h-fit p-4 border border-gray-300 rounded-lg"
+              >
+                <div
+                  className="flex justify-center items-center h-16 w-full rounded-md"
+                  style={{ backgroundColor: item.bg }}
+                >
+                  <span className="text-center font-semibold text-gray-800 text-lg">
+                    {item.title}
+                  </span>
+                </div>
+              
+              </div>
+              )
+            }
+          }
+          
+          )}
+        </div>
+
         <Agtable
+          getRowClass={getRowClass}
           permissionsUserTable={{
             buttonElement: "CatProveedores",
             table: "CatProveedores",
@@ -289,7 +386,7 @@ const SuppliersComponent = () => {
       </div>
       <ModalComponent
         open={open}
-        title={`${initialValues?.IDProveedor && initialValues.IDProveedor > 0 ? 'Actualizar' : 'Registrar'} proveedor`}
+        title={`${initialValues?.IDProveedor && initialValues.IDProveedor > 0 ? "Actualizar" : "Registrar"} proveedor`}
         setOpen={() => {
           setOpen(false);
         }}

@@ -34,3 +34,16 @@
     background-color: #8bce26 !important;
    
 }
+.provedor_new {
+    background-color: #edff9f !important; /* Amarillo claro */
+}
+
+.provedor_accepted {
+    background-color: #a8e6a1 !important; /* Verde claro */
+}
+
+.provedor_canceled {
+    background-color: #ffb3b3 !important; /* Rojo suave */
+}
+
+/* Establecer la animación de movimiento de la bolita */

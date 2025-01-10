@@ -19,5 +19,6 @@ export  type ProvedorType = {
     Telefono1: string;
     Telefono2: string;
     EMail: string;
+    vigencia? :"Nuevo"|"Certificado"|"Vencido",
   };
   

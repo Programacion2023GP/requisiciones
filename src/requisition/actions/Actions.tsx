@@ -15,6 +15,7 @@ import { customLog } from "../../extras/consoles";
 import { PermissionMenu } from "../../extras/menupermisos";
 import { MdOutlineCheckBox } from "react-icons/md";
 import CotizacionComponent from "../cotizacion/Cotizacion";
+import Spinner from "../../loading/Loading";
 
 const Actions: React.FC<{
   data: Record<string, any>;
@@ -25,6 +26,7 @@ const Actions: React.FC<{
     autorized: false,
     cotizacion: false,
   });
+  const [spiner,setSpiner] = useState<boolean>(false);
   const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
   const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
   const [autorized, SetAutorized] = useState(false);
@@ -69,7 +71,9 @@ const Actions: React.FC<{
       data?: any;
       pdfData: Record<string, any>;
     }) => AxiosRequest(url, method, data),
+
     onSuccess: async (data, variables) => {
+
       try {
         const result = await ObservablePost("PdfRequisicion", {
           data: {
@@ -79,12 +83,14 @@ const Actions: React.FC<{
         });
       } catch (e) {
       } finally {
+        
         setOpen((prev) => ({
           autorized: false,
           cotizacion: false,
           pdf: true,
         }));
       }
+
     },
     onError: (error: any) => {
       showToast(
@@ -93,7 +99,6 @@ const Actions: React.FC<{
       );
     },
   });
-
   const newStatus = (status: string): string => {
     let state = "";
     switch (status) {
@@ -115,6 +120,49 @@ const Actions: React.FC<{
     }
     return state;
   };
+  const mutationCotized = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+      status,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+      status:string
+    }) => AxiosRequest(url, method, data),
+    onMutate(variables) {
+      setSpiner(true);
+    },
+    onSuccess: async (data, variables) => {
+      try {
+        // customLog(`${JSON.stringify(data)}`, "green");
+        const result = await ObservablePost("IdRequisicion", {
+          data: {
+            data: data.data,
+            status:variables.status
+            
+          },
+        });
+      } catch (e) {
+      } finally {
+        setOpen((prev) => ({
+          autorized: false,
+          cotizacion: true,
+          pdf: false,
+        }));
+      }
+      setSpiner(false)
+    },
+    onError: (error: any) => {
+      showToast(
+        error.response?.data?.message || "Error al realizar la acción",
+        "error"
+      );
+    },
+  });
+  
   const getColorButton = (status: string): string => {
     let color = "";
     if (status == "CP") {
@@ -204,6 +252,8 @@ const Actions: React.FC<{
   }, [data]);
   return (
     <>
+    
+      {spiner && <Spinner/>}
       {open.autorized && (
         <AutorizedComponent
           setReloadTable={setReloadTable}
@@ -234,7 +284,7 @@ const Actions: React.FC<{
       )}
       {open.cotizacion && (
         <CotizacionComponent
-        setReloadTable={setReloadTable}
+          setReloadTable={setReloadTable}
           open={open.cotizacion}
           setOpen={() => {
             setOpen((prev) => ({
@@ -259,21 +309,18 @@ const Actions: React.FC<{
               content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}
             >
               <div
-                onClick={async() => {
-                  if (newStatus(data.Status) == "CO") {
-                    try {
-                      await ObservablePost("IdRequisicion", {
-                        id: data.Id,
-                      });
-                    } catch (e) {
-                    } finally {
-                      setOpen((prev) => ({
-                        autorized: true,
-                        pdf: false,
-                        cotizacion: true,
-                      }));
-                    }
-              
+                onClick={async () => {
+                  if (newStatus(data.Status) == "CO" || newStatus(data.Status) == "OC") {
+                    mutationCotized.mutate({
+                      method: "POST",
+                      url: "/requisiciones/products",
+                      status:newStatus(data.Status),
+                      data: {
+                        IDRequisicion: data.IDRequisicion,
+                        Ejercicio: data.Ejercicio,
+                      },
+                    });
+                  
                   } else {
                     showConfirmationAlert(
                       `El estatus se cambiara a ${newStatus(data.Status)} `,

@@ -412,9 +412,14 @@ const RequisicionesAdd = () => {
         queryFn: () => GetAxios(`autorizadores/cotizadores`),
         refetchOnWindowFocus: true,
       },
+      {
+        queryKey: ["requisitionssuppliers/index"],
+        queryFn: () => GetAxios("provedores/index"),
+        refetchOnWindowFocus: true,
+      },
     ],
   });
-  const [groups, types, autorizadores] = queries;
+  const [groups, types, autorizadores, suppliers] = queries;
   useEffect(() => {
     // first
     if (autorizadores.data && autorizadores.data.data) {
@@ -423,7 +428,14 @@ const RequisicionesAdd = () => {
       });
     }
   }, [autorizadores.data]);
-
+  useEffect(() => {
+    // first
+    if (suppliers.data && suppliers.data.data) {
+      ObservablePost("suppliersSelect", {
+        suppliers: suppliers.data.data,
+      });
+    }
+  }, [suppliers.data]);
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -585,35 +597,35 @@ const RequisicionesAdd = () => {
   ]);
   const buttonElement = useMemo(
     () => (
-        <Tooltip content="Agregar Requisición">
-          <div className="mb-4">
-            <Button
-              onClick={() => {
-                pageTransitionRef.current?.reset();
+      <Tooltip content="Agregar Requisición">
+        <div className="mb-4">
+          <Button
+            onClick={() => {
+              pageTransitionRef.current?.reset();
 
-                formikProducts.current?.resetForm({
-                  values: { Cantidad1: null, Descripcion1: null },
-                });
-                formik.current?.resetForm({
-                  values: {
-                    IDDepartamento: 0,
-                    Observaciones: "",
-                    Solicitante: "",
-                    IDTipo: 0,
-                  },
-                });
+              formikProducts.current?.resetForm({
+                values: { Cantidad1: null, Descripcion1: null },
+              });
+              formik.current?.resetForm({
+                values: {
+                  IDDepartamento: 0,
+                  Observaciones: "",
+                  Solicitante: "",
+                  IDTipo: 0,
+                },
+              });
 
-                setOpen(true);
-                // toggleOpen();
-              }}
-              size="medium"
-              color="blue"
-              variant="solid"
-            >
-              <LuPlus />
-            </Button>
-          </div>
-        </Tooltip>
+              setOpen(true);
+              // toggleOpen();
+            }}
+            size="medium"
+            color="blue"
+            variant="solid"
+          >
+            <LuPlus />
+          </Button>
+        </div>
+      </Tooltip>
     ),
     []
   );
@@ -622,7 +634,7 @@ const RequisicionesAdd = () => {
     data: Record<string, any>;
   }) => {
     const { Status } = params?.data;
-    
+
     if (Status == "CA") {
       return "class_ca";
     }
@@ -645,12 +657,14 @@ const RequisicionesAdd = () => {
       return "class_su";
     }
   };
-// const year =2024
+  // const year =2024
 
-const year =new Date().getFullYear()
+  const year = new Date().getFullYear();
   return (
     <>
-      <PermissionMenu IdMenu={["Listado", "SeguimientoRequis",'RequisicionesAdd']}>
+      <PermissionMenu
+        IdMenu={["Listado", "SeguimientoRequis", "RequisicionesAdd"]}
+      >
         <div className="container mx-auto shadow-lg p-6 border mt-12">
           <Typography
             className="w-full text-center py-2"
@@ -661,38 +675,37 @@ const year =new Date().getFullYear()
             la tabla empieza consultando el ejercicio del año actual
             {" " + year}
           </Typography>
-            <div className="flex w-full flex-row flex-wrap justify-center mb-6">
-              <Chip message="Captura (CA)" className="bg-gray-400" />
-              <Chip message="Autorizada (AU)" className="bg-black" />
-              <Chip message="Asignado  (AS)" className="bg-purple-500" />
-              <Chip message="Cotizado  (CO)" className="bg-orange-500" />
-              <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
-              <Chip message="Rechazada  (RE)" className="bg-red-500" />
-              <Chip message="Realizada  (RE)" className="bg-cyan-500" />
-              <Chip message="Surtida  (SU)" className="bg-lime-500" />
-            </div>
-            <Agtable
+          <div className="flex w-full flex-row flex-wrap justify-center mb-6">
+            <Chip message="Captura (CA)" className="bg-gray-400" />
+            <Chip message="Autorizada (AU)" className="bg-black" />
+            <Chip message="Asignado  (AS)" className="bg-purple-500" />
+            <Chip message="Cotizado  (CO)" className="bg-orange-500" />
+            <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
+            <Chip message="Rechazada  (RE)" className="bg-red-500" />
+            <Chip message="Realizada  (RE)" className="bg-cyan-500" />
+            <Chip message="Surtida  (SU)" className="bg-lime-500" />
+          </div>
+          <Agtable
             permissionsUserTable={{
-              table:"Listado",
-              buttonElement:"RequisicionesAdd"
+              table: "Listado",
+              buttonElement: "RequisicionesAdd",
             }}
-              getRowClass={getRowClass}
-              backUrl={{
-                pathName: "requisiciones/index",
-                startSearchFilter: {
-                  where: `Ejercicio = '${year}'`,
-                  // where: `Ejercicio = '2024'`,
-
-                },
-                restart: reloadTable,
-              }}
-              filtersActive={{
-                Ejercicio: "2024",
-              }}
-              columnDefs={columnDefs}
-              buttonElement={buttonElement}
-              colapseFilters
-            />
+            getRowClass={getRowClass}
+            backUrl={{
+              pathName: "requisiciones/index",
+              startSearchFilter: {
+                where: `Ejercicio = '${year}'`,
+                // where: `Ejercicio = '2024'`,
+              },
+              restart: reloadTable,
+            }}
+            filtersActive={{
+              Ejercicio: "2024",
+            }}
+            columnDefs={columnDefs}
+            buttonElement={buttonElement}
+            colapseFilters
+          />
         </div>
 
         <ModalComponent
@@ -772,7 +785,7 @@ const year =new Date().getFullYear()
                       loading={groups.isLoading}
                       name="IDDepartamento"
                       label={"selecciona el departamento"}
-                      options={groups.data?.data}
+                      options={groups.data?.data.filter((it:any) => it.vigencia !== "Vencido")}
                       idKey={"IDDepartamento"}
                       labelKey={"Nombre_Departamento"}
                     />
