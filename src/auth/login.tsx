@@ -34,6 +34,8 @@ const LoginComponent = () => {
       localStorage.setItem('group', data.data.group);
       localStorage.setItem('token', data.data.token);
       localStorage.setItem('name', data.data.name);
+      localStorage.setItem('role', data.data.role);
+
 
       window.location.href = '/MnuSeguridad'
       showToast(data.message, data.status);

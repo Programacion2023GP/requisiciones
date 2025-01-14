@@ -13,7 +13,7 @@ import { createTw } from "react-pdf-tailwind";
 import Observable from "../../extras/observable";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-
+import Logo from "../../assets/logo-gpd.png";
 type PdfRequisitionType = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -66,7 +66,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
             orientation="landscape"
             style={{
               ...styles.page,
-              ...tw("w-full flex flex-col bg-gray-50 p-6"),
+              ...tw("w-full flex flex-col bg-white p-6"),
             }}
           >
             <View
@@ -74,14 +74,17 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                 "w-full flex flex-col items-center bg-blue-100 rounded-lg p-4 mb-6 shadow-lg"
               )}
             >
+              <Image src={Logo} style={tw("h-28 w-96")} />
               <Text
-                style={tw("text-3xl font-bold text-blue-800 text-center mb-1")}
+                style={tw(
+                  "text-3xl font-bold text-blue-800 mt-12 text-center mb-1"
+                )}
               >
                 R. AYUNTAMIENTO DE GOMEZ PALACIO, DGO 2022-2025
               </Text>
             </View>
 
-            <View style={tw("w-full flex flex-row gap-6")}>
+            <View style={tw("w-full flex flex-row -gap6")}>
               <View
                 style={tw(
                   "w-1/2 bg-white rounded-xl shadow-md overflow-hidden"
@@ -100,11 +103,21 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                       label: "Fecha de impresión",
                       value: ` ${new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`,
                     },
-                    { label: "IdRequisición", value: data.data.pdfData.IDRequisicion },
+                    {
+                      label: "IdRequisición",
+                      value: data?.data?.pdfData?.IDRequisicion,
+                    },
 
-                    { label: "Centro de Costos", value: "DEPT-COMPRAS" },
+                    {
+                      label: "Centro de Costos",
+                      value: data?.data?.pdfData?.Nombre_CC,
+                    },
                     { label: "Aplicación", value: "" },
-                    { label: "Fecha de asignación", value: "" },
+                    {
+                      label: "Fecha de asignación",
+                      value: `
+                      ${new Date(data?.data?.pdfData?.FechaAsignacion).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}`,
+                    },
                   ].map((item, index) => (
                     <View
                       key={index}
@@ -130,14 +143,15 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                 <View
                   style={tw("bg-white rounded-xl shadow-md overflow-hidden")}
                 >
-                  <View style={tw("bg-blue-100 p-4")}>
+              <View break>
+              <View wrap style={tw("bg-blue-100 p-4")}>
                     <Text
                       style={tw("text-xl font-bold text-blue-800 text-center")}
                     >
                       Detalle de Productos
                     </Text>
                   </View>
-                  <View wrap style={tw("p-4")}>
+                  <View  style={tw("p-4")}>
                     <View
                       style={tw(
                         "flex flex-row mb-2 pb-2 border-b border-gray-200"
@@ -154,31 +168,36 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                           "w-1/4 text-sm font-bold text-gray-600 text-right"
                         )}
                       >
-                        Clave
+                        {/* Clave */}
                       </Text>
                     </View>
-                     {data?.data?.products && data.data.products.map((producto, index) => (
-                      <View
-                        key={index}
-                        style={tw(
-                          `flex flex-row py-3 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`
-                        )}
-                      >
-                        <Text
-                          style={tw("w-1/4 text-sm text-gray-800 text-center text-wrap")}
+                    {data?.data?.products &&
+                      data.data.products.map((producto, index) => (
+                        <View
+                          key={index}
+                          style={tw(
+                            `flex flex-row py-3 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`
+                          )}
                         >
-                          {producto.Cantidad}
-                        </Text>
-                        <Text style={tw("w-1/2 text-sm text-gray-800 text-wrap")}>
-                          {producto.Descripcion}
-                        </Text>
-                        <Text
-                          style={tw("w-1/4 text-sm text-gray-800 text-right")}
-                        >
-                          {producto.ClavePresupestal}
-                        </Text>
-                      </View>
-                    ))}
+                          <Text
+                            style={tw(
+                              "w-1/4 text-sm text-gray-800 text-center text-wrap"
+                            )}
+                          >
+                            {producto.Cantidad}
+                          </Text>
+                          <Text
+                            style={tw("w-1/2 text-sm text-gray-800 text-wrap")}
+                          >
+                            {producto.Descripcion}
+                          </Text>
+                          <Text
+                            style={tw("w-1/4 text-sm text-gray-800 text-right")}
+                          >
+                            {producto.ClavePresupestal}
+                          </Text>
+                        </View>
+                      ))}
                     <View style={tw("flex flex-row justify-between py-3")}>
                       <Text
                         style={tw("text-sm font-semibold text-gray-600 w-1/2")}
@@ -193,164 +212,197 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                         {data.data.pdfData.Observaciones}
                       </Text>
                     </View>
-                    {/* <View
-                      style={tw(
-                        "mt-4 pt-4 border-t border-gray-200 flex flex-row justify-between"
-                      )}
-                    >
-                      <Text style={tw("text-sm font-bold text-gray-800")}>
-                        Total de Productos
-                      </Text>
-                      <Text style={tw("text-sm font-bold text-blue-800")}>
-                        6 Unidades
-                      </Text>
-                    </View> */}
                   </View>
+              </View>
                 </View>
               </View>
-
               <View
                 style={tw(
-                  "w-1/2 bg-white rounded-xl shadow-md overflow-hidden"
+                  "w-1/2 bg-white rounded-xl  overflow-hidden"
                 )}
               >
                 <View wrap style={tw("bg-blue-100 p-4")}>
                   <Text
                     style={tw("text-xl font-bold text-blue-800 text-center")}
                   >
-                    Información de Proveedores
+                    Información de Proveedores por Producto
                   </Text>
                 </View>
-                {[
-                  {
-                    nombre: data.data.pdfData.proveedor1,
-                    productos: [
-                      {
-                        descripcion: "Laptop Profesional",
-                        cantidad: 2,
-                        precioUnitario: "$1,500.00",
-                        total: "$3,000.00",
-                      },
-                    ],
-                    contacto: data.data.pdfData.proveedor1,
-                    telefono: "(55) 9876-5432",
-                  },
-                  {
-                    nombre: data.data.pdfData.proveedor2,
-                    productos: [
-                      {
-                        descripcion: "Monitor 4K",
-                        cantidad: 1,
-                        precioUnitario: "$450.00",
-                        total: "$450.00",
-                      },
-                    ],
-                    contacto: data.data.pdfData.proveedor2,
-                    telefono: "(55) 1122-3344",
-                  },
-                  {
-                    nombre: data.data.pdfData.proveedor3,
-                    productos: [
-                      {
-                        descripcion: "Teclado Ergonómico",
-                        cantidad: 3,
-                        precioUnitario: "$120.00",
-                        total: "$360.00",
-                      },
-                    ],
-                    contacto: data.data.pdfData.proveedor3,
-                    telefono: "(55) 5555-7777",
-                  },
-                ].map((proveedor, provIndex) => (
+
+                {data?.data?.products.map((producto, prodIndex) => (
                   <View
                     wrap
-                    key={provIndex}
+                    key={prodIndex}
                     style={tw("p-4 border-b border-gray-200")}
                   >
-                    <View style={tw("flex flex-row justify-between mb-2 ")}>
-                      <Text
-                        style={tw(
-                          "text-base font-bold text-gray-800 text-wrap"
-                        )}
-                      >Provedor</Text>
-                      <Text style={tw("text-sm text-gray-600")}>
-                        {proveedor.contacto}
+                    <View
+                    
+                    style={tw("flex flex-row flex-wrap justify-between mb-2")}
+                    >
+                      <Text style={tw("text-base font-bold text-gray-800")}>
+                        Producto:
+                      </Text>
+                      <Text style={tw("text-sm text-gray-600 ml-2")}>
+                        {producto.Descripcion}
+                      </Text>
+                    </View>
+                    <View
+
+                      style={tw("flex flex-row flex-wrap justify-between mb-2")}
+                    >
+                      <Text style={tw("text-base font-bold text-gray-800")}>
+                        Cantidad:
+                      </Text>
+                      <Text style={tw("text-sm text-gray-600 ml-2")}>
+                        {producto.Cantidad}
                       </Text>
                     </View>
                     <View style={tw("bg-gray-50 rounded p-3 mb-2")}>
-                      {proveedor.productos.map((producto, prodIndex) => (
+                      {/* Header row */}
+                      <View style={tw("bg-gray-50 rounded p-4 mb-4")}>
+                        {/* Header row with better contrast */}
                         <View
-                          key={prodIndex}
-                          style={tw("flex flex-row justify-between py-2")}
+                          style={tw(
+                            "flex flex-row justify-between py-2 border-b border-gray-300"
+                          )}
                         >
-                          <Text style={tw("w-1/2 text-sm text-gray-700")}>
-                            {producto.descripcion}
+                          <Text
+                            style={tw(
+                              "w-1/5 text-sm font-medium text-gray-700 text-center"
+                            )}
+                          >
+                            Proveedor
                           </Text>
                           <Text
                             style={tw(
-                              "w-1/4 text-sm text-gray-700 text-center"
+                              "w-1/5 text-sm font-medium text-gray-700 text-right"
                             )}
                           >
-                            {producto.cantidad}
+                            Precio
                           </Text>
                           <Text
-                            style={tw("w-1/4 text-sm text-gray-700 text-right")}
+                            style={tw(
+                              "w-1/5 text-sm font-medium text-gray-700 text-right"
+                            )}
                           >
-                            {producto.total}
+                            IVA
+                          </Text>
+                          <Text
+                            style={tw(
+                              "w-1/5 text-sm font-medium text-gray-700 text-right"
+                            )}
+                          >
+                            Precio con IVA
+                          </Text>
+                          <Text
+                            style={tw(
+                              "w-1/5 text-sm font-medium text-gray-700 text-right"
+                            )}
+                          >
+                            Retenciones
                           </Text>
                         </View>
-                      ))}
+
+                        {/* Productos with better row styling */}
+                        {["Proveedor1", "Proveedor2", "Proveedor3"].map(
+                          (key, index) => {
+                            const selected =
+                              producto[`seleccionado${index + 1}`]; // Ejemplo: seleccionado1, seleccionado2, etc.
+                            const rowStyle =
+                              producto.Proveedor ==
+                              producto[`Proveedor${index + 1}`]
+                                ? "bg-lime-100"
+                                : "bg-white";
+
+                            return (
+                              <View
+                              wrap
+                                key={index}
+                                style={tw(
+                                  `flex flex-row justify-between py-2 ${rowStyle} border-b border-gray-200 `
+                                )}
+                              >
+                                <Text
+                                  style={tw(
+                                    "w-1/5 text-xs text-gray-700 text-center"
+                                  )}
+                                >
+                                  {producto[`Proveedor${index + 1}`]}
+                                </Text>
+                                <Text
+                                  style={tw(
+                                    "w-1/5 text-sm text-gray-700 text-right"
+                                  )}
+                                >
+                                  {producto[`PrecioUnitarioSinIva${index + 1}`]}
+                                </Text>
+                                <Text
+                                  style={tw(
+                                    "w-1/5 text-sm text-gray-700 text-right"
+                                  )}
+                                >
+                                  {producto[`ImporteIva${index + 1}`]}
+                                </Text>
+                                <Text
+                                  style={tw(
+                                    "w-1/5 text-sm text-gray-700 text-right"
+                                  )}
+                                >
+                                  {producto[`PrecioUnitarioConIva${index + 1}`]}
+                                </Text>
+                                <Text
+                                  style={tw(
+                                    "w-1/5 text-sm text-gray-700 text-right"
+                                  )}
+                                >
+                                  {producto[`Retenciones${index + 1}`]}
+                                </Text>
+
+                                {selected && (
+                                  <Text
+                                    style={tw(
+                                      "absolute right-2 text-green-500 font-bold text-sm"
+                                    )}
+                                  >
+                                    Seleccionado
+                                  </Text>
+                                )}
+                              </View>
+                            );
+                          }
+                        )}
+                      </View>
                     </View>
-                    <Text style={tw("text-sm text-gray-600")}>
-                      {proveedor.telefono}
-                    </Text>
                   </View>
                 ))}
-                <View style={tw("p-4")}>
-                  <Text
-                    style={tw(
-                      "text-xl font-bold text-blue-800 text-center mb-2"
-                    )}
-                  >
-                    Total a Proveedores
-                  </Text>
-                  <View
-                    style={tw(
-                      "flex flex-row justify-between py-2 border-t border-gray-200 mt-4"
-                    )}
-                  >
-                    <Text style={tw("text-sm font-bold text-gray-800")}>
-                      Sub-total
-                    </Text>
-                    <Text style={tw("text-sm font-bold text-gray-800")}>
-                      $4,650.00
-                    </Text>
-                  </View>
-                  <View
-                    style={tw(
-                      "flex flex-row justify-between py-2 border-t border-gray-200"
-                    )}
-                  >
-                    <Text style={tw("text-sm font-bold text-gray-800")}>
-                      IVA (16%)
-                    </Text>
-                    <Text style={tw("text-sm font-bold text-gray-800")}>
-                      $744.00
-                    </Text>
-                  </View>
-                  <View
-                    style={tw(
-                      "flex flex-row justify-between py-2 border-t border-gray-200"
-                    )}
-                  >
-                    <Text style={tw("text-lg font-bold text-gray-800")}>
-                      Total
-                    </Text>
-                    <Text style={tw("text-lg font-bold text-blue-800")}>
-                      $5,394.00
-                    </Text>
-                  </View>
-                </View>
+              </View>
+
+           
+            </View>
+            <View style={tw("w-full flex flex-row -gap6  mt-10")}>
+
+              {/* Primera firma */}
+              <View style={tw("w-1/2 flex items-center bg-white")}>
+                <Text
+                  style={tw(
+                    "text-sm font-medium text-gray-700 text-center mb-2"
+                  )}
+                >
+                  Firma Representante ({data?.data?.products[0]?.Nombre_Director})
+                </Text>
+                <View style={tw("w-4/5 h-12 border-b border-gray-500")} />
+              </View>
+
+              {/* Segunda firma */}
+              <View style={tw("w-1/2 flex items-center bg-white")}>
+                <Text
+                  style={tw(
+                    "text-sm font-medium text-gray-700 text-center mb-2"
+                  )}
+                >
+                  Firma Autorización
+                </Text>
+                <View style={tw("w-4/5 h-12 border-b border-gray-500")} />
               </View>
             </View>
           </Page>

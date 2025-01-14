@@ -37,6 +37,7 @@ import Chip from "../components/chip/Chip";
 import { createTw } from "react-pdf-tailwind";
 import Observable from "../extras/observable";
 import { PermissionMenu } from "../extras/menupermisos";
+import Spinner from "../loading/Loading";
 
 const ProductsComponent = memo(
   ({
@@ -304,6 +305,7 @@ const FormProductsComponent = forwardRef<
 
 const RequisicionesAdd = () => {
   const pageTransitionRef = useRef<PageTransitionRef>(null);
+  const [spiner, setSpiner] = useState<boolean>(false);
 
   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
   const formikProducts = useRef<FormikProps<Record<string, any>> | null>(null);
@@ -352,12 +354,15 @@ const RequisicionesAdd = () => {
       data?: any;
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
+      setSpiner(true)
       setReloadTable(false);
     },
     onSuccess: (data) => {
       // mutation.reset()
       setOpen(false);
       setReloadTable(true);
+      setSpiner(false)
+
       setValues({
         valuesRequisition: {
           IDDepartamento: 0,
@@ -407,35 +412,13 @@ const RequisicionesAdd = () => {
         queryFn: () => GetAxios("tipos/index"),
         refetchOnWindowFocus: true,
       },
-      {
-        queryKey: ["autorizadoresRequisition/cotizadores"],
-        queryFn: () => GetAxios(`autorizadores/cotizadores`),
-        refetchOnWindowFocus: true,
-      },
-      {
-        queryKey: ["requisitionssuppliers/index"],
-        queryFn: () => GetAxios("provedores/index"),
-        refetchOnWindowFocus: true,
-      },
+
+    
     ],
   });
-  const [groups, types, autorizadores, suppliers] = queries;
-  useEffect(() => {
-    // first
-    if (autorizadores.data && autorizadores.data.data) {
-      ObservablePost("autorizadoresSelect", {
-        autorizadores: autorizadores.data.data,
-      });
-    }
-  }, [autorizadores.data]);
-  useEffect(() => {
-    // first
-    if (suppliers.data && suppliers.data.data) {
-      ObservablePost("suppliersSelect", {
-        suppliers: suppliers.data.data,
-      });
-    }
-  }, [suppliers.data]);
+  const [groups, types] = queries;
+
+  
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -635,6 +618,9 @@ const RequisicionesAdd = () => {
   }) => {
     const { Status } = params?.data;
 
+    if (Status == "CP") {
+      return "class_cp";
+    }
     if (Status == "CA") {
       return "class_ca";
     }
@@ -662,6 +648,8 @@ const RequisicionesAdd = () => {
   const year = new Date().getFullYear();
   return (
     <>
+          {spiner && <Spinner />}
+
       <PermissionMenu
         IdMenu={["Listado", "SeguimientoRequis", "RequisicionesAdd"]}
       >
@@ -676,14 +664,14 @@ const RequisicionesAdd = () => {
             {" " + year}
           </Typography>
           <div className="flex w-full flex-row flex-wrap justify-center mb-6">
-            <Chip message="Captura (CA)" className="bg-gray-400" />
+            <Chip message="Rechazada  (CA)" className="bg-red-500" />
+            <Chip message="Captura (CP)" className="bg-gray-400" />
             <Chip message="Autorizada (AU)" className="bg-black" />
             <Chip message="Asignado  (AS)" className="bg-purple-500" />
             <Chip message="Cotizado  (CO)" className="bg-orange-500" />
             <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
-            <Chip message="Rechazada  (RE)" className="bg-red-500" />
-            <Chip message="Realizada  (RE)" className="bg-cyan-500" />
             <Chip message="Surtida  (SU)" className="bg-lime-500" />
+            {/* <Chip message="Realizada  (RE)" className="bg-cyan-500" /> */}
           </div>
           <Agtable
             permissionsUserTable={{

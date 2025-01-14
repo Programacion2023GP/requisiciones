@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.class_ca{
+.class_cp{
     background-color: #9ca3af !important;
 }
 .class_au{
@@ -23,6 +23,10 @@
    
 }
 .class_rec{
+    background-color: #ef4444 !important;
+   
+}
+.class_ca{
     background-color: #ef4444 !important;
    
 }

@@ -16,6 +16,8 @@ import { PermissionMenu } from "../../extras/menupermisos";
 import { MdOutlineCheckBox } from "react-icons/md";
 import CotizacionComponent from "../cotizacion/Cotizacion";
 import Spinner from "../../loading/Loading";
+import { FaEye } from "react-icons/fa";
+import DetailsRequistion from "../details/DetailsRequisition";
 
 const Actions: React.FC<{
   data: Record<string, any>;
@@ -25,9 +27,11 @@ const Actions: React.FC<{
     pdf: false,
     autorized: false,
     cotizacion: false,
+    view: false,
   });
-  const [spiner,setSpiner] = useState<boolean>(false);
+  const [spiner, setSpiner] = useState<boolean>(false);
   const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
+
   const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
   const [autorized, SetAutorized] = useState(false);
   const { ObservablePost } = Observable();
@@ -42,10 +46,12 @@ const Actions: React.FC<{
       data?: any;
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
+      setSpiner(true);
       setReloadTable(false);
     },
     onSuccess: (data) => {
       setReloadTable(true);
+      setSpiner(false);
 
       showToast(data.message, data.status);
       if (mutation.status === "success") {
@@ -71,9 +77,10 @@ const Actions: React.FC<{
       data?: any;
       pdfData: Record<string, any>;
     }) => AxiosRequest(url, method, data),
-
+    onMutate(variables) {
+      setSpiner(true);
+    },
     onSuccess: async (data, variables) => {
-
       try {
         const result = await ObservablePost("PdfRequisicion", {
           data: {
@@ -83,14 +90,15 @@ const Actions: React.FC<{
         });
       } catch (e) {
       } finally {
-        
+        setSpiner(false);
+
         setOpen((prev) => ({
           autorized: false,
           cotizacion: false,
+          view: false,
           pdf: true,
         }));
       }
-
     },
     onError: (error: any) => {
       showToast(
@@ -120,17 +128,16 @@ const Actions: React.FC<{
     }
     return state;
   };
-  const mutationCotized = useMutation({
+
+  const mutationView = useMutation({
     mutationFn: ({
       url,
       method,
       data,
-      status,
     }: {
       url: string;
       method: "POST" | "PUT" | "DELETE";
       data?: any;
-      status:string
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
       setSpiner(true);
@@ -141,19 +148,18 @@ const Actions: React.FC<{
         const result = await ObservablePost("IdRequisicion", {
           data: {
             data: data.data,
-            status:variables.status
-            
           },
         });
       } catch (e) {
       } finally {
         setOpen((prev) => ({
           autorized: false,
-          cotizacion: true,
+          cotizacion: false,
           pdf: false,
+          view: true,
         }));
       }
-      setSpiner(false)
+      setSpiner(false);
     },
     onError: (error: any) => {
       showToast(
@@ -162,7 +168,6 @@ const Actions: React.FC<{
       );
     },
   });
-  
   const getColorButton = (status: string): string => {
     let color = "";
     if (status == "CP") {
@@ -245,198 +250,289 @@ const Actions: React.FC<{
     return false;
   };
   useEffect(() => {
-    customLog(`${data.Status}`, "blue", "medium");
+    // customLog(`${data.Status}`, "blue", "medium");
 
-    customLog(`${Autorized(newStatus(data.Status))}`, "orange", "medium");
+    // customLog(`${Autorized(newStatus(data.Status))}`, "orange", "medium");
     SetAutorized(Autorized(newStatus(data.Status)));
   }, [data]);
   return (
     <>
-    
-      {spiner && <Spinner/>}
-      {open.autorized && (
-        <AutorizedComponent
-          setReloadTable={setReloadTable}
-          open={open.autorized}
-          setOpen={() => {
-            setOpen((prev) => ({
-              pdf: false,
-              autorized: false,
-              cotizacion: false,
-            }));
-          }}
-        />
-      )}
+      {data.Status != "CA" && (
+        <>
+          {spiner && <Spinner />}
 
-      {open.pdf && (
-        <PermissionMenu IdMenu="SeguimientoRequis">
-          <Pdfrequisition
-            open={open.pdf}
-            setOpen={() => {
-              setOpen((prev) => ({
-                autorized: false,
-                pdf: false,
-                cotizacion: false,
-              }));
-            }}
-          />
-        </PermissionMenu>
-      )}
-      {open.cotizacion && (
-        <CotizacionComponent
-          setReloadTable={setReloadTable}
-          open={open.cotizacion}
-          setOpen={() => {
-            setOpen((prev) => ({
-              autorized: false,
-              pdf: false,
-              cotizacion: false,
-            }));
-          }}
-        />
-      )}
-      <div className="flex flex-row gap-2">
-        {newStatus(data.Status) !== "CP" &&
-          newStatus(data.Status) !== "SU" &&
-          newStatus(data.Status) !== "AS" &&
-          AutorizedEspecial(
-            data.RequiereAut,
-            data.AutEspecial,
-            newStatus(data.Status)
-          ) &&
-          autorized && (
-            <Tooltip
-              content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}
-            >
-              <div
-                onClick={async () => {
-                  if (newStatus(data.Status) == "CO" || newStatus(data.Status) == "OC") {
-                    mutationCotized.mutate({
+          {open.autorized && (
+            <AutorizedComponent
+              setReloadTable={setReloadTable}
+              open={open.autorized}
+              setOpen={() => {
+                setOpen((prev) => ({
+                  pdf: false,
+                  autorized: false,
+                  cotizacion: false,
+                  view: false,
+                }));
+              }}
+            />
+          )}
+
+          {open.pdf && (
+            <PermissionMenu IdMenu="SeguimientoRequis">
+              <Pdfrequisition
+                open={open.pdf}
+                setOpen={() => {
+                  setOpen((prev) => ({
+                    autorized: false,
+                    pdf: false,
+                    cotizacion: false,
+                    view: false,
+                  }));
+                }}
+              />
+            </PermissionMenu>
+          )}
+          {open.cotizacion && (
+            <CotizacionComponent
+              setReloadTable={setReloadTable}
+              open={open.cotizacion}
+              setOpen={() => {
+                setOpen((prev) => ({
+                  autorized: false,
+                  pdf: false,
+                  cotizacion: false,
+                  view: false,
+                }));
+              }}
+            />
+          )}
+          {open.view && (
+            <DetailsRequistion
+              open={open.view}
+              setOpen={() => {
+                setOpen((prev) => ({
+                  autorized: false,
+                  pdf: false,
+                  cotizacion: false,
+                  view: false,
+                }));
+              }}
+            />
+          )}
+          <div className="flex flex-row gap-2">
+            <div className="w-fit">
+              <Tooltip content="Ver requisición">
+                <Button
+                  color="presidencia"
+                  variant="solid"
+                  size="small"
+                  onClick={() => {
+                    mutationView.mutate({
                       method: "POST",
-                      url: "/requisiciones/products",
-                      status:newStatus(data.Status),
+                      url: "/requisiciones/show",
                       data: {
                         IDRequisicion: data.IDRequisicion,
                         Ejercicio: data.Ejercicio,
                       },
                     });
-                  
-                  } else {
-                    showConfirmationAlert(
-                      `El estatus se cambiara a ${newStatus(data.Status)} `,
-                      "Esta acción no se puede deshacer."
-                    ).then((isConfirmed) => {
-                      if (isConfirmed) {
-                        mutation.mutate({
-                          method: "PUT",
-                          url: "/requisiciones/update",
-                          data: { Status: newStatus(data.Status), id: data.Id },
-                        });
-                      } else {
-                        showToast("La acción fue cancelada.", "error");
-                      }
-                    });
-                  }
-                }}
-                className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
-              >
-                <span>{data.Status}</span>
-                <LiaExchangeAltSolid className="text-whitecursor-pointer" />
-                <span>{newStatus(data.Status)} </span>
-              </div>
-            </Tooltip>
-          )}
-        {data.Status !== "SU" && (
-          <div className="w-fit">
-            <Tooltip content="Cancelar">
-              <Button color="red" variant="solid" size="small">
-                <MdCancel />
-              </Button>
-            </Tooltip>
-          </div>
-        )}
-
-        {data.Status == "AU" &&
-          data.AutEspecial == 1 &&
-          !data.UsuarioVoBo &&
-          buttonVobo(data.IDTipo) && (
-            <PermissionMenu IdMenu={"VoBo"}>
-              <Tooltip content="Visto bueno">
-                <Button
-                  color="teal"
-                  variant="solid"
-                  size="small"
-                  onClick={() => {
-                    mutation.mutate({
-                      method: "PUT",
-                      url: "/requisiciones/vobo",
-                      data: { id: data.Id },
-                    });
                   }}
                 >
-                  <MdOutlineCheckBox />
-                  {data.UsuarioVoBo}
+                  <FaEye />
                 </Button>
               </Tooltip>
-            </PermissionMenu>
-          )}
+            
+            </div>
+            <div className="w-fit ">
+            {(newStatus(data.Status) == "CO" ||
+              newStatus(data.Status) == "OC") && (
 
-        <div className="w-fit">
-          <PermissionMenu IdMenu="SeguimientoRequis">
-            <Tooltip content="Descargar archivo adjunto">
-              <Button
-                color="blue"
-                variant="solid"
-                size="small"
-                onClick={async () => {
-                  console.log(data);
-                  mutationPdf.mutate({
-                    method: "POST",
-                    url: "/requisiciones/products",
-                    pdfData: data,
-                    data: {
-                      IDRequisicion: data.IDRequisicion,
-                      Ejercicio: data.Ejercicio,
-                    },
-                  });
-                }}
-              >
-                <BsFiletypePdf />
-              </Button>
-            </Tooltip>
-          </PermissionMenu>
-        </div>
-
-        {!data.UsuarioAS &&
-          newStatus(data.Status) == "AS" &&
-          permisos.Permiso_Asignar == 1 && (
-            <div className="w-fit">
-              <Tooltip content="Asignar requisitor">
+                <Tooltip content={newStatus(data.Status) == "CO"?'cotizar':'seleccionar provedor'}>
                 <Button
-                  color="indigo"
+                  color={newStatus(data.Status) == "CO"?'orange':'pink'}
                   variant="solid"
                   size="small"
-                  onClick={async () => {
+                  onClick={async() => {
                     try {
-                      await ObservablePost("IdRequisicion", {
-                        id: data.Id,
+                      // customLog(`${JSON.stringify(data)}`, "green");
+                      const result = await ObservablePost("IdRequisicion", {
+                        data: {
+                          IDRequisicion: data.IDRequisicion,
+                          Ejercicio: data.Ejercicio,
+
+                          status: newStatus(data.Status),
+                        },
                       });
                     } catch (e) {
                     } finally {
                       setOpen((prev) => ({
-                        autorized: true,
+                        autorized: false,
+                        cotizacion: true,
                         pdf: false,
-                        cotizacion: false,
+                        view: false,
                       }));
                     }
+                 
                   }}
                 >
-                  <PiPersonArmsSpreadThin />
+                  {newStatus(data.Status) == "CO"?'cotizar':'seleccionar provedor'}
                 </Button>
               </Tooltip>
+              )}
             </div>
-          )}
-      </div>
+            {newStatus(data.Status) !== "CP" &&
+              // newStatus(data.Status) !== "SU" &&
+              newStatus(data.Status) !== "AS" &&
+              AutorizedEspecial(
+                data.RequiereAut,
+                data.AutEspecial,
+                newStatus(data.Status)
+              ) &&
+              autorized && (
+                <Tooltip
+                  content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}
+                >
+                  <div
+                    onClick={async () => {
+                      showConfirmationAlert(
+                        `El estatus se cambiara a ${newStatus(data.Status)} `,
+                        "Esta acción no se puede deshacer."
+                      ).then((isConfirmed) => {
+                        if (isConfirmed) {
+                          mutation.mutate({
+                            method: "PUT",
+                            url: "/requisiciones/update",
+                            data: {
+                              Status: newStatus(data.Status),
+                              id: data.Id,
+                            },
+                          });
+                        } else {
+                          showToast("La acción fue cancelada.", "error");
+                        }
+                      });
+                    }}
+                    className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
+                  >
+                    <span>{data.Status}</span>
+                    <LiaExchangeAltSolid className="text-whitecursor-pointer" />
+                    <span>{newStatus(data.Status)} </span>
+                  </div>
+                </Tooltip>
+              )}
+        
+            {data.Status !== "SU" &&
+              localStorage.getItem("role") == "COMPRAS" && (
+                <div className="w-fit">
+                  <Tooltip content="Cancelar">
+                    <Button
+                      color="red"
+                      variant="solid"
+                      size="small"
+                      onClick={() => {
+                        showConfirmationAlert(
+                          `El estatus se cambiara a  CA `,
+                          "Esta acción no se puede deshacer."
+                        ).then((isConfirmed) => {
+                          if (isConfirmed) {
+                            mutation.mutate({
+                              method: "PUT",
+                              url: "/requisiciones/update",
+                              data: { Status: "CA", id: data.Id },
+                            });
+                          } else {
+                            showToast("La acción fue cancelada.", "error");
+                          }
+                        });
+                      }}
+                    >
+                      <MdCancel />
+                    </Button>
+                  </Tooltip>
+                </div>
+              )}
+
+            {data.Status == "AU" &&
+              data.AutEspecial == 1 &&
+              !data.UsuarioVoBo &&
+              buttonVobo(data.IDTipo) && (
+                <PermissionMenu IdMenu={"VoBo"}>
+                  <Tooltip content="Visto bueno">
+                    <Button
+                      color="teal"
+                      variant="solid"
+                      size="small"
+                      onClick={() => {
+                        mutation.mutate({
+                          method: "PUT",
+                          url: "/requisiciones/vobo",
+                          data: { id: data.Id },
+                        });
+                      }}
+                    >
+                      <MdOutlineCheckBox />
+                      {data.UsuarioVoBo}
+                    </Button>
+                  </Tooltip>
+                </PermissionMenu>
+              )}
+
+            <div className="w-fit">
+              <PermissionMenu IdMenu="SeguimientoRequis">
+                <Tooltip content="Descargar archivo adjunto">
+                  <Button
+                    color="blue"
+                    variant="solid"
+                    size="small"
+                    onClick={async () => {
+                      mutationPdf.mutate({
+                        method: "POST",
+                        url: "/requisiciones/detailsRequisicion",
+                        pdfData: data,
+                        data: {
+                          IDRequisicion: data,
+                          Ejercicio: data.Ejercicio,
+                        },
+                      });
+                    }}
+                  >
+                    <BsFiletypePdf />
+                  </Button>
+                </Tooltip>
+              </PermissionMenu>
+            </div>
+
+            {!data.UsuarioAS &&
+              newStatus(data.Status) == "AS" &&
+              permisos.Permiso_Asignar == 1 && (
+                <div className="w-fit">
+                  <Tooltip content="Asignar requisitor">
+                    <Button
+                      color="indigo"
+                      variant="solid"
+                      size="small"
+                      onClick={async () => {
+                        try {
+                          await ObservablePost("IdRequisicion", {
+                            id: data.Id,
+                          });
+                        } catch (e) {
+                        } finally {
+                          setOpen((prev) => ({
+                            autorized: true,
+                            pdf: false,
+                            cotizacion: false,
+                            view: false,
+                          }));
+                        }
+                      }}
+                    >
+                      <PiPersonArmsSpreadThin />
+                    </Button>
+                  </Tooltip>
+                </div>
+              )}
+          </div>
+        </>
+      )}
     </>
   );
 };

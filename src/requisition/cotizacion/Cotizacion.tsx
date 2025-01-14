@@ -12,9 +12,15 @@ import {
 } from "../../components/formik/FormikInputs/FormikInput";
 import SwitchComponent from "../../components/switch/Swichcomponent";
 import Observable from "../../extras/observable";
-import { useMutation } from "@tanstack/react-query";
-import { AxiosRequest } from "../../axios/Axios";
+import { useMutation, useQueries } from "@tanstack/react-query";
+import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showToast } from "../../sweetalert/Sweetalert";
+import Button from "../../components/form/Button";
+import { IoMdSend } from "react-icons/io";
+import Spinner from "../../loading/Loading";
+import { MdCheck } from "react-icons/md";
+import { IoClose } from "react-icons/io5";
+import Tooltip from "../../components/toltip/Toltip";
 
 type CotizacionType = {
   open: boolean;
@@ -47,7 +53,8 @@ type RequisitionType = {
   data: Requisition;
 };
 type Requisition = {
-  data: Array<Record<string, any>>;
+  Ejercicio: number;
+  IdRequisicion: number;
   status: "OC" | "CO";
 };
 const CotizacionComponent: React.FC<CotizacionType> = ({
@@ -55,11 +62,76 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
   setOpen,
   setReloadTable,
 }) => {
-  const data = Observable().ObservableGet("suppliersSelect") as SuppliersType;
   const IdRequisicion = Observable().ObservableGet(
     "IdRequisicion"
   ) as RequisitionType;
-
+  const [initialValues, setInitialValues] = useState<Record<string, any>>({});
+  const [spiner, setSpiner] = useState<boolean>(true);
+  const [data, setData] = useState<Array<Record<string, any>>>([]);
+  const mutationSearch = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
+    onMutate(variables) {
+      setInitialValues({});
+      setSpiner(true);
+    },
+    onSuccess: (data) => {
+      setSpiner(false);
+      setInitialValues({ ...data?.data, ObservacionesCot: "" });
+      // showToast(data.message, data.status);
+      if (mutationSearch.status === "success") {
+        mutationSearch.reset();
+      }
+    },
+    onError: (error: any) => {
+      showToast(
+        error.response?.data?.message || "Error al realizar la acción",
+        "error"
+      );
+    },
+  });
+  const mutationCotized = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, IdRequisicion.data),
+    onMutate(variables) {
+      setData([]);
+      setSpiner(true);
+    },
+    onSuccess: async (data, variables) => {
+      setSpiner(false);
+      setData(data.data);
+    },
+    onError: (error: any) => {
+      showToast(
+        error.response?.data?.message || "Error al realizar la acción",
+        "error"
+      );
+    },
+  });
+  const queries = useQueries({
+    queries: [
+      {
+        queryKey: ["requisitionssuppliers/index"],
+        queryFn: () => GetAxios("provedores/index"),
+        refetchOnWindowFocus: true,
+      },
+    ],
+  });
+  const [suppliers] = queries;
   const mutation = useMutation({
     mutationFn: ({
       url,
@@ -71,15 +143,23 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       data?: any;
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
+      setSpiner(true);
       setReloadTable(false);
     },
     onSuccess: (data) => {
-      setReloadTable(true);
-
+      mutationCotized.mutate({
+        method: "POST",
+        url: "/requisiciones/products",
+        data: {
+          ...IdRequisicion.data,
+        },
+      });
+      // setReloadTable(true);
+      setInitialValues({});
       showToast(data.message, data.status);
-      if (mutation.status === "success") {
-        mutation.reset();
-      }
+      // if (mutation.status === "success") {
+      //   mutation.reset();
+      // }
     },
     onError: (error: any) => {
       showToast(
@@ -88,31 +168,6 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       );
     },
   });
-  const initialValues = {
-    IDRequisicion: IdRequisicion?.data?.data[0].IDRequisicion,
-    Ejercicio: IdRequisicion?.data?.data[0].Ejercicio,
-
-    IDProveedor: null, // Cambiar a null
-    IDproveedor1: 0,
-    PrecioUnitarioSinIva1: "",
-    PorcentajeIVA1: "",
-    ImporteIva1: "",
-    PrecioUnitarioConIva1: "",
-    Retenciones1: "",
-    IDproveedor2: 0,
-    PrecioUnitarioSinIva2: "",
-    PorcentajeIVA2: "",
-    ImporteIva2: "",
-    PrecioUnitarioConIva2: "",
-    Retenciones2: "",
-    IDproveedor3: 0,
-    PrecioUnitarioSinIva3: "",
-    PorcentajeIVA3: "",
-    ImporteIva3: "",
-    PrecioUnitarioConIva3: "",
-    Retenciones3: "",
-    ObservacionesCot: "",
-  };
 
   const handleSubmit = (values: any) => {
     mutation.mutate({
@@ -123,11 +178,11 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
   };
 
   const validationSchema =
-    IdRequisicion.data.status == "CO"
+    IdRequisicion?.data?.status == "CO"
       ? Yup.object({
-          // IDProveedor: Yup.number()
+          // Proveedor: Yup.number()
           //   .min(1, "Selecciona un provedor")
-          //   .required("Selecciona un provedor"), // Asegúrate que IDProveedor pueda ser null
+          //   .required("Selecciona un provedor"), // Asegúrate que Proveedor pueda ser null
           IDproveedor1: Yup.number().required("El provedor 1 es obligatorio"),
           PrecioUnitarioSinIva1: Yup.number().required(
             "Precio unitario sin iva es obligatorio"
@@ -167,7 +222,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           // Retenciones3: Yup.number().required("Retenciones es obligatorio"),
         })
       : Yup.object({
-          IDProveedor: Yup.number()
+          Proveedor: Yup.number()
             .min(1, "Selecciona un provedor")
             .required("Selecciona un provedor"),
         });
@@ -210,142 +265,212 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
     setFieldValue("ImporteIva3", importeIva3);
     setFieldValue("PrecioUnitarioConIva3", precioConIva3);
   };
-
+  useEffect(() => {
+    mutationCotized.mutate({
+      method: "POST",
+      url: "/requisiciones/products",
+      data: {
+        IDRequisicion: IdRequisicion.data.IdRequisicion,
+        Ejercicio: IdRequisicion.data.Ejercicio,
+      },
+    });
+  }, []);
   return (
     <ModalComponent
       title="Detalle de Cotizaciones"
       open={open}
       setOpen={() => setOpen(false)}
     >
+      {suppliers.status == "pending" || (spiner && <Spinner />)}
       <div className="overflow-x-auto w-full mx-auto mb-8 p-4 bg-gray-50 rounded-lg shadow">
         <table className="w-full border-collapse bg-white rounded-lg overflow-hidden text-sm">
           <thead className="bg-gray-100 text-slate-900">
             <tr>
-              <th className="py-3 px-4 text-left font-medium">Descripción</th>
-              <th className="py-3 px-4 text-right font-medium">Cantidad</th>
+              <th className="py-3 px-4 text-center font-medium">Descripción</th>
+              <th className="py-3 px-4 text-center font-medium">Cantidad</th>
+              <th className="py-3 px-4 text-center font-medium">Cotizado</th>
+              <th className="py-3 px-4 text-center font-medium">
+                Provedor seleccionado
+              </th>
+
+              <th className="py-3 px-4 text-center font-medium">Accion</th>
             </tr>
           </thead>
           <tbody>
-            {IdRequisicion.data.data.map((item: any) => (
-              <tr className="hover:bg-gray-100 transition duration-150">
-                <td className="border-b border-gray-200 px-4 py-3 text-left text-gray-700">
-                  {item.Descripcion}
-                </td>
-                <td className="border-b border-gray-200 px-4 py-3 text-right text-gray-700">
-                  {item.Cantidad}
-                </td>
-              </tr>
-            ))}
+            {Array.isArray(data) &&
+              data.map((item: any) => (
+                <tr
+                  className={` transition duration-150 ${initialValues?.IDDetalle == item.IDDetalle && "bg-sky-100"}`}
+                >
+                  <td className="border-b border-gray-200 px-4 py-3 text-center text-gray-700">
+                    {/* {item.IDDetalle}   */}
+                    {item.Descripcion}
+                  </td>
+                  <td className="border-b border-gray-200 px-4 py-3 text-center text-gray-700">
+                    {item.Cantidad}
+                  </td>
+                  <td className="border-b border-gray-200  px-4 py-3 text-center text-gray-700">
+                    <div className="w-full flex justify-center">
+                      {item.IDproveedor1 > 0 &&
+                      item.IDproveedor2 > 0 &&
+                      item.IDproveedor3 > 0 ? (
+                        <MdCheck />
+                      ) : (
+                        <IoClose />
+                      )}
+                    </div>
+                  </td>
+                  <td className="border-b border-gray-200  px-4 py-3 text-center text-gray-700">
+                    <div className="w-full flex justify-center">
+                      {item.Proveedor ? <MdCheck /> : <IoClose />}
+                    </div>
+                  </td>
+                  <td className="border-b border-gray-200 px-4 py-3  text-gray-700 flex justify-center">
+                    <div className="w-fit">
+                      <Tooltip content="seleccionar">
+                        <Button
+                          color="blue"
+                          variant="solid"
+                          size="small"
+                          onClick={() => {
+                            mutationSearch.mutate({
+                              method: "POST",
+                              url: "/requisicionesdetails/search",
+                              data: { IDDetalle: item.IDDetalle },
+                            });
+                          }}
+                        >
+                          <IoMdSend />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
 
-      {/* Formulario */}
-      <FormikForm
-        buttonMessage="Registrar"
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
-        {(values, setFieldValue, setTouched, errors) => {
-          return (
-            <div className="w-full space-y-8 px-2 overflow-auto">
-              {[1, 2, 3].map((contProvedor) => (
-                <div
-                  key={contProvedor}
-                  className={`w-full ${
-                    values.IDProveedor === contProvedor
-                      ? "bg-sky-100"
-                      : "bg-gray-50"
-                  } p-6 rounded-lg shadow-lg`}
-                >
-                  <Typography className="mb-4 text-lg font-semibold text-slate-800">
-                    Proveedor {contProvedor}
-                  </Typography>
+      {initialValues?.IDDetalle && (
+        <FormikForm
+          buttonMessage={
+            IdRequisicion.data.status == "CO"
+              ? "Cotizar"
+              : "Seleccionar provedor"
+          }
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+      {(values, setFieldValue, setTouched, errors) => {
+  return (
+    <div className="w-full space-y-8 px-2 overflow-auto">
+      {[1, 2, 3].map((contProvedor) => {
+        // Clase dinámica de fondo
+        const bgClass =
+          values.Proveedor === values[`IDproveedor${contProvedor}`] &&
+          values[`IDproveedor${contProvedor}`] > 0
+            ? "bg-sky-100"
+            : "bg-gray-50";
 
-                  {IdRequisicion.data.status == "OC" && (
-                    <SwitchComponent
-                      enabled={values.IDProveedor === contProvedor}
-                      label={`Seleccionar al proveedor ${contProvedor}`}
-                      enabledColor="bg-sky-200"
-                      disabledColor="bg-gray-200"
-                      onclick={() => {
-                        values.IDProveedor === contProvedor
-                          ? setFieldValue("IDProveedor", null)
-                          : setFieldValue("IDProveedor", contProvedor);
-                      }}
-                    />
-                  )}
-                  {/* {JSON.stringify(errors)} */}
-                  {errors?.IDProveedor && (
-                    <Typography className="mb-4 text-md font-semibold text-red-500">
-                      {errors.IDProveedor}
-                    </Typography>
-                  )}
-                  <div className="w-full">
-                    {(Object.keys(titlesForm) as (keyof TitlesTitle)[]).map(
-                      (title) => {
-                        const fieldName = titlesForm[title] + contProvedor;
+        return (
+          <div
+            key={contProvedor}
+            className={`w-full ${bgClass} p-6 rounded-lg shadow-lg`}
+          >
+            <Typography className="mb-4 text-lg font-semibold text-slate-800">
+              Proveedor {contProvedor}
+            </Typography>
 
-                        {
-                          if (title === "Selecciona el provedor") {
-                            return (
-                              <FormikAutocomplete
-                                disabled={
-                                  IdRequisicion.data.status == "OC"
-                                    ? true
-                                    : false
-                                }
-                                label={title}
-                                key={title + contProvedor}
-                                name={fieldName}
-                                options={data?.suppliers ? data?.suppliers : []}
-                                labelKey={"NombreCompleto"}
-                                idKey={"IDProveedor"}
-                                loading={false}
-                              />
-                            );
+            {IdRequisicion.data.status === "OC" && (
+              <SwitchComponent
+                enabled={values.Proveedor === values[`IDproveedor${contProvedor}`]}
+                label={`Seleccionar al proveedor ${contProvedor}`}
+                enabledColor="bg-sky-200"
+                disabledColor="bg-gray-200"
+                onclick={() => {
+                  // Alterna el proveedor seleccionado
+                  values.Proveedor === values[`IDproveedor${contProvedor}`]
+                    ? setFieldValue("Proveedor", null)
+                    : setFieldValue(
+                        "Proveedor",
+                        values[`IDproveedor${contProvedor}`]
+                      );
+                }}
+              />
+                      )}
+                      {/* {JSON.stringify(errors)} */}
+                      {errors?.Proveedor && (
+                        <Typography className="mb-4 text-md font-semibold text-red-500">
+                          {errors.Proveedor}
+                        </Typography>
+                      )}
+                      <div className="w-full">
+                        {(Object.keys(titlesForm) as (keyof TitlesTitle)[]).map(
+                          (title) => {
+                            const fieldName = titlesForm[title] + contProvedor;
+
+                            {
+                              if (title === "Selecciona el provedor") {
+                                return (
+                                  <FormikAutocomplete
+                                    disabled={
+                                      IdRequisicion.data.status == "OC"
+                                        ? true
+                                        : false
+                                    }
+                                    label={title}
+                                    key={title + contProvedor}
+                                    name={fieldName}
+                                    options={suppliers?.data?.data || []}
+                                    labelKey={"NombreCompleto"}
+                                    idKey={"IDProveedor"}
+                                    loading={false}
+                                  />
+                                );
+                              }
+
+                              return (
+                                <FormikInput
+                                  handleModified={
+                                    title == "Precio Uni. S/IVA" ||
+                                    title == "PorcentajeIVA"
+                                      ? handleModified
+                                      : undefined
+                                  }
+                                  disabled={
+                                    title == "Importe IVA" ||
+                                    title == "Precio Uni. C/IVA" ||
+                                    IdRequisicion.data.status == "OC"
+                                      ? true
+                                      : false
+                                  }
+                                  key={title + contProvedor}
+                                  type={"number"}
+                                  responsive={{ "2xl": 6, xl: 6 }}
+                                  name={fieldName}
+                                  label={title}
+                                />
+                              );
+                            }
                           }
-
-                          return (
-                            <FormikInput
-                              handleModified={
-                                title == "Precio Uni. S/IVA" ||
-                                title == "PorcentajeIVA"
-                                  ? handleModified
-                                  : undefined
-                              }
-                              disabled={
-                                title == "Importe IVA" ||
-                                title == "Precio Uni. C/IVA" ||
-                                IdRequisicion.data.status == "OC"
-                                  ? true
-                                  : false
-                              }
-                              key={title + contProvedor}
-                              type={"number"}
-                              responsive={{ "2xl": 6, xl: 6 }}
-                              name={fieldName}
-                              label={title}
-                            />
-                          );
-                        }
-                      }
-                    )}
-                  </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <div className="overflow-x-auto w-full mx-auto mb-8 p-4 bg-gray-50 rounded-lg shadow">
+                  <FormikTextArea
+                    label="Observaciones de la Cotización"
+                    name="ObservacionesCot"
+                    disabled={IdRequisicion.data.status == "OC" ? true : false}
+                  />
                 </div>
-              ))}
-              <div className="overflow-x-auto w-full mx-auto mb-8 p-4 bg-gray-50 rounded-lg shadow">
-                <FormikTextArea
-                  label="Observaciones de la Cotización"
-                  name="ObservacionesCot"
-                  disabled={IdRequisicion.data.status == "OC" ? true : false}
-                />
               </div>
-            </div>
-          );
-        }}
-      </FormikForm>
+            );
+          }}
+        </FormikForm>
+      )}
     </ModalComponent>
   );
 };

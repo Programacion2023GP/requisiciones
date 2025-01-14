@@ -9,7 +9,8 @@ type ButtonProps = {
     | "purple"
     | "pink"
     | "indigo"
-    | "teal"
+    | "teal" 
+    |'orange'
     | "presidencia";
   variant: "solid" | "outline" | "ghost" | "link" | "text" | "light";
   size?: "small" | "medium" | "large";
@@ -22,12 +23,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ color, variant, size = "medium", children, onClick, type = "button" }, ref) => {
     // Clases de color según el color seleccionado
     const colorClasses = {
+      orange: "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500",
       blue: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
       green: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",
       red: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
       yellow: "bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500",
       purple: "bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500",
-      pink: "bg-pink-600 text-white hover:bg-pink-700 focus:ring-pink-500",
+      pink: "bg-pink-500 text-white hover:bg-pink-600 focus:ring-pink-500",
       indigo: "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500",
       teal: "bg-teal-600 text-white hover:bg-teal-700 focus:ring-teal-500",
       presidencia: "bg-presidencia text-white hover:bg-presidencia focus:ring-presidencia",

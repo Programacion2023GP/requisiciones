@@ -4,9 +4,9 @@ import Observable from "../../extras/observable";
 import Typography from "../../components/typografy/Typografy";
 import InputComponent from "../../components/form/Input";
 import { customLog } from "../../extras/consoles";
-import { AxiosRequest } from "../../axios/Axios";
+import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showToast } from "../../sweetalert/Sweetalert";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueries } from "@tanstack/react-query";
 
 type AutorizedType = {
   open: boolean;
@@ -16,7 +16,21 @@ type AutorizedType = {
 };
 
 const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTable }) => {
-  const data = Observable().ObservableGet("autorizadoresSelect");
+  // const data = Observable().ObservableGet("autorizadoresSelect");
+  const queries = useQueries({
+    queries: [
+ 
+      {
+        queryKey: ["autorizadoresRequisition/cotizadores"],
+        queryFn: () => GetAxios(`autorizadores/cotizadores`),
+        refetchOnWindowFocus: true,
+      },
+    
+    ],
+  });
+  const [autorizadores] = queries;
+
+
   const idRequisition = Observable().ObservableGet("IdRequisicion") as { id: number};
   const mutation = useMutation({
     mutationFn: ({
@@ -62,12 +76,10 @@ const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTa
 
   const filteredAutorizadores = (text: string = ""): Array<Record<string, any>> => {
     if (
-      typeof data === "object" &&
-      data !== null &&
-      "autorizadores" in data &&
-      Array.isArray(data.autorizadores)
+    
+      Array.isArray(autorizadores.data.data)
     ) {
-      return data.autorizadores.filter((item: any) =>
+      return autorizadores.data.data.filter((item: any) =>
         item.NombreCompleto.toLowerCase().includes(text.toLowerCase())
       );
     }
@@ -77,7 +89,7 @@ const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTa
   // Efecto para actualizar la lista filtrada cuando el texto de búsqueda cambie
   useEffect(() => {
     setFilteredData(filteredAutorizadores(searchText));
-  }, [searchText, data]);
+  }, [searchText]);
 
   return (
     <ModalComponent
