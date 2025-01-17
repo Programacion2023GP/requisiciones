@@ -2,7 +2,7 @@ import React from "react";
 import ModalComponent from "../../components/modal/Modal";
 import Observable from "../../extras/observable";
 
-type PdfRequisitionType = {
+export type PdfRequisitionType = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };

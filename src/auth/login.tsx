@@ -28,7 +28,10 @@ const LoginComponent = () => {
       AxiosRequest(url, method, data),
     
     onSuccess: (data) => {
-      console.log(data);
+      if(data.data.redirect =="/"){
+        showToast("no cuentas con permisos", 'question');
+        return;
+      }
       localStorage.setItem('permisos', JSON.stringify(data.data.permisos));
       localStorage.setItem('menuPermiso', JSON.stringify(data.data.menuPermiso));
       localStorage.setItem('group', data.data.group);
@@ -37,12 +40,13 @@ const LoginComponent = () => {
       localStorage.setItem('role', data.data.role);
 
 
-      window.location.href = '/MnuSeguridad'
       showToast(data.message, data.status);
+      window.location.href = data.data.redirect
      
     },
     onError: (error: any) => {
-      showToast(error.response?.data?.message || 'Error al realizar la acción', 'error');
+      console.log("ddd",error);
+      showToast(error.message || 'Error al realizar la acción', 'error');
     },
   },);
 

@@ -281,7 +281,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       open={open}
       setOpen={() => setOpen(false)}
     >
-      {suppliers.status == "pending" || (spiner && <Spinner />)}
+      {(suppliers.status == "pending" || spiner) && <Spinner />}
       <div className="overflow-x-auto w-full mx-auto mb-8 p-4 bg-gray-50 rounded-lg shadow">
         <table className="w-full border-collapse bg-white rounded-lg overflow-hidden text-sm">
           <thead className="bg-gray-100 text-slate-900">

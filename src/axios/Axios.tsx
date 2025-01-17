@@ -30,8 +30,8 @@ export const GetAxios = async (url: string) => {
   } catch (error: any) {
     console.error("Error en la solicitud:", error);
     if (error.response && error.response.status === 401) {
-      localStorage.clear();
-      window.location.href = "/";
+      // localStorage.clear();
+      // window.location.href = "/";
     }
   }
 };
@@ -59,8 +59,8 @@ export const AxiosRequest = async (
     return response.data;
   } catch (error: any) {
     if (error.response && error.response.status === 401) {
-      localStorage.clear();
-      window.location.href = "/";
+      // localStorage.clear();
+      // window.location.href = "/";
     } else {
       return error.response.data;
     }

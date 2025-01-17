@@ -18,6 +18,9 @@ import CotizacionComponent from "../cotizacion/Cotizacion";
 import Spinner from "../../loading/Loading";
 import { FaEye } from "react-icons/fa";
 import DetailsRequistion from "../details/DetailsRequisition";
+import TracingComponent from "../tracing/Tracing";
+import DropdownComponent from "../../components/drop/DropDown";
+import { TbReport } from "react-icons/tb";
 
 const Actions: React.FC<{
   data: Record<string, any>;
@@ -28,6 +31,7 @@ const Actions: React.FC<{
     autorized: false,
     cotizacion: false,
     view: false,
+    tracing: false,
   });
   const [spiner, setSpiner] = useState<boolean>(false);
   const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
@@ -97,6 +101,7 @@ const Actions: React.FC<{
           cotizacion: false,
           view: false,
           pdf: true,
+          tracing: false,
         }));
       }
     },
@@ -107,6 +112,7 @@ const Actions: React.FC<{
       );
     },
   });
+
   const newStatus = (status: string): string => {
     let state = "";
     switch (status) {
@@ -157,6 +163,7 @@ const Actions: React.FC<{
           cotizacion: false,
           pdf: false,
           view: true,
+          tracing: false,
         }));
       }
       setSpiner(false);
@@ -260,7 +267,20 @@ const Actions: React.FC<{
       {data.Status != "CA" && (
         <>
           {spiner && <Spinner />}
-
+          {open.tracing && (
+            <TracingComponent
+              open={open.tracing}
+              setOpen={() => {
+                setOpen((prev) => ({
+                  pdf: false,
+                  autorized: false,
+                  cotizacion: false,
+                  view: false,
+                  tracing: false,
+                }));
+              }}
+            />
+          )}
           {open.autorized && (
             <AutorizedComponent
               setReloadTable={setReloadTable}
@@ -271,25 +291,27 @@ const Actions: React.FC<{
                   autorized: false,
                   cotizacion: false,
                   view: false,
+                  tracing: false,
                 }));
               }}
             />
           )}
 
           {open.pdf && (
-            <PermissionMenu IdMenu="SeguimientoRequis">
-              <Pdfrequisition
-                open={open.pdf}
-                setOpen={() => {
-                  setOpen((prev) => ({
-                    autorized: false,
-                    pdf: false,
-                    cotizacion: false,
-                    view: false,
-                  }));
-                }}
-              />
-            </PermissionMenu>
+            <Pdfrequisition
+              open={open.pdf}
+              setOpen={() => {
+                setOpen((prev) => ({
+                  autorized: false,
+                  pdf: false,
+                  cotizacion: false,
+                  view: false,
+                  tracing: false,
+                }));
+              }}
+            />
+            //   <PermissionMenu IdMenu="SeguimientoRequis">
+            // </PermissionMenu>
           )}
           {open.cotizacion && (
             <CotizacionComponent
@@ -301,6 +323,7 @@ const Actions: React.FC<{
                   pdf: false,
                   cotizacion: false,
                   view: false,
+                  tracing: false,
                 }));
               }}
             />
@@ -314,172 +337,95 @@ const Actions: React.FC<{
                   pdf: false,
                   cotizacion: false,
                   view: false,
+                  tracing: false,
                 }));
               }}
             />
           )}
-          <div className="flex flex-row gap-2">
-            <div className="w-fit">
-              <Tooltip content="Ver requisición">
-                <Button
-                  color="presidencia"
-                  variant="solid"
-                  size="small"
-                  onClick={() => {
-                    mutationView.mutate({
-                      method: "POST",
-                      url: "/requisiciones/show",
-                      data: {
-                        IDRequisicion: data.IDRequisicion,
-                        Ejercicio: data.Ejercicio,
-                      },
-                    });
-                  }}
-                >
-                  <FaEye />
-                </Button>
-              </Tooltip>
-            
-            </div>
-            <div className="w-fit ">
-            {(newStatus(data.Status) == "CO" ||
-              newStatus(data.Status) == "OC") && (
-
-                <Tooltip content={newStatus(data.Status) == "CO"?'cotizar':'seleccionar provedor'}>
-                <Button
-                  color={newStatus(data.Status) == "CO"?'orange':'pink'}
-                  variant="solid"
-                  size="small"
-                  onClick={async() => {
-                    try {
-                      // customLog(`${JSON.stringify(data)}`, "green");
-                      const result = await ObservablePost("IdRequisicion", {
+          <DropdownComponent>
+            <div className="flex flex-col gap-2">
+              <div className="w-fit">
+                <Tooltip content="Ver requisición">
+                  <Button
+                    color="presidencia"
+                    variant="solid"
+                    size="small"
+                    onClick={() => {
+                      mutationView.mutate({
+                        method: "POST",
+                        url: "/requisiciones/show",
                         data: {
                           IDRequisicion: data.IDRequisicion,
                           Ejercicio: data.Ejercicio,
-
-                          status: newStatus(data.Status),
                         },
                       });
-                    } catch (e) {
-                    } finally {
-                      setOpen((prev) => ({
-                        autorized: false,
-                        cotizacion: true,
-                        pdf: false,
-                        view: false,
-                      }));
-                    }
-                 
-                  }}
-                >
-                  {newStatus(data.Status) == "CO"?'cotizar':'seleccionar provedor'}
-                </Button>
-              </Tooltip>
-              )}
-            </div>
-            {newStatus(data.Status) !== "CP" &&
-              // newStatus(data.Status) !== "SU" &&
-              newStatus(data.Status) !== "AS" &&
-              AutorizedEspecial(
-                data.RequiereAut,
-                data.AutEspecial,
-                newStatus(data.Status)
-              ) &&
-              autorized && (
-                <Tooltip
-                  content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}
-                >
-                  <div
-                    onClick={async () => {
-                      showConfirmationAlert(
-                        `El estatus se cambiara a ${newStatus(data.Status)} `,
-                        "Esta acción no se puede deshacer."
-                      ).then((isConfirmed) => {
-                        if (isConfirmed) {
+                    }}
+                  >
+                    <FaEye />
+                  </Button>
+                </Tooltip>
+              </div>
+
+              {data.Status !== "SU" &&
+                localStorage.getItem("role") == "COMPRAS" && (
+                  <div className="w-fit">
+                    <Tooltip content="Cancelar">
+                      <Button
+                        color="red"
+                        variant="solid"
+                        size="small"
+                        onClick={() => {
+                          showConfirmationAlert(
+                            `El estatus se cambiara a  CA `,
+                            "Esta acción no se puede deshacer."
+                          ).then((isConfirmed) => {
+                            if (isConfirmed) {
+                              mutation.mutate({
+                                method: "PUT",
+                                url: "/requisiciones/update",
+                                data: { Status: "CA", id: data.Id },
+                              });
+                            } else {
+                              showToast("La acción fue cancelada.", "error");
+                            }
+                          });
+                        }}
+                      >
+                        <MdCancel />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
+
+              {data.Status == "AU" &&
+                data.AutEspecial == 1 &&
+                !data.UsuarioVoBo &&
+                buttonVobo(data.IDTipo) && (
+                  <PermissionMenu IdMenu={"VoBo"}>
+                    <Tooltip content="Visto bueno">
+                      <Button
+                        color="teal"
+                        variant="solid"
+                        size="small"
+                        onClick={() => {
                           mutation.mutate({
                             method: "PUT",
-                            url: "/requisiciones/update",
-                            data: {
-                              Status: newStatus(data.Status),
-                              id: data.Id,
-                            },
+                            url: "/requisiciones/vobo",
+                            data: { id: data.Id },
                           });
-                        } else {
-                          showToast("La acción fue cancelada.", "error");
-                        }
-                      });
-                    }}
-                    className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
-                  >
-                    <span>{data.Status}</span>
-                    <LiaExchangeAltSolid className="text-whitecursor-pointer" />
-                    <span>{newStatus(data.Status)} </span>
-                  </div>
-                </Tooltip>
-              )}
-        
-            {data.Status !== "SU" &&
-              localStorage.getItem("role") == "COMPRAS" && (
-                <div className="w-fit">
-                  <Tooltip content="Cancelar">
-                    <Button
-                      color="red"
-                      variant="solid"
-                      size="small"
-                      onClick={() => {
-                        showConfirmationAlert(
-                          `El estatus se cambiara a  CA `,
-                          "Esta acción no se puede deshacer."
-                        ).then((isConfirmed) => {
-                          if (isConfirmed) {
-                            mutation.mutate({
-                              method: "PUT",
-                              url: "/requisiciones/update",
-                              data: { Status: "CA", id: data.Id },
-                            });
-                          } else {
-                            showToast("La acción fue cancelada.", "error");
-                          }
-                        });
-                      }}
-                    >
-                      <MdCancel />
-                    </Button>
-                  </Tooltip>
-                </div>
-              )}
+                        }}
+                      >
+                        <MdOutlineCheckBox />
+                        {data.UsuarioVoBo}
+                      </Button>
+                    </Tooltip>
+                  </PermissionMenu>
+                )}
 
-            {data.Status == "AU" &&
-              data.AutEspecial == 1 &&
-              !data.UsuarioVoBo &&
-              buttonVobo(data.IDTipo) && (
-                <PermissionMenu IdMenu={"VoBo"}>
-                  <Tooltip content="Visto bueno">
-                    <Button
-                      color="teal"
-                      variant="solid"
-                      size="small"
-                      onClick={() => {
-                        mutation.mutate({
-                          method: "PUT",
-                          url: "/requisiciones/vobo",
-                          data: { id: data.Id },
-                        });
-                      }}
-                    >
-                      <MdOutlineCheckBox />
-                      {data.UsuarioVoBo}
-                    </Button>
-                  </Tooltip>
-                </PermissionMenu>
-              )}
-
-            <div className="w-fit">
-              <PermissionMenu IdMenu="SeguimientoRequis">
-                <Tooltip content="Descargar archivo adjunto">
+              <div className="w-fit">
+                <Tooltip content="Pdf">
                   <Button
-                    color="blue"
+                    color="presidencia"
                     variant="solid"
                     size="small"
                     onClick={async () => {
@@ -497,40 +443,159 @@ const Actions: React.FC<{
                     <BsFiletypePdf />
                   </Button>
                 </Tooltip>
-              </PermissionMenu>
-            </div>
-
-            {!data.UsuarioAS &&
-              newStatus(data.Status) == "AS" &&
-              permisos.Permiso_Asignar == 1 && (
-                <div className="w-fit">
-                  <Tooltip content="Asignar requisitor">
+              </div>
+              <div className="w-fit">
+                <PermissionMenu IdMenu="SeguimientoRequis">
+                  <Tooltip content="Seguimiento de la requisición">
                     <Button
-                      color="indigo"
+                      color="presidencia"
                       variant="solid"
                       size="small"
                       onClick={async () => {
                         try {
-                          await ObservablePost("IdRequisicion", {
-                            id: data.Id,
-                          });
-                        } catch (e) {
+                          const result = await ObservablePost(
+                            "tracingRequisition",
+                            {
+                              data: {
+                                data: data,
+                              },
+                            }
+                          );
                         } finally {
                           setOpen((prev) => ({
-                            autorized: true,
-                            pdf: false,
+                            autorized: false,
                             cotizacion: false,
                             view: false,
+                            pdf: false,
+                            tracing: true,
                           }));
                         }
                       }}
                     >
-                      <PiPersonArmsSpreadThin />
+                      <TbReport />
                     </Button>
                   </Tooltip>
-                </div>
-              )}
-          </div>
+                </PermissionMenu>
+              </div>
+              {!data.UsuarioAS &&
+                newStatus(data.Status) == "AS" &&
+                permisos.Permiso_Asignar == 1 && (
+                  <div className="w-fit">
+                    <Tooltip content="Asignar requisitor">
+                      <Button
+                        color="indigo"
+                        variant="solid"
+                        size="small"
+                        onClick={async () => {
+                          try {
+                            await ObservablePost("IdRequisicion", {
+                              id: data.Id,
+                            });
+                          } catch (e) {
+                          } finally {
+                            setOpen((prev) => ({
+                              autorized: true,
+                              pdf: false,
+                              cotizacion: false,
+                              view: false,
+                              tracing: false,
+                            }));
+                          }
+                        }}
+                      >
+                        <PiPersonArmsSpreadThin />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
+
+              <div className="w-fit ">
+                {(newStatus(data.Status) == "CO" ||
+                  newStatus(data.Status) == "OC") && (
+                  <Tooltip
+                    content={
+                      newStatus(data.Status) == "CO"
+                        ? "cotizar"
+                        : "seleccionar provedor"
+                    }
+                  >
+                    <Button
+                      color={newStatus(data.Status) == "CO" ? "orange" : "pink"}
+                      variant="solid"
+                      size="small"
+                      onClick={async () => {
+                        try {
+                          // customLog(`${JSON.stringify(data)}`, "green");
+                          const result = await ObservablePost("IdRequisicion", {
+                            data: {
+                              IDRequisicion: data.IDRequisicion,
+                              Ejercicio: data.Ejercicio,
+
+                              status: newStatus(data.Status),
+                            },
+                          });
+                        } catch (e) {
+                        } finally {
+                          setOpen((prev) => ({
+                            autorized: false,
+                            cotizacion: true,
+                            pdf: false,
+                            view: false,
+                            tracing: false,
+                          }));
+                        }
+                      }}
+                    >
+                      {newStatus(data.Status) == "CO"
+                        ? "cotizar"
+                        : "seleccionar provedor"}
+                    </Button>
+                  </Tooltip>
+                )}
+              </div>
+
+              {newStatus(data.Status) !== "CP" &&
+                // newStatus(data.Status) !== "SU" &&
+                newStatus(data.Status) !== "AS" &&
+                AutorizedEspecial(
+                  data.RequiereAut,
+                  data.AutEspecial,
+                  newStatus(data.Status)
+                ) &&
+                autorized && (
+                  <Tooltip
+                    content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}
+                  >
+                    <div
+                      onClick={async () => {
+                        showConfirmationAlert(
+                          `El estatus se cambiara a ${newStatus(data.Status)} `,
+                          "Esta acción no se puede deshacer."
+                        ).then((isConfirmed) => {
+                          if (isConfirmed) {
+                            mutation.mutate({
+                              method: "PUT",
+                              url: "/requisiciones/update",
+                              data: {
+                                Status: newStatus(data.Status),
+                                id: data.Id,
+                              },
+                            });
+                          } else {
+                            showToast("La acción fue cancelada.", "error");
+                          }
+                        });
+                      }}
+                      className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
+                    >
+                      <span>{data.Status}</span>
+                      <LiaExchangeAltSolid className="text-whitecursor-pointer" />
+                      <span>{newStatus(data.Status)} </span>
+                    </div>
+                  </Tooltip>
+                )}
+            </div>
+          </DropdownComponent>
         </>
       )}
     </>

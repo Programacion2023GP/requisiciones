@@ -15,7 +15,7 @@ import * as RiIcons from "react-icons/ri";
 import { CiLogout } from "react-icons/ci";
 import { showToast } from "../../sweetalert/Sweetalert";
 import { customLog } from "../../extras/consoles";
-
+import Logo from '../../assets/logo-gpd.png'
 const IconLibraries = {
   ...AiIcons,
   ...FaIcons,
@@ -54,6 +54,7 @@ const SidebarComponent = () => {
       window.location.href = "/";
     },
     onError: (error: any) => {
+      
       showToast(
         error.response?.data?.message || "Error al realizar la acción",
         "error"
@@ -115,7 +116,7 @@ const SidebarComponent = () => {
       <div className="flex items-center justify-center mb-8">
         {/* Logo Section */}
         <div className="text-3xl font-bold text-center text-white hover:text-green-500 transition-all duration-300">
-          Logo
+          <img src={Logo} alt="Logo GPD" width="100%" />
         </div>
       </div>
 

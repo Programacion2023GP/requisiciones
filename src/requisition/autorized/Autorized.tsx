@@ -7,31 +7,36 @@ import { customLog } from "../../extras/consoles";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showToast } from "../../sweetalert/Sweetalert";
 import { useMutation, useQueries } from "@tanstack/react-query";
+import Spinner from "../../loading/Loading";
 
 type AutorizedType = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setReloadTable: Dispatch<SetStateAction<boolean>>;
-
 };
 
-const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTable }) => {
+const AutorizedComponent: React.FC<AutorizedType> = ({
+  open,
+  setOpen,
+  setReloadTable,
+}) => {
   // const data = Observable().ObservableGet("autorizadoresSelect");
   const queries = useQueries({
     queries: [
- 
       {
         queryKey: ["autorizadoresRequisition/cotizadores"],
         queryFn: () => GetAxios(`autorizadores/cotizadores`),
         refetchOnWindowFocus: true,
       },
-    
     ],
   });
   const [autorizadores] = queries;
 
+  // const [spiner, setSpiner] = useState<boolean>(true);
 
-  const idRequisition = Observable().ObservableGet("IdRequisicion") as { id: number};
+  const idRequisition = Observable().ObservableGet("IdRequisicion") as {
+    id: number;
+  };
   const mutation = useMutation({
     mutationFn: ({
       url,
@@ -47,10 +52,9 @@ const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTa
     },
     onSuccess: (data) => {
       setReloadTable(true);
-  
+
       showToast(data.message, data.status);
       setOpen(false);
-
     },
     onError: (error: any) => {
       showToast(
@@ -61,7 +65,9 @@ const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTa
   });
   // Estado para el texto de búsqueda
   const [searchText, setSearchText] = useState<string>("");
-  const [filteredData, setFilteredData] = useState<Array<Record<string, any>>>([]);
+  const [filteredData, setFilteredData] = useState<Array<Record<string, any>>>(
+    []
+  );
 
   const SelectRequisitor = (item: Record<string, any>) => {
     mutation.mutate({
@@ -74,11 +80,10 @@ const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTa
     });
   };
 
-  const filteredAutorizadores = (text: string = ""): Array<Record<string, any>> => {
-    if (
-    
-      Array.isArray(autorizadores.data.data)
-    ) {
+  const filteredAutorizadores = (
+    text: string = ""
+  ): Array<Record<string, any>> => {
+    if (autorizadores?.data && Array.isArray(autorizadores?.data?.data)) {
       return autorizadores.data.data.filter((item: any) =>
         item.NombreCompleto.toLowerCase().includes(text.toLowerCase())
       );
@@ -89,58 +94,61 @@ const AutorizedComponent: React.FC<AutorizedType> = ({ open, setOpen,setReloadTa
   // Efecto para actualizar la lista filtrada cuando el texto de búsqueda cambie
   useEffect(() => {
     setFilteredData(filteredAutorizadores(searchText));
-  }, [searchText]);
+  }, [searchText, autorizadores?.data]);
 
   return (
-    <ModalComponent
-      title="Asignacion de autorizador"
-      open={open}
-      setOpen={setOpen}
-    >
-     
+    <>
+      {autorizadores.status=="pending" && <Spinner />}
 
-      {/* Input para buscar */}
-      <div className="mt-4 pt-4 pr-4 overflow-y-auto ">
-      <InputComponent
-      
-        label="Buscador"
-        name="Buscador"
-        value={searchText}
-        suscribeValue={(searchText: string) => {
-          setSearchText(searchText);  // Actualiza el estado con el texto de búsqueda
-        }}
-      />
+      <ModalComponent
+        title="Asignacion de autorizador"
+        open={open}
+        setOpen={setOpen}
+      >
+        {/* Input para buscar */}
+        <div className="mt-4 pt-4 pr-4 overflow-y-auto ">
+          <InputComponent
+            label="Buscador"
+            name="Buscador"
+            value={searchText}
+            suscribeValue={(searchText: string) => {
+              setSearchText(searchText); // Actualiza el estado con el texto de búsqueda
+            }}
+          />
 
-      {/* Lista filtrada de autorizadores */}
-      <ul className="space-y-2">
-        {filteredData.length > 0 ? (
-          filteredData.map((item, index) => (
-            <li
-              className="w-full bg-white p-4 shadow-md rounded-lg flex items-center gap-3 transition-transform transform hover:scale-105 hover:shadow-lg hover:bg-blue-50 cursor-pointer"
-              key={index}
-              onClick={() => {
-                SelectRequisitor(item);
-              }}
-            >
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
-                {item.NombreCompleto[0].toUpperCase()}
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-900 font-semibold text-lg">
-                  {item.NombreCompleto}
-                </p>
-                <p className="text-gray-500 text-sm">
-                  Seleccionar como autorizador
-                </p>
-              </div>
-            </li>
-          ))
-        ) : (
-          <li className="w-full text-center text-gray-500">No se encontraron resultados.</li>
-        )}
-      </ul>
-      </div>
-    </ModalComponent>
+          {/* Lista filtrada de autorizadores */}
+          <ul className="space-y-2">
+            {filteredData.length > 0 ? (
+              filteredData.map((item, index) => (
+                <li
+                  className="w-full bg-white p-4 shadow-md rounded-lg flex items-center gap-3 transition-transform transform hover:scale-105 hover:shadow-lg hover:bg-blue-50 cursor-pointer"
+                  key={index}
+                  onClick={() => {
+                    SelectRequisitor(item);
+                  }}
+                >
+                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
+                    {item.NombreCompleto[0].toUpperCase()}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-900 font-semibold text-lg">
+                      {item.NombreCompleto}
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Seleccionar como autorizador
+                    </p>
+                  </div>
+                </li>
+              ))
+            ) : (
+              <li className="w-full text-center text-gray-500">
+                No se encontraron resultados.
+              </li>
+            )}
+          </ul>
+        </div>
+      </ModalComponent>
+    </>
   );
 };
 
