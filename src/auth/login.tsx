@@ -38,6 +38,7 @@ const LoginComponent = () => {
       localStorage.setItem('token', data.data.token);
       localStorage.setItem('name', data.data.name);
       localStorage.setItem('role', data.data.role);
+      localStorage.setItem('redirect', data.data.redirect);
 
 
       showToast(data.message, data.status);

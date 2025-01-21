@@ -5,6 +5,7 @@ const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // URL base
   headers: {
     "Content-Type": "application/json",
+    
     Authorization: `Bearer ${localStorage.getItem("token")}`, // Obtener el token de localStorage
   },
 });

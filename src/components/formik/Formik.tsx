@@ -34,7 +34,7 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>(
         {({ isSubmitting, values, setFieldValue, setTouched, errors, }) => {
         
           return (
-            <Form className="space-y-4">
+            <Form encType="multipart/form-data" className="space-y-4">
               <RowComponent>
                 {children(values, setFieldValue, setTouched, errors)}
               </RowComponent>

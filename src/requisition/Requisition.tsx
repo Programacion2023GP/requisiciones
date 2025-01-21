@@ -434,6 +434,7 @@ const RequisicionesAdd = () => {
     IDTipo: Yup.number()
       .min(1, "El tipo  es obligatorio")
       .required("El tipo  es obligatorio"),
+    Observaciones: Yup.string().required("La observación es requerida"),
   });
   const [columnDefs] = useState<ColDef<any>[]>([
     {
@@ -515,7 +516,7 @@ const RequisicionesAdd = () => {
     },
     {
       headerName: "Tipo",
-      field: "Tipo",
+      field: "TipoNombre",
       sortable: true,
       filter: true,
     },
@@ -537,30 +538,30 @@ const RequisicionesAdd = () => {
       sortable: true,
       filter: true,
     },
-    {
-      headerName: "Motivo de cancelación",
-      field: "Motivo_AutEspecial",
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: "Motivo de cancelación",
-      field: "Motivo_AutEspecial",
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: "Orden compra",
-      field: "Orden_Compra",
-      sortable: true,
-      filter: true,
-    },
-    {
-      headerName: "Orden consolidada",
-      field: "OC_Consolidada",
-      sortable: true,
-      filter: true,
-    },
+    // {
+    //   headerName: "Motivo de cancelación",
+    //   field: "Motivo_AutEspecial",
+    //   sortable: true,
+    //   filter: true,
+    // },
+    // {
+    //   headerName: "Motivo de cancelación",
+    //   field: "Motivo_AutEspecial",
+    //   sortable: true,
+    //   filter: true,
+    // },
+    // {
+    //   headerName: "Orden compra",
+    //   field: "Orden_Compra",
+    //   sortable: true,
+    //   filter: true,
+    // },
+    // {
+    //   headerName: "Orden consolidada",
+    //   field: "OC_Consolidada",
+    //   sortable: true,
+    //   filter: true,
+    // },
     {
       headerName: "Usuario captura",
       field: "UsuarioCaptura",

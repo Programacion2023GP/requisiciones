@@ -1,11 +1,12 @@
 import { createRootRoute, createRootRouteWithContext, createRoute, Link, Outlet, redirect, useLocation } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import React, { Suspense } from "react";
+import React, { Dispatch, SetStateAction, Suspense } from "react";
 import Spinner from "../loading/Loading";
 import Users from "../users/Users";
 import { UseAuth } from "../extras/useAuth";
 import MenuComponent from "../menus/Menus";
 import SuppliersComponent from "../catalogues/suppliers/Suppliers";
+import CatDepartaments from "../catalogues/departaments/Departaments";
 const LazyLayout = React.lazy(() => import("../layout/Layout"));
 const LoginComponent = React.lazy(() => import("../auth/login"));
 const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
@@ -15,6 +16,9 @@ const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
 
 export type RouterContext = {
   authentication: {
+
+    navigateTo:boolean; //
+    setNavigateTo:Dispatch<SetStateAction<boolean>>
     signIn :()=>void,
     signOut :()=>void,
     isLoggedIn :()=>boolean
@@ -41,13 +45,20 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 const Layout = createRoute({
   path: "/",
-  
+  loader: () =>{
+    const navigateTo = localStorage.getItem("navigateTo");
+    if (navigateTo=="Home") {
+      localStorage.setItem("navigateTo","OK");
+      return redirect({ to: localStorage.getItem("redirect") });
+    }
+  },
   beforeLoad: ({ context: { authentication } }) => {
     if (!authentication.isLoggedIn()) {
       if (window.location.pathname !== "/login") {
         return redirect({ to: "/login" });
       }
     }
+
     
   },
   
@@ -66,10 +77,10 @@ const LoginRoute = createRoute({
   path: "/login",
   beforeLoad: ({ context: { authentication } }) => {
     if (authentication.isLoggedIn()) {
-    
-      if (window.location.pathname !== "/MnuSeguridad") {
-        return redirect({ to: "/MnuSeguridad" });
-      }
+      
+      // if (window.location.pathname !== "/MnuSeguridad") {
+        return redirect({ to: localStorage.getItem('redirect') });
+      // }
     }
   },
   getParentRoute: () => Route, 
@@ -95,6 +106,12 @@ const SuppliersRoute = createRoute({
   getParentRoute: () => Layout, 
   component: () => <SuppliersComponent/>,  // Implement this component
 });
+const CatDepartamentos = createRoute({
+  path: "/CatDepartamentos",
+
+  getParentRoute: () => Layout, 
+  component: () => <CatDepartaments/>,  // Implement this component
+});
 
 Route.addChildren([Layout,LoginRoute]);
-Layout.addChildren([MnuSeguridadRoute,RequisitionRoute,SuppliersRoute])
+Layout.addChildren([MnuSeguridadRoute,RequisitionRoute,SuppliersRoute,CatDepartamentos])

@@ -309,6 +309,11 @@ export const Agtable: React.FC<TypeTable> = ({
   };
   const defaulColDef = useMemo(
     () => ({
+      flex: 1,
+      minWidth: 100,
+      cellClass: "ag-cell-custom",
+      cellRendererFramework: "react",
+      cellRenderer: "handleCellValue",
       filterParams: {
         buttons: ["apply", "reset"],
       },
@@ -356,7 +361,7 @@ export const Agtable: React.FC<TypeTable> = ({
               sm: 12,
             }}
           >
-            <div className="flex items-stretch">
+            <div className="flex items-stretch text-wrap">
               <div className="flex-1">
                 <AgGridReact
                   // key={data.length>0?"key":dataTable?.key}
@@ -380,7 +385,7 @@ export const Agtable: React.FC<TypeTable> = ({
                 />
               </div>
 
-              <div className="max-md:hidden lg:flex-shrink-0">
+              <div className="max-md:hidden lg:flex-shrink-0 text-wrap">
                 {!colapse && !openColumns && (
                   <>
                     <button
@@ -462,6 +467,8 @@ export const Agtable: React.FC<TypeTable> = ({
                           display: "inline-block",
                           marginLeft: "auto",
                           marginRight: "auto",
+                        textWrap: "wrap",
+
                         }}
                       >
                         ¿Como usar la tabla? (Manual)

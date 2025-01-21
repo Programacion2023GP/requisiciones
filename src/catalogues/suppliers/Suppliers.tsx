@@ -17,6 +17,7 @@ import { MdDelete } from "react-icons/md";
 import { showToast } from "../../sweetalert/Sweetalert";
 import CardComponent from "../../components/card/Card";
 import Typography from "../../components/typografy/Typografy";
+import Spinner from "../../loading/Loading";
 
 const TypeVigencia=({
   data,
@@ -299,22 +300,21 @@ const SuppliersComponent = () => {
   }) => {
     const { vigencia } = params?.data;
     if (vigencia === "Certificado") {
-      console.log("ac");
       return "provedor_accepted";
     }
     if (vigencia === "Vencido") {
-      console.log("ca");
 
       return "provedor_canceled";
     }
     if (vigencia === "Nuevo") {
-      console.log("ne");
 
       return "provedor_new";
     }
   };
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
+            {mutation.status =='pending' && (<Spinner/>)}
+
       <div className="ag-theme-alpine w-full mx-auto container p-6">
         <div className="w-full justify-center flex flex-row flex-wrap gap-4 mb-2">
           {[

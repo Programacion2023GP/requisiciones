@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ColComponent } from "../../../responsive/Responsive";
 import { IoIosEyeOff, IoMdEye } from "react-icons/io";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 type InputWithLabelProps = {
   label: string;
@@ -134,6 +135,118 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
     </ColComponent>
   );
 };
+
+
+
+
+import { AiOutlineCamera } from "react-icons/ai"; // Icono de cámara para el botón
+
+interface FormikImageInputProps {
+  label: string;
+  name: string;
+  disabled?: boolean;
+  acceptedFileTypes?: string; // Opcional: acepta tipos de archivo para validación
+}
+
+export const FormikImageInput: React.FC<FormikImageInputProps> = ({
+  label,
+  name,
+  disabled = false,
+  acceptedFileTypes = "image/*", // Definir los tipos de archivo aceptados (por defecto imágenes)
+}) => {
+  const { setFieldValue, errors, touched } = useFormikContext(); // Obtenemos el contexto de Formik
+  const [preview, setPreview] = useState<string | null>(null); // Para vista previa de la imagen
+  const [fileName, setFileName] = useState<string | null>(null); // Nombre del archivo seleccionado
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null); // Referencia al input de archivo
+
+  // Función para manejar el cambio de archivo
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]; // Obtener el primer archivo
+    if (file) {
+      setFieldValue(name, file); // Establecer el archivo en Formik
+
+      // Vista previa de la imagen
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Mostrar nombre del archivo
+      setFileName(file.name);
+    }
+  };
+
+  // Función para abrir el campo de archivo al hacer clic en la imagen de vista previa
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Disparar el click en el input
+    }
+  };
+
+  return (
+    <div className="relative z-0 w-full mb-5">
+      <label
+        htmlFor={name}
+        className="block text-gray-500 text-sm font-medium mb-2"
+      >
+        {label}
+      </label>
+
+      <div className="flex flex-col items-center justify-center space-y-4">
+        {/* Área para la vista previa de la imagen o el botón de carga */}
+        <div className="relative w-full h-60">
+          {preview &&(
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full h-full object-cover border-4 border-cyan-500 shadow-lg transition-transform duration-300 hover:scale-105 cursor-pointer"
+              onClick={handleImageClick} // Hacer clic en la imagen para cambiarla
+            />
+          ) }
+            <div
+              className={`${preview ? 'invisible hidden w-0 h-0':'w-full h-full'} flex items-center justify-center  bg-gray-100 border-4 border-dashed border-gray-300 rounded-full cursor-pointer`}
+              style={{ minHeight: "8rem" }}
+            >
+              <input
+                ref={fileInputRef} // Asignamos la referencia al input
+                id={name}
+                name={name}
+                type="file"
+                accept={acceptedFileTypes}
+                onChange={handleChange}
+                disabled={disabled}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+              <AiOutlineCamera className="text-gray-600 text-3xl" />
+            </div>
+          
+        </div>
+
+        {/* Mostrar nombre del archivo seleccionado */}
+        {fileName && (
+          <span className="text-sm text-gray-500 mt-2">{fileName}</span>
+        )}
+
+        {/* Texto de ayuda o mensaje de validación */}
+        <span className="text-xs text-gray-500">
+          {`Solo archivos de tipo: ${acceptedFileTypes.replace("image/", "")}`}
+        </span>
+
+        {/* Mensaje de error de Formik */}
+        {touched[name] && errors[name] && (
+          <div className="text-sm font-semibold text-red-600 mt-2">{errors[name]}</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
 // O usa otro ícono si prefieres
 interface FormikNumberInputProps extends InputWithLabelProps {
   min?: number;
@@ -447,7 +560,6 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
     option: T,
     setFieldValue: (name: string, value: any) => void
   ) => {
-    console.log(option,option[labelKey],name, option[idKey])
     setTextSearch(option[labelKey]); //
     setFilteredOptions(options);
     setFieldValue(name, option[idKey]); // Establecer el valor en Formik
@@ -459,7 +571,10 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
     option: T,
     setFieldValue: (name: string, value: any) => void
   ) => {
+    setTextSearch(option[labelKey]); //
     selectOption(option, setFieldValue);
+
+    // setShowOptions(false);
   };
 
   const handleInputFocus = () => {
@@ -505,6 +620,17 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 disabled={disabled}
                 ref={inputRef}
                 type="text"
+                onFocus={() => {
+                  if (disabled) {
+                    return;
+                  }
+                  handleInputFocus();
+                }}
+                onBlur={() => {
+                  setTimeout(() => {
+                    setShowOptions(false);
+                  }, 500);
+                }}
                 autoComplete="off"
                 id={name}
                 placeholder=" "
@@ -515,13 +641,13 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                     ]) ||
                   textSearch
                 }
-                onClick={() => {
-                  if (disabled) {
-                    return;
-                  }
-                  setFieldValue(name, ""); // Establecer el valor vacío al hacer clic
-                  handleInputFocus();
-                }}
+                // onClick={() => {
+                //   if (disabled) {
+                //     return;
+                //   }
+                //   setFieldValue(name, ""); // Establecer el valor vacío al hacer clic
+                //   handleInputFocus();
+                // }}
                 // onBlur={handleInputFocus}
                 onChange={(e) => {
                   handleFilter(e.target.value);
@@ -549,6 +675,13 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                   </span>
                 )}
               </label>
+              <div
+                onClick={handleInputFocus}
+                className="absolute top-6 right-0 cursor-pointer"
+              >
+              
+                <IoMdArrowDropdown />
+              </div>
 
               {showOptions && (
                 <ul

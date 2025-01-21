@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -19,6 +19,8 @@ type RouterContext = {
 };
 export type context = {
   authentication: {
+    navigateTo:boolean; //
+    setNavigateTo:Dispatch<SetStateAction<boolean>>
     signIn: () => void;
     signOut: () => void;
   };
@@ -44,6 +46,20 @@ const queryClient = new QueryClient({
   },
 });
 function Requisiciones() {
+  useEffect(() => {
+    const handleBeforeUnload = (event:any) => {
+      console.log("El usuario está saliendo del sitio.");
+      localStorage.setItem("navigateTo","Home");
+      // event.preventDefault();
+      // event.returnValue = "¿Estás seguro de que quieres salir?";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
   const authentication = UseAuth();
   return (
     <QueryClientProvider client={queryClient}>
