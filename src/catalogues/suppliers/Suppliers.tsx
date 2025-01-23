@@ -377,6 +377,7 @@ const SuppliersComponent = () => {
             buttonElement: "CatProveedores",
             table: "CatProveedores",
           }}
+          loading={suppliers.status=="pending"?true:false}
           data={suppliers?.data?.data}
           isLoading={suppliers.isLoading}
           columnDefs={columnDefs}

@@ -50,8 +50,7 @@ const SidebarComponent = () => {
     }) => AxiosRequest(url, method, data),
     onSuccess: (data) => {
       showToast(data.message, data.status);
-      localStorage.clear();
-      window.location.href = "/";
+      
     },
     onError: (error: any) => {
       
@@ -105,6 +104,8 @@ const SidebarComponent = () => {
   }, [menus.isSuccess]);
 
   const logout = () => {
+    localStorage.clear();
+      window.location.href = "/";
     mutation.mutate({
       method: "POST",
       url: "/auth/logout",

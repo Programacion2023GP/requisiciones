@@ -38,6 +38,8 @@ import { createTw } from "react-pdf-tailwind";
 import Observable from "../extras/observable";
 import { PermissionMenu } from "../extras/menupermisos";
 import Spinner from "../loading/Loading";
+import YearSelect from "./select/Dropdown";
+import StatusColumn from "./columns/status/Status";
 
 const ProductsComponent = memo(
   ({
@@ -302,13 +304,36 @@ const FormProductsComponent = forwardRef<
     </>
   );
 });
-
+type ChipsProps = {
+  captura: boolean;
+  autorizada: boolean;
+  asignado: boolean;
+  cotizado: boolean;
+  realizada: boolean;
+  rechazada: boolean;
+  ordenDeCompra: boolean;
+  surtida: boolean;
+};
 const RequisicionesAdd = () => {
   const pageTransitionRef = useRef<PageTransitionRef>(null);
   const [spiner, setSpiner] = useState<boolean>(false);
-
+  const [filters, setFilters] = useState<string>(`Ejercicio = '${new Date().getFullYear()}'`);
+  const [chipsOpen, setChipsOpen] = useState<ChipsProps>({
+    rechazada: false,
+    captura: false,
+    autorizada: false,
+    asignado: false,
+    cotizado: false,
+    ordenDeCompra: false,
+    surtida: false,
+    realizada: false,
+  });
   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
   const formikProducts = useRef<FormikProps<Record<string, any>> | null>(null);
+  const queryClient = useQueryClient();
+  const { ObservablePost } = Observable();
+  const [open, setOpen] = useState<boolean>(false);
+
   const NewValidations = (
     cantidad: string,
     descripcion: string
@@ -354,14 +379,13 @@ const RequisicionesAdd = () => {
       data?: any;
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
-      setSpiner(true)
+      setSpiner(true);
       setReloadTable(false);
     },
     onSuccess: (data) => {
-      // mutation.reset()
       setOpen(false);
       setReloadTable(true);
-      setSpiner(false)
+      setSpiner(false);
 
       setValues({
         valuesRequisition: {
@@ -385,9 +409,6 @@ const RequisicionesAdd = () => {
       if (mutation.status === "success") {
         mutation.reset();
       }
-      //   queryClient.refetchQueries({
-      //     queryKey: ["users/index"],
-      //   });
     },
     onError: (error: any) => {
       showToast(
@@ -397,9 +418,6 @@ const RequisicionesAdd = () => {
     },
   });
 
-  const queryClient = useQueryClient();
-  const { ObservablePost } = Observable();
-  const [open, setOpen] = useState<boolean>(false);
   const queries = useQueries({
     queries: [
       {
@@ -412,13 +430,10 @@ const RequisicionesAdd = () => {
         queryFn: () => GetAxios("tipos/index"),
         refetchOnWindowFocus: true,
       },
-
-    
     ],
   });
   const [groups, types] = queries;
 
-  
   const onSumbit = (values: Record<string, any>) => {
     setValues((prev) => ({
       ...prev,
@@ -438,7 +453,7 @@ const RequisicionesAdd = () => {
   });
   const [columnDefs] = useState<ColDef<any>[]>([
     {
-      headerName: "IDRequisicion",
+      headerName: "Folio",
       field: "IDRequisicion",
       sortable: true,
       filter: true,
@@ -513,6 +528,9 @@ const RequisicionesAdd = () => {
       field: "Status",
       sortable: true,
       filter: true,
+      cellRenderer: (params: any) => (
+        <StatusColumn data={params.data}  />
+      ),
     },
     {
       headerName: "Tipo",
@@ -538,30 +556,7 @@ const RequisicionesAdd = () => {
       sortable: true,
       filter: true,
     },
-    // {
-    //   headerName: "Motivo de cancelación",
-    //   field: "Motivo_AutEspecial",
-    //   sortable: true,
-    //   filter: true,
-    // },
-    // {
-    //   headerName: "Motivo de cancelación",
-    //   field: "Motivo_AutEspecial",
-    //   sortable: true,
-    //   filter: true,
-    // },
-    // {
-    //   headerName: "Orden compra",
-    //   field: "Orden_Compra",
-    //   sortable: true,
-    //   filter: true,
-    // },
-    // {
-    //   headerName: "Orden consolidada",
-    //   field: "OC_Consolidada",
-    //   sortable: true,
-    //   filter: true,
-    // },
+
     {
       headerName: "Usuario captura",
       field: "UsuarioCaptura",
@@ -613,48 +608,36 @@ const RequisicionesAdd = () => {
     ),
     []
   );
-  const getRowClass = (params: {
-    node: { rowIndex: number };
-    data: Record<string, any>;
-  }) => {
-    const { Status } = params?.data;
-
-    if (Status == "CP") {
-      return "class_cp";
-    }
-    if (Status == "CA") {
-      return "class_ca";
-    }
-    if (Status == "AU") {
-      return "class_au";
-    }
-    if (Status == "AS") {
-      return "class_as";
-    }
-    if (Status == "CO") {
-      return "class_co";
-    }
-    if (Status == "OC") {
-      return "class_oc";
-    }
-    if (Status == "RE") {
-      return "class_re";
-    }
-    if (Status == "SU") {
-      return "class_su";
-    }
-  };
+ 
   // const year =2024
+  const chipData = [
+    { message: "Rechazada (CA)", className: "bg-red-500", key: "rechazada",sql:'ca' },
+    { message: "Captura (CP)", className: "bg-gray-400", key: "captura",sql:'cp' },
+    { message: "Autorizada (AU)", className: "bg-black", key: "autorizada",sql:'au' },
+    { message: "Asignado (AS)", className: "bg-purple-500", key: "asignado",sql:'as' },
+    { message: "Cotizado (CO)", className: "bg-orange-500", key: "cotizado" ,sql:'co'},
+    {
+      message: "Orden de Compra (OC)",
+      className: "bg-pink-500",
+      key: "ordenDeCompra",
+      sql:'oc'
+    },
+    { message: "Surtida (SU)", className: "bg-lime-500", key: "surtida" ,sql:'su'},
+    { message: "Todos los status", className: "bg-neutral-500", key: "" ,sql:''},
 
-  const year = new Date().getFullYear();
+    // { message: "Realizada (RE)", className: "bg-cyan-500", key: "realizada" },
+  ];
+
+  
+
   return (
     <>
-          {spiner && <Spinner />}
+      {spiner && <Spinner />}
 
       <PermissionMenu
         IdMenu={["Listado", "SeguimientoRequis", "RequisicionesAdd"]}
       >
-        <div className="container mx-auto shadow-lg p-6 border mt-12">
+        <div className="container mx-auto shadow-lg p-6 border mt-12 relative">
           <Typography
             className="w-full text-center py-2"
             variant="h2"
@@ -662,28 +645,56 @@ const RequisicionesAdd = () => {
             size="3xl"
           >
             la tabla empieza consultando el ejercicio del año actual
-            {" " + year}
+            {" " + new Date().getFullYear()}
           </Typography>
-          <div className="flex w-full flex-row flex-wrap justify-center mb-6">
-            <Chip message="Rechazada  (CA)" className="bg-red-500" />
-            <Chip message="Captura (CP)" className="bg-gray-400" />
-            <Chip message="Autorizada (AU)" className="bg-black" />
-            <Chip message="Asignado  (AS)" className="bg-purple-500" />
-            <Chip message="Cotizado  (CO)" className="bg-orange-500" />
-            <Chip message="Orden de Compra (OC)" className="bg-pink-500" />
-            <Chip message="Surtida  (SU)" className="bg-lime-500" />
-            {/* <Chip message="Realizada  (RE)" className="bg-cyan-500" /> */}
+          <div className="flex w-full flex-row flex-wrap justify-center mb-6  ">
+            {chipData.map(({ message, className, key,sql }) => (
+              <Chip
+                key={key}
+                message={message}
+                className={className}
+                open={chipsOpen === key} // Comprobamos si el `key` del chip es el que está abierto
+                setOpen={() => {
+                  setReloadTable(false)
+
+                  setChipsOpen((prev) => (prev === key ? null : key));
+                }}
+                children={() => (
+                  <YearSelect
+                  onChange={(value)=>{
+                      console.log(sql)
+                    if (sql =="" && (value ==null || value==undefined)) {
+                      showToast('Demasiada información por favor pon almenos un filtro','info')
+                      return
+                    }
+                    const whereSql = `${sql ? `status = '${sql}'` : ''} ${(value ==null || value==undefined)? '': sql !=''? ' and ' + value :value}`;
+                  
+                                      setFilters(whereSql)
+                    setReloadTable(true)
+                    // setFilters(value)
+                  }}
+                    setClosed={() => {
+                      setChipsOpen(null);
+                    }}
+                  />
+                )}
+              />
+            ))}
+
+
           </div>
           <Agtable
             permissionsUserTable={{
               table: "Listado",
               buttonElement: "RequisicionesAdd",
             }}
-            getRowClass={getRowClass}
+          
+            // getRowClass={getRowClass}
             backUrl={{
               pathName: "requisiciones/index",
               startSearchFilter: {
-                where: `Ejercicio = '${year}'`,
+                
+                where:  filters,
                 // where: `Ejercicio = '2024'`,
               },
               restart: reloadTable,
@@ -774,7 +785,9 @@ const RequisicionesAdd = () => {
                       loading={groups.isLoading}
                       name="IDDepartamento"
                       label={"selecciona el departamento"}
-                      options={groups.data?.data.filter((it:any) => it.vigencia !== "Vencido")}
+                      options={groups.data?.data.filter(
+                        (it: any) => it.vigencia !== "Vencido"
+                      )}
                       idKey={"IDDepartamento"}
                       labelKey={"Nombre_Departamento"}
                     />

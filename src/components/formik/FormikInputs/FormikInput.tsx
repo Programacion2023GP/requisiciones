@@ -17,6 +17,8 @@ type InputWithLabelProps = {
   };
   type?: "number" | "text" | "date";
   disabled?: boolean;
+  padding?: boolean;
+
   handleModified?: (
     values: Record<string, any>,
     setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void
@@ -83,10 +85,11 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
   type = "text",
   disabled = false,
   handleModified,
+  padding=false
 }) => {
   // console.log("rendering input")
   return (
-    <ColComponent responsive={responsive}>
+    <ColComponent responsive={responsive} autoPadding={padding}>
       <FastField name={name}>
         {({ field, form: { errors, touched, values, setFieldValue } }: any) => {
           const error =
@@ -253,6 +256,7 @@ interface FormikNumberInputProps extends InputWithLabelProps {
   max?: number;
   decimals?: boolean;
   romanNumerals?: boolean;
+  padding?: boolean;
 }
 
 export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
@@ -263,6 +267,8 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
   max,
   decimals = true,
   romanNumerals = false,
+  padding = false,
+  
 }) => {
   const formatNumber = (value: number) => {
     if (romanNumerals) {
@@ -317,7 +323,7 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
   };
 
   return (
-    <ColComponent responsive={responsive}>
+    <ColComponent responsive={responsive} autoPadding={padding}>
       <FastField name={name}>
         {({ field, form: { errors, touched, setFieldValue } }: any) => {
           const error =
@@ -470,6 +476,7 @@ type AutocompleteProps<T extends Record<string, any>> = {
     "2xl"?: number;
   };
   disabled?: boolean;
+  padding?: boolean; // Agregar espacio entre cada opción
 };
 
 export const FormikAutocomplete = <T extends Record<string, any>>({
@@ -481,6 +488,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   loading,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
   disabled = false,
+  padding =false
 }: AutocompleteProps<T>) => {
   const formik = useFormikContext();
   if (!formik) {
@@ -601,7 +609,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   // }, [filteredOptions]);
 
   return (
-    <ColComponent responsive={responsive}>
+    <ColComponent responsive={responsive} autoPadding={padding}>
       <Field name={name}>
         {({ form: { setFieldValue, errors, touched, values } }: any) => {
           const error =

@@ -33,8 +33,10 @@ export const Agtable: React.FC<TypeTable> = ({
   colapseFilters,
   backUrl,
   getRowClass,
-  permissionsUserTable
-  
+  permissionsUserTable,
+  loading,
+  getData
+
 }) => {
   const [search, setSearch] = useState<SearchType>({
     text: "",
@@ -109,6 +111,8 @@ export const Agtable: React.FC<TypeTable> = ({
         sql: "",
         key: generateRandomKey(50),
       }));
+
+       getData &&  getData(data?.data as Array<Record<string,any>>);
       mutation.reset();
     },
     onError: (error: any) => {
@@ -279,20 +283,24 @@ export const Agtable: React.FC<TypeTable> = ({
       setDataTable((prev) => ({
         previous: prev.previous,
         data: [],
-        sql: sqlWhereClause,
+        sql: backUrl?.startSearchFilter?.where!="" ?  backUrl?.startSearchFilter?.where +" and " + sqlWhereClause:sqlWhereClause,
         key: generateRandomKey(50),
       }));
-      mutation.mutate({
-        url: backUrl?.pathName ? backUrl.pathName : "",
-        method: "POST",
-        data: { sql: sqlWhereClause },
-      });
+       console.log("carga",backUrl?.startSearchFilter?.where,"table",sqlWhereClause,sqlWhereClause.split(" "))
+
+
+      // mutation.mutate({
+      //   url: backUrl?.pathName ? backUrl.pathName : "",
+      //   method: "POST",
+      //   data: { sql: backUrl?.startSearchFilter?.where!="" ?  backUrl?.startSearchFilter?.where +" and " + sqlWhereClause:sqlWhereClause },
+      // });
     } else {
-      mutation.mutate({
-        url: backUrl?.pathName ? backUrl.pathName : "",
-        method: "POST",
-        data: { sql: data.sql },
-      });
+      console.log("Error")
+      // mutation.mutate({
+      //   url: backUrl?.pathName ? backUrl.pathName : "",
+      //   method: "POST",
+      //   data: { sql: backUrl?.startSearchFilter?.where },
+      // });
       setDataTable((prev) => ({
         previous: prev.previous,
         data: [],
@@ -314,9 +322,9 @@ export const Agtable: React.FC<TypeTable> = ({
       cellClass: "ag-cell-custom",
       cellRendererFramework: "react",
       cellRenderer: "handleCellValue",
-      filterParams: {
-        buttons: ["apply", "reset"],
-      },
+      // filterParams: {
+      //   buttons: ["apply", "reset"],
+      // },
       resizable: true, // Asegura que las columnas puedan ajustarse
 
     }),
@@ -370,7 +378,7 @@ export const Agtable: React.FC<TypeTable> = ({
                   paginationPageSize={10}
                   paginationPageSizeSelector={[10, 25, 50, 100]}
                   loading={
-                    mutation.status === "pending"
+                    mutation.status === "pending"||loading
                   }
                   rowData={filteredData}
                   columnDefs={columnDefsH}

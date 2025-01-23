@@ -523,6 +523,7 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
           buttonElement:"Usuarios",
           table:"Usuarios"
         }}
+          loading={users.status=="pending"?true:false}
           data={users?.data?.data}
           isLoading={users.isLoading}
           columnDefs={columnDefs}

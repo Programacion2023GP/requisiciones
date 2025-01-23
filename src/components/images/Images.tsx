@@ -13,7 +13,6 @@ interface PhotoZoomProps {
 // Componente PhotoZoom
 const PhotoZoom: React.FC<PhotoZoomProps> = ({ src, alt, description, title }) => {
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
-
   // Toggle para abrir y cerrar el zoom
   const toggleZoom = () => setIsZoomed((prev) => !prev);
 

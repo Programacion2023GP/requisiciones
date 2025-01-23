@@ -383,11 +383,16 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
 
               {/* Primera firma */}
               <View style={tw("w-1/2 flex items-center bg-white")}>
+                {/* {data?.data?.status !="CP" && (
+                  ARREGLA CON FOTOS DE LAS FIRMAS
+               <Image cache  src={`${import.meta.env.VITE_API_IMG}/${data?.data?.products[0]?.Firma_Director}`} debug/>
+                )} */}
                 <Text
                   style={tw(
                     "text-sm font-medium text-gray-700 text-center mb-2"
                   )}
-                >
+                  >
+
                   Firma Representante ({data?.data?.products[0]?.Nombre_Director})
                 </Text>
                 <View style={tw("w-4/5 h-12 border-b border-gray-500")} />

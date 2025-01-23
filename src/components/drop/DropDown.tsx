@@ -47,7 +47,7 @@ const DropdownComponent: React.FC<Props> = ({children}) => {
     <div className="relative inline-block text-left">
       <button
         ref={buttonRef}
-        className="flex items-center justify-center w-10 h-10 p-1 rounded-full bg-white hover:bg-gray-300"
+        className="flex items-center justify-center w-10 h-10 p-1 rounded-full cursor-pointer bg-white hover:bg-gray-300"
         onClick={(e) => {
           e.stopPropagation(); // Previene que el evento cierre el dropdown
           toggleDropdown();

@@ -57,7 +57,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         onClick={onClick}
         type={type} // Usamos directamente el valor de 'type'
-        className={`w-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 ${variantClasses[variant]} ${sizeClasses[size]}`}
+        className={`w-full transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  ${variantClasses[variant]} ${sizeClasses[size]} cursor-pointer`}
       >
         {children}
       </button>

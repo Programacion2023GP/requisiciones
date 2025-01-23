@@ -28,10 +28,11 @@ const LoginComponent = () => {
       AxiosRequest(url, method, data),
     
     onSuccess: (data) => {
-      if(data.data.redirect =="/"){
+      if(data?.data && data?.data?.redirect =="/"){
         showToast("no cuentas con permisos", 'question');
         return;
       }
+    if (data?.data) {
       localStorage.setItem('permisos', JSON.stringify(data.data.permisos));
       localStorage.setItem('menuPermiso', JSON.stringify(data.data.menuPermiso));
       localStorage.setItem('group', data.data.group);
@@ -39,15 +40,16 @@ const LoginComponent = () => {
       localStorage.setItem('name', data.data.name);
       localStorage.setItem('role', data.data.role);
       localStorage.setItem('redirect', data.data.redirect);
-
-
-      showToast(data.message, data.status);
       window.location.href = data.data.redirect
+    }
+    showToast(data.message, data.status);
+
+
      
-    },
+  },
     onError: (error: any) => {
-      console.log("ddd",error);
-      showToast(error.message || 'Error al realizar la acción', 'error');
+      console.log(error);
+      showToast(error?.message || 'Error al realizar la acción', 'error');
     },
   },);
 
@@ -57,7 +59,6 @@ const LoginComponent = () => {
       method: 'POST',
       data: values,
     });
-    console.log(mutation.isPending)
   }
   return (
     <>

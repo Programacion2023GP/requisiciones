@@ -75,11 +75,13 @@ const Actions: React.FC<{
       method,
       data,
       pdfData,
+      status
     }: {
       url: string;
       method: "POST" | "PUT" | "DELETE";
       data?: any;
       pdfData: Record<string, any>;
+      status:string
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
       setSpiner(true);
@@ -90,6 +92,7 @@ const Actions: React.FC<{
           data: {
             products: data.data,
             pdfData: variables.pdfData,
+            status: variables.status,
           },
         });
       } catch (e) {
@@ -433,6 +436,7 @@ const Actions: React.FC<{
                         method: "POST",
                         url: "/requisiciones/detailsRequisicion",
                         pdfData: data,
+                        status: data.Status,
                         data: {
                           IDRequisicion: data,
                           Ejercicio: data.Ejercicio,

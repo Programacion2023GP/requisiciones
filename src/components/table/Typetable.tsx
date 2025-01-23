@@ -7,8 +7,8 @@ export type TypeTable = {
      */
     isLoading?: boolean;
     filtersActive?:Record<string,any>,
+    loading?: boolean;
     /** 
-     
 
      * Definición de las columnas de la tabla. 
      * Acepta un array de objetos que definen las columnas, como el nombre, el campo y otras configuraciones.
@@ -29,6 +29,7 @@ export type TypeTable = {
     /** 
      * Se colapsaran buscadores con clicks para busquedas con filtradores
      */
+    getData?(data:Array<Record<string,any>>):void;
     colapseFilters?: boolean;
     backUrl?:{
       pathName: string;

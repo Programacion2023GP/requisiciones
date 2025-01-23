@@ -7,6 +7,7 @@ import { UseAuth } from "../extras/useAuth";
 import MenuComponent from "../menus/Menus";
 import SuppliersComponent from "../catalogues/suppliers/Suppliers";
 import CatDepartaments from "../catalogues/departaments/Departaments";
+import NotFoundPage from "../error/Error";
 const LazyLayout = React.lazy(() => import("../layout/Layout"));
 const LoginComponent = React.lazy(() => import("../auth/login"));
 const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
@@ -36,10 +37,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   ),
 
   errorComponent: () => (
-    <>Oops! Algo salió mal.</>
+    <NotFoundPage/>
+
   ),
   notFoundComponent: () =>(
-    <>no se encontro el componente</>
+    <NotFoundPage/>
   )
   
 });

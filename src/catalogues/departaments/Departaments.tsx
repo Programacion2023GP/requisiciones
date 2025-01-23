@@ -16,6 +16,7 @@ import {
 } from "../../components/formik/FormikInputs/FormikInput";
 import { showToast } from "../../sweetalert/Sweetalert";
 import Spinner from "../../loading/Loading";
+import { FaUserEdit } from "react-icons/fa";
 
 type PropsTable = {
   IdDetDirectores: number;
@@ -49,7 +50,7 @@ const ActionButtons = ({
   return (
     <>
       <div className="flex gap-2">
-        <Tooltip content="editar provedor">
+        <Tooltip content="asignar nuevo director">
           <Button
             color="yellow"
             size="small"
@@ -58,7 +59,7 @@ const ActionButtons = ({
               handleEdit(data as PropsTable);
             }}
           >
-            <BiEdit />
+            <FaUserEdit />
           </Button>
         </Tooltip>
         {/* 
@@ -77,10 +78,11 @@ const ActionButtons = ({
   );
 };
 const Picture = ({ data }: { data: PropsTable }) => {
+
   return (
     <PhotoZoom
       src={
-        "https://wallpapers.com/images/featured/fondos-de-goku-vhm3f71ddueli0kl.jpg"
+      `${import.meta.env.VITE_API_IMG}/${data.Firma_Director}`  
       }
       alt={"Firma del director " + data.Nombre_Director}
       title={data?.Nombre_Director ||''}
@@ -150,7 +152,6 @@ const CatDepartaments = () => {
   const [departaments, users] = queries;
   const onSubmit = async (values: Record<string, any>) => {
     setSpiner(true)
-    console.log("Valores del formulario:", values);
   
     const formData = new FormData();
     formData.append("IDDepartamento", values.IDDepartamento);
@@ -267,6 +268,7 @@ const queryClient = useQueryClient(); // Inicializa el query client
             buttonElement: "CatDepartamentos",
             table: "CatDepartamentos",
           }}
+          loading={departaments.status=="pending"?true:false}
           data={departaments?.data?.data}
           isLoading={departaments.isLoading}
           columnDefs={columnDefs}
