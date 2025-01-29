@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Button from "../../components/form/Button";
 import { LiaExchangeAltSolid } from "react-icons/lia";
-import { MdCancel } from "react-icons/md";
+import { MdCancel, MdEdit } from "react-icons/md";
 import Tooltip from "../../components/toltip/Toltip";
 import { showConfirmationAlert, showToast } from "../../sweetalert/Sweetalert";
 import { AxiosRequest } from "../../axios/Axios";
@@ -25,7 +25,8 @@ import { TbReport } from "react-icons/tb";
 const Actions: React.FC<{
   data: Record<string, any>;
   setReloadTable: Dispatch<SetStateAction<boolean>>;
-}> = ({ data, setReloadTable }) => {
+  setOpenForm:Dispatch<SetStateAction<boolean>>
+}> = ({ data, setReloadTable,setOpenForm }) => {
   const [open, setOpen] = useState({
     pdf: false,
     autorized: false,
@@ -115,7 +116,49 @@ const Actions: React.FC<{
       );
     },
   });
+  const mutationEdit = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
+    onMutate(variables) {
+      setSpiner(true);
+   
+    },
+    onSuccess: async(data) => {
+      setSpiner(false);
+      try{
+      const result = await ObservablePost("FormRequisicion", {
+        data: {
+          data: data.data,
+        },
+      });
+    } catch (e) {
 
+    } finally {
+      setOpenForm(true)
+      // setOpen((prev) => ({
+      //   autorized: false,
+      //   cotizacion: false,
+      //   pdf: false,
+      //   view: true,
+      //   tracing: false,
+      // }));
+    }
+
+
+
+    },
+    onError: (error: any) => {
+      setSpiner(false);
+      
+    },
+  });
   const newStatus = (status: string): string => {
     let state = "";
     switch (status) {
@@ -347,7 +390,7 @@ const Actions: React.FC<{
           )}
           <DropdownComponent>
             <div className="flex flex-col gap-2">
-              <div className="w-fit">
+              {/* <div className="w-fit">
                 <Tooltip content="Ver requisición">
                   <Button
                     color="presidencia"
@@ -367,8 +410,29 @@ const Actions: React.FC<{
                     <FaEye />
                   </Button>
                 </Tooltip>
+              </div> */}
+            {data.Status =="CP" && (
+              <div className="w-fit">
+                <Tooltip content="Editar">
+                  <Button
+                    color="yellow"
+                    variant="solid"
+                    size="small"
+                    onClick={() => {
+                      mutationEdit.mutate({
+                        method: "POST",
+                        url: "/requisiciones/showRequisicion",
+                        data: {
+                          Id: data.Id,
+                        },
+                      });
+                    }}
+                  >
+                  <MdEdit />
+                  </Button>
+                </Tooltip>
               </div>
-
+            )}
               {data.Status !== "SU" &&
                 localStorage.getItem("role") == "COMPRAS" && (
                   <div className="w-fit">
@@ -515,7 +579,8 @@ const Actions: React.FC<{
 
               <div className="w-fit ">
                 {(newStatus(data.Status) == "CO" ||
-                  newStatus(data.Status) == "OC") && (
+                  newStatus(data.Status) == "OC") && (permisos[newStatus(data.Status) == 'CO' ? 'Permiso_Cotizar' : 'Permiso_Orden_Compra']) == 1 &&
+                  (
                   <Tooltip
                     content={
                       newStatus(data.Status) == "CO"

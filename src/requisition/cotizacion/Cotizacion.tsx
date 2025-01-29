@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import ModalComponent from "../../components/modal/Modal";
 import Typography from "../../components/typografy/Typografy";
 import FormikForm from "../../components/formik/Formik";
@@ -21,6 +21,7 @@ import Spinner from "../../loading/Loading";
 import { MdCheck } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import Tooltip from "../../components/toltip/Toltip";
+import { FormikProps } from "formik";
 
 type CotizacionType = {
   open: boolean;
@@ -68,6 +69,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
   const [initialValues, setInitialValues] = useState<Record<string, any>>({});
   const [spiner, setSpiner] = useState<boolean>(true);
   const [data, setData] = useState<Array<Record<string, any>>>([]);
+  const formik = useRef<FormikProps<Record<string, any>> | null>(null);
   const mutationSearch = useMutation({
     mutationFn: ({
       url,
@@ -183,9 +185,96 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           // Proveedor: Yup.number()
           //   .min(1, "Selecciona un provedor")
           //   .required("Selecciona un provedor"), // Asegúrate que Proveedor pueda ser null
-          IDproveedor1: Yup.number().required("El provedor 1 es obligatorio"),
+          IDproveedor1: Yup.number()
+          .test(
+            "unique1",
+            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+            function (value) {
+              const { IDproveedor2, IDproveedor3 } = this.parent; 
+              console.log("Valores del formulario:", this.parent); 
+              return value !== IDproveedor2 && value !== IDproveedor3; 
+            }
+          )
+          .required("El proveedor 1 es obligatorio"), 
+      
+        // Proveedor 2
+        IDproveedor2: Yup.number()
+          .min(1, "Selecciona un proveedor")
+          .test(
+            "unique2",
+            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+            function (value) {
+              const { IDproveedor1, IDproveedor3 } = this.parent; 
+              console.log("Valores del formulario:", this.parent); 
+              return value !== IDproveedor1 && value !== IDproveedor3; 
+            }
+          )
+          .required("Selecciona un proveedor"), 
+      
+        // Proveedor 3
+        IDproveedor3: Yup.number()
+          .min(1, "Selecciona un proveedor")
+          .test(
+            "unique3",
+            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+            function (value) {
+              const { IDproveedor1, IDproveedor2 } = this.parent; 
+              console.log("Valores del formulario:", this.parent); 
+              return value !== IDproveedor1 && value !== IDproveedor2; 
+            }
+          )
+          .required("Selecciona un proveedor"), 
+          
+          // IDproveedor1: Yup.number()
+          //   .test(
+          //     "unique1",
+          //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+          //     function (value) {
+          //       console.log("Valores del formulario:", this.parent); // 👀 Verificar qué llega aquí
+          //       const { IDProveedor1, IDProveedor3 } = this.parent || {}; // Evitar undefined
+          //       return value !== IDProveedor1 && value !== IDProveedor3;
+          //     }
+          //   )
+          //   .required("El proveedor 1 es obligatorio"),
+
+          //   IDproveedor2: Yup.number()
+          //   .min(1, "Selecciona un provedor")
+          //   .test(
+          //     "unique",
+          //     "El provedor ya esta seleccionado en los demas provedores seleccione otro",
+          //     (value) =>
+          //       value ==
+          //       (formik?.current?.values["IDproveedor3"] ||
+          //         formik?.current?.values["IDproveedor1"])
+
+          //     // {
+          //     // const { IDproveedor1, IDproveedor3 } = formik?.current?.values;
+          //     // console.log( Number(value) == Number(IDproveedor1),Number(value) == Number(IDproveedor3),value );
+          //     //  (Number(value) == Number(IDproveedor1) || Number(value) == Number(IDproveedor3));
+
+          //     // }
+          //   )
+          //   .required("Selecciona un provedor"),
+
+
+          //   IDproveedor3: Yup.number()
+          //   .min(1, "Selecciona un proveedor")
+          //   .test(
+          //     "unique3",
+          //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+          //     function (value) {
+          //       const { IDproveedor1, IDproveedor2 } = this.parent; // Accede a los valores del formulario
+          //       return value !== IDproveedor1 && value !== IDproveedor2;
+          //     }
+          //   )
+
+          //   .required("Selecciona un provedor"),
+
+
+
+
           PrecioUnitarioSinIva1: Yup.number().required(
-            "Precio unitario sin iva es obligatorio"
+            "Precio unitario sin IVA es obligatorio"
           ),
           // PorcentajeIVA1: Yup.number().required("porcentaje del iva es obligatorio"),
           ImporteIva1: Yup.number().required("Importe iva es obligatorio"),
@@ -194,9 +283,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           ),
           // Retenciones1: Yup.number().required("Retenciones es obligatorio"),
 
-          IDproveedor2: Yup.number()
-            .min(1, "Selecciona un provedor")
-            .required("Selecciona un provedor"),
+
+
           PrecioUnitarioSinIva2: Yup.number().required(
             "Precio unitario sin iva es obligatorio"
           ),
@@ -207,9 +295,6 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           ),
           // Retenciones2: Yup.number().required("Retenciones es obligatorio"),
 
-          IDproveedor3: Yup.number()
-            .min(1, "Selecciona un provedor")
-            .required("Selecciona un provedor"),
           PrecioUnitarioSinIva3: Yup.number().required(
             "Precio unitario sin iva es obligatorio"
           ),
@@ -226,6 +311,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             .min(1, "Selecciona un provedor")
             .required("Selecciona un provedor"),
         });
+
   const handleModified = (
     values: Record<string, any>,
     setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void
@@ -361,43 +447,48 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
+          ref={formik}
         >
-      {(values, setFieldValue, setTouched, errors) => {
-  return (
-    <div className="w-full space-y-8 px-2 overflow-auto">
-      {[1, 2, 3].map((contProvedor) => {
-        // Clase dinámica de fondo
-        const bgClass =
-          values.Proveedor === values[`IDproveedor${contProvedor}`] &&
-          values[`IDproveedor${contProvedor}`] > 0
-            ? "bg-sky-100"
-            : "bg-gray-50";
+          {(values, setFieldValue, setTouched, errors) => {
+            return (
+              <div className="w-full space-y-8 px-2 overflow-auto">
+                {[1, 2, 3].map((contProvedor) => {
+                  // Clase dinámica de fondo
+                  const bgClass =
+                    values.Proveedor === values[`IDproveedor${contProvedor}`] &&
+                    values[`IDproveedor${contProvedor}`] > 0
+                      ? "bg-sky-100"
+                      : "bg-gray-50";
 
-        return (
-          <div
-            key={contProvedor}
-            className={`w-full ${bgClass} p-6 rounded-lg shadow-lg`}
-          >
-            <Typography className="mb-4 text-lg font-semibold text-slate-800">
-              Proveedor {contProvedor}
-            </Typography>
+                  return (
+                    <div
+                      key={contProvedor}
+                      className={`w-full ${bgClass} p-6 rounded-lg shadow-lg`}
+                    >
+                      <Typography className="mb-4 text-lg font-semibold text-slate-800">
+                        Proveedor {contProvedor}
+                      </Typography>
 
-            {IdRequisicion.data.status === "OC" && (
-              <SwitchComponent
-                enabled={values.Proveedor === values[`IDproveedor${contProvedor}`]}
-                label={`Seleccionar al proveedor ${contProvedor}`}
-                enabledColor="bg-sky-200"
-                disabledColor="bg-gray-200"
-                onclick={() => {
-                  // Alterna el proveedor seleccionado
-                  values.Proveedor === values[`IDproveedor${contProvedor}`]
-                    ? setFieldValue("Proveedor", null)
-                    : setFieldValue(
-                        "Proveedor",
-                        values[`IDproveedor${contProvedor}`]
-                      );
-                }}
-              />
+                      {IdRequisicion.data.status === "OC" && (
+                        <SwitchComponent
+                          enabled={
+                            values.Proveedor ===
+                            values[`IDproveedor${contProvedor}`]
+                          }
+                          label={`Seleccionar al proveedor ${contProvedor}`}
+                          enabledColor="bg-sky-200"
+                          disabledColor="bg-gray-200"
+                          onclick={() => {
+                            // Alterna el proveedor seleccionado
+                            values.Proveedor ===
+                            values[`IDproveedor${contProvedor}`]
+                              ? setFieldValue("Proveedor", null)
+                              : setFieldValue(
+                                  "Proveedor",
+                                  values[`IDproveedor${contProvedor}`]
+                                );
+                          }}
+                        />
                       )}
                       {/* {JSON.stringify(errors)} */}
                       {errors?.Proveedor && (
@@ -415,14 +506,25 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                 return (
                                   <FormikAutocomplete
                                     disabled={
-                                      IdRequisicion.data.status == "OC"
+                                      IdRequisicion?.data?.status == "OC"
                                         ? true
                                         : false
                                     }
                                     label={title}
                                     key={title + contProvedor}
                                     name={fieldName}
-                                    options={suppliers?.data?.data || []}
+                                    options={
+                                      suppliers?.data?.data.filter(
+                                        (prov: Record<string, any>) =>
+                                          ![
+                                            values.IDProveedor1,
+                                            values.IDProveedor2,
+                                            values.IDProveedor3,
+                                          ]
+                                            .filter(Boolean)
+                                            .includes(prov.IDProveedor)
+                                      ) || []
+                                    }
                                     labelKey={"NombreCompleto"}
                                     idKey={"IDProveedor"}
                                     loading={false}

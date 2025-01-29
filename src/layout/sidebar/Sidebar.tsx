@@ -1,10 +1,6 @@
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
-import { memo, useEffect, useState } from "react";
-import { LuUser, LuSettings, LuFileText } from "react-icons/lu";
-import { AxiosRequest, GetAxios } from "../../axios/Axios";
-import { FaFolder, FaFolderOpen } from "react-icons/fa6";
-import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as BiIcons from "react-icons/bi";
@@ -12,10 +8,20 @@ import * as MdIcons from "react-icons/md";
 import * as FiIcons from "react-icons/fi";
 import * as GiIcons from "react-icons/gi";
 import * as RiIcons from "react-icons/ri";
+import { 
+  FaFolder, 
+  FaFolderOpen, 
+  FaSpinner 
+} from "react-icons/fa6";
+import { 
+  IoMdArrowDropdown, 
+  IoMdArrowDropup 
+} from "react-icons/io";
 import { CiLogout } from "react-icons/ci";
+import Logo from '../../assets/logo-gpd.png';
+import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showToast } from "../../sweetalert/Sweetalert";
-import { customLog } from "../../extras/consoles";
-import Logo from '../../assets/logo-gpd.png'
+
 const IconLibraries = {
   ...AiIcons,
   ...FaIcons,
@@ -23,9 +29,10 @@ const IconLibraries = {
   ...MdIcons,
   ...FiIcons,
   ...GiIcons,
-  ...RiIcons,
+  ...RiIcons
 };
 
+// Rest of the code remains the same as in the previous artifact
 export interface MenuItem {
   Id: number;
   IdMenu: string;
@@ -38,6 +45,7 @@ export interface MenuItem {
 
 const SidebarComponent = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
   const mutation = useMutation({
     mutationFn: ({
       url,
@@ -50,10 +58,8 @@ const SidebarComponent = () => {
     }) => AxiosRequest(url, method, data),
     onSuccess: (data) => {
       showToast(data.message, data.status);
-      
     },
     onError: (error: any) => {
-      
       showToast(
         error.response?.data?.message || "Error al realizar la acción",
         "error"
@@ -105,7 +111,7 @@ const SidebarComponent = () => {
 
   const logout = () => {
     localStorage.clear();
-      window.location.href = "/";
+    window.location.href = "/";
     mutation.mutate({
       method: "POST",
       url: "/auth/logout",
@@ -113,95 +119,113 @@ const SidebarComponent = () => {
   };
 
   return (
-    <div className="w-64 shadow-lg h-screen overflow-auto bg-presidencia text-white p-4 transition-all ease-in-out duration-300">
-      <div className="flex items-center justify-center mb-8">
-        {/* Logo Section */}
-        <div className="text-3xl font-bold text-center text-white hover:text-green-500 transition-all duration-300">
-          <img src={Logo} alt="Logo GPD" width="100%" />
-        </div>
+    <div className="relative h-full w-72   shadow-2xl overflow-hidden">
+      {/* Glowing Logo Container */}
+      <div className="relative p-6 border-b border-gray-700/30">
+        <div className="absolute inset-0 bg-presidencia/10 blur-2xl -z-10"></div>
+        <img 
+          src={Logo} 
+          alt="Logo" 
+          className="w-40 mx-auto transform transition-all hover:scale-105 hover:rotate-3 hover:shadow-lg"
+        />
       </div>
 
-      <div className="mt-4 space-y-2">
-      {menuItems.map((menu) => {
-  // Asegúrate de que `IconLibraries` y `menu.Icon` existan y sean válidos
-  const IconComponent = menu.Icon
-    ? IconLibraries[menu.Icon as keyof typeof IconLibraries]
-    : null;
-
-  if (menu.IdMenu === "MnuCatalogos" && menu.children?.length) {
-    return (
-      <Dropdown key={menu.Id} label={menu.Menu}>
-        {menu.children.map((child) => {
-          const ChildIcon = child.Icon
-            ? IconLibraries[child.Icon as keyof typeof IconLibraries]
+      {/* Menu Container with Elegant Scroll */}
+      <nav className="py-4 space-y-2 h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+        {menuItems.map((menu) => {
+          const IconComponent = menu.Icon
+            ? IconLibraries[menu.Icon as keyof typeof IconLibraries]
             : null;
 
+          if (menu.IdMenu === "MnuCatalogos" && menu.children?.length) {
+            return (
+              <Dropdown key={menu.Id} label={menu.Menu}>
+                {menu.children.map((child) => {
+                  const ChildIcon = child.Icon
+                    ? IconLibraries[child.Icon as keyof typeof IconLibraries]
+                    : null;
+
+                  return (
+                    <Item
+                      key={child.IdMenu}
+                      href={child.IdMenu}
+                      label={child.Menu}
+                      icon={ChildIcon ? <ChildIcon size={24} /> : null}
+                    />
+                  );
+                })}
+              </Dropdown>
+            );
+          }
+
           return (
-            <Item
-              key={child.IdMenu}
-              href={child.IdMenu}
-              label={child.Menu}
-              icon={ChildIcon ? <ChildIcon size={24} /> : null}
-            />
+            <div key={menu.Id}>
+              {Array.isArray(menu.children) &&
+              menu.children.length > 0 &&
+              addSectionMenu(menu.children) ? (
+                <Item
+                  key={menu.IdMenu}
+                  href={menu.IdMenu}
+                  label={menu.Menu}
+                  icon={IconComponent ? <IconComponent size={24} /> : null}
+                />
+              ) : null}
+            </div>
           );
         })}
-      </Dropdown>
-    );
-  }
-
-  return (
-    <div key={menu.Id}>
-      {Array.isArray(menu.children) &&
-      menu.children.length > 0 &&
-      addSectionMenu(menu.children) ? (
-        <Item
-          key={menu.IdMenu}
-          href={menu.IdMenu}
-          label={menu.Menu}
-          icon={IconComponent ? <IconComponent size={24} /> : null}
-        />
-      ) : null}
-    </div>
-  );
-})}
-
 
         {menus.status === "pending" && (
-          <div className="w-full h-full flex justify-center items-center">
-            <FaIcons.FaSpinner className="animate-spin text-6xl mb-4" />
+          <div className="w-full flex justify-center items-center">
+            <FaSpinner className="animate-spin text-4xl text-blue-400" />
           </div>
         )}
+      </nav>
 
-        {menus.status === "success" && (
-          <div
+      {/* Logout Section with Hover Effects */}
+      {menus.status === "success" && (
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700/30">
+          <button 
             onClick={logout}
-            className="cursor-pointer flex items-center text-lg text-white hover:bg-green-700 p-3 rounded-lg transition-all duration-300 space-x-3 mt-4"
+            className="
+              w-full 
+              flex items-center 
+              justify-center 
+              gap-3 
+              py-3 
+              rounded-lg 
+              text-blue-900 
+              bg-gradient-to-r 
+              from-black-500/20 
+              to-black-600/20 
+              hover:from-black-500/40 
+              hover:to-black-600/40 
+              transition-all 
+              duration-300 
+              group
+            "
           >
-            <CiLogout className="text-2xl" />
-            <span className="text-lg">Cerrar sesión</span>
-          </div>
-        )}
-      </div>
+            <CiLogout className="text-xl  group-hover:rotate-12 transition-transform" />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-type LinkItem = {
+const Item: React.FC<{
   label: string;
   href?: string;
   icon: React.ReactNode;
-};
-
-const Item: React.FC<LinkItem> = ({ href, label, icon }) => {
+}> = ({ href, label, icon }) => {
   const location = useLocation();
   const [currentLocation, setCurrentLocation] = useState<string | null>(null);
 
-  // Retraso en la actualización de la ubicación para animación más fluida
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentLocation(location.pathname.split('/')[1]);
-    }, 100); // Retraso de 100ms
-    return () => clearTimeout(timer); // Limpieza del temporizador
+    }, 100);
+    return () => clearTimeout(timer);
   }, [location]);
 
   const isActive = currentLocation === href;
@@ -210,24 +234,31 @@ const Item: React.FC<LinkItem> = ({ href, label, icon }) => {
     <Link
       to={href || "#"}
       className={`
-        flex items-center text-lg text-white 
-        ${isActive ? "bg-green-600" : "bg-transparent"} 
-        hover:bg-green-700 p-3 rounded-lg transition-all duration-500 space-x-3 ease-in-out
+        px-4 
+        py-3 
+        flex 
+        items-center 
+        gap-3 
+        text-blue/80 
+        hover:bg-white/5 
+        rounded-lg 
+        transition-all 
+        duration-300
+        ${isActive ? "bg-blue-500/20" : ""}
       `}
     >
-      {icon && <span className="text-2xl">{icon}</span>}
-      <span className="text-md">{label}</span>
+      {icon && <span className="text-blue-400">{icon}</span>}
+      <span className={`text-sm ${isActive ? "text-blue-400 font-semibold" : "group-hover:text-white"}`}>
+        {label}
+      </span>
     </Link>
   );
 };
 
-// Dropdown Component
-type DropdownProps = {
+const Dropdown: React.FC<{
   label: string;
   children: React.ReactNode;
-};
-
-const Dropdown: React.FC<DropdownProps> = ({ label, children }) => {
+}> = ({ label, children }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -235,22 +266,40 @@ const Dropdown: React.FC<DropdownProps> = ({ label, children }) => {
   };
 
   return (
-    <div className="ml-2">
-      <div
-        className="flex items-center text-lg text-white hover:bg-green-700  p-2 rounded-lg transition-all duration-300 cursor-pointer space-x-3"
+    <div className="px-4">
+      <div 
         onClick={toggleDropdown}
+        className="
+          flex 
+          items-center 
+          justify-between 
+          px-4 
+          py-3 
+          rounded-lg 
+          text-blue/80 
+          hover:bg-white/5 
+          cursor-pointer 
+          transition-all 
+          duration-300
+          group
+        "
       >
-        <span className="text-md">
-          {isOpen ? <FaFolderOpen /> : <FaFolder />}
-        </span>
-        <span className="text-md">{label}</span>
-        <span className="ml-auto text-md">
+        <div className="flex items-center gap-3">
+          {isOpen ? <FaFolderOpen className="text-blue-400" /> : <FaFolder className="text-blue-400" />}
+          <span className="text-sm font-medium group-hover:text-blue-500">{label}</span>
+        </div>
+        <span>
           {isOpen ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}
         </span>
       </div>
-      {isOpen && <div className="ml-6 space-y-2 mt-2">{children}</div>}
+
+      {isOpen && (
+        <div className="ml-6 mt-2 space-y-2 border-l border-gray-700/30">
+          {children}
+        </div>
+      )}
     </div>
   );
 };
 
-export default memo(SidebarComponent);
+export default SidebarComponent;

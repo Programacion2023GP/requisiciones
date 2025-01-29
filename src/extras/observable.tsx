@@ -31,6 +31,11 @@ const Observable = () => {
     ObservableGet: (key: string) => {
       return queryClient.getQueryData([`${myKey}_${key}`]);
     },
+    
+    ObservableDelete: (key: string) => {
+      queryClient.removeQueries({ queryKey: [`${myKey}_${key}`] }); // Usa QueryFilters
+      console.log("Deleted", key);
+    },
   };
 };
 

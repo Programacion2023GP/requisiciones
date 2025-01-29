@@ -18,9 +18,11 @@ export const showToast = (message: string, icon: ToastIcon = 'success') => {
     }
   });
 };
-export const showConfirmationAlert = (title: string, text: string): Promise<boolean> => {
+export const showConfirmationAlert = (title: string, text: string,  position: 'top-start' | 'top-end' | 'top' | 'center-start' | 'center' | 'center-end' | 'bottom-start' | 'bottom-end' | 'bottom' = 'center'
+): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     Swal.fire({
+    position: position,    // Posición en la parte superior derecha
       title: title,           // Título de la alerta
       text: text,             // Mensaje de la alerta
       icon: 'warning',        // Tipo de icono (advertencia)
@@ -28,6 +30,7 @@ export const showConfirmationAlert = (title: string, text: string): Promise<bool
       confirmButtonText: 'Aceptar', // Texto del botón "Aceptar"
       cancelButtonText: 'Cancelar', // Texto del botón "Cancelar"
       reverseButtons: true,   // Invierte la posición de los botones
+      allowOutsideClick: false          // No permite cerrar la alerta haciendo clic fuera de ella
     }).then((result) => {
       if (result.isConfirmed) {
         resolve(true); // Resuelve la promesa como "true" si el usuario hace clic en "Aceptar"

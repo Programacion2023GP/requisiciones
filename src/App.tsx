@@ -38,10 +38,12 @@ declare module "@tanstack/react-router" {
 }
 
 const queryClient = new QueryClient({
+
   defaultOptions: {
+
     queries: {
       staleTime: Infinity,
-
+      
     },
   },
 });
@@ -63,6 +65,8 @@ function Requisiciones() {
   const authentication = UseAuth();
   return (
     <QueryClientProvider client={queryClient}>
+            {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+
       <RouterProvider
         router={router}
         context={{ authentication }}

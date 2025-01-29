@@ -13,6 +13,7 @@ const CollapseComponent: React.FC<{ children: React.ReactNode; title: string }> 
       <div className="flex justify-between items-center p-1 bg-gray-100 hover:bg-gray-200 transition-all duration-300">
         <p className="ml-2 text-md font-semibold text-gray-700 w-full">{title}</p>
         <button
+        type="button"
           onClick={toggleCollapse}
           className="text-gray-600 p-2 rounded-md hover:text-gray-900 focus:outline-none transition-all duration-300"
         >

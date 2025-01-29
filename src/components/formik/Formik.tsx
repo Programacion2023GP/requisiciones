@@ -23,17 +23,18 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>(
        innerRef={ref} // Pasamos el ref al Formik usando innerRef
        initialValues={initialValues}
        validationSchema={validationSchema}
-       onSubmit={async (values, { setSubmitting, setStatus }) => {
+       onSubmit={async (values, { setSubmitting, setStatus, }) => {
          // Llamamos a onSubmit del componente padre
-         onSubmit(values as Record<string, any>);
          setStatus(1);
+         setSubmitting(true);
+         onSubmit(values as Record<string, any>);
 
          // Después de enviar, cambiamos el estado de submitting a false
-         // setSubmitting(true);
        }}
      >
-       {({ isSubmitting, values, setFieldValue, setTouched, errors, }) => {
-       
+       {({ isSubmitting, values, setFieldValue, setTouched, errors }) => {
+          if (isSubmitting) {
+          }
          return (
            <Form encType="multipart/form-data" className="space-y-4">
              <RowComponent>

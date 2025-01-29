@@ -353,7 +353,8 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
     IDDepartamento: Yup.number()
       .min(1, "El departamento es obligatorio")
       .required("El departamento es obligatorio"),
-    Rol: Yup.string().required("El rol es obligatorio"),
+    Rol: Yup.string().oneOf(['REQUISITOR','DIRECTOR','AUTORIZADOR'], 'Selecciona un rol válido') // Aquí validamos que el valor esté entre los roles permitidos
+    .required('El rol es obligatorio'),
   });
   const responsive = {
     "2xl": 6,

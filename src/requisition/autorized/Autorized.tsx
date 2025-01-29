@@ -98,7 +98,7 @@ const AutorizedComponent: React.FC<AutorizedType> = ({
 
   return (
     <>
-      {autorizadores.status=="pending" && <Spinner />}
+      {(autorizadores.status=="pending" || mutation.status=='pending') && <Spinner />}
 
       <ModalComponent
         title="Asignacion de autorizador"

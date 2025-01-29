@@ -1,4 +1,4 @@
-import { FastField, Field, useFormikContext } from "formik";
+import { FastField, Field, FormikContext, useField, useFormikContext } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { ColComponent } from "../../../responsive/Responsive";
 import { IoIosEyeOff, IoMdEye } from "react-icons/io";
@@ -85,13 +85,19 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
   type = "text",
   disabled = false,
   handleModified,
-  padding=false
+  padding=true
 }) => {
+  const [field, meta] = useField(name);
+  const  formik = useFormikContext()
+
   // console.log("rendering input")
+  
+
   return (
     <ColComponent responsive={responsive} autoPadding={padding}>
       <FastField name={name}>
         {({ field, form: { errors, touched, values, setFieldValue } }: any) => {
+         
           const error =
             touched?.[name] && typeof errors?.[name] === "string"
               ? (errors?.[name] as string)
@@ -123,12 +129,12 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
               >
                 {label}
               </label>
-              {error && (
+              {(meta.error && (meta.touched || formik.status)) && (
                 <span
                   className="text-sm font-semibold text-red-600"
-                  id={`${name}-error`}
+                  id={`${name}-meta.error`}
                 >
-                  {error}
+                  {meta.error}
                 </span>
               )}
             </div>
@@ -276,7 +282,8 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
     }
     return decimals ? value.toFixed(2) : Math.floor(value).toString();
   };
-
+  const [field, meta] = useField(name);
+  const formik = useFormikContext()
   // Conversión completa a números romanos
   const toRoman = (num: number) => {
     if (num < 1) return "";
@@ -321,7 +328,6 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
       setFieldValue(name, value);
     }
   };
-
   return (
     <ColComponent responsive={responsive} autoPadding={padding}>
       <FastField name={name}>
@@ -357,7 +363,10 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
                   value={formatNumber(Number(field.value) || 0)} // Usamos el formato de número
                   id={name}
                   placeholder=" "
-                  onChange={(e) => handleInputChange(e, setFieldValue)} // Maneja el cambio del input
+                  onChange={(e) => {handleInputChange(e, setFieldValue) 
+
+                    formik.handleChange(e)
+                  }} // Maneja el cambio del input
                   min={min}
                   max={max}
                   inputMode="numeric" // Para teclado numérico en dispositivos móviles
@@ -386,12 +395,12 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
               >
                 {label}
               </label>
-              {error && (
+              {(meta.error && (meta.touched || formik.status)) && (
                 <span
                   className="text-sm font-semibold text-red-600"
-                  id={`${name}-error`}
+                  id={`${name}-meta.error`}
                 >
-                  {error}
+                  {meta.error}
                 </span>
               )}
             </div>
@@ -477,6 +486,14 @@ type AutocompleteProps<T extends Record<string, any>> = {
   };
   disabled?: boolean;
   padding?: boolean; // Agregar espacio entre cada opción
+  handleModifiedOptions?:{
+    name:string;
+
+  };
+  handleModified?: (
+    name:string,
+    values:string|number,
+  ) => any;
 };
 
 export const FormikAutocomplete = <T extends Record<string, any>>({
@@ -488,13 +505,17 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   loading,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
   disabled = false,
-  padding =false
+  padding =true,
+  handleModified,
+  handleModifiedOptions
+
 }: AutocompleteProps<T>) => {
-  const formik = useFormikContext();
+  const formik = useFormikContext(); // Obtenemos el contexto de Formik
   if (!formik) {
     throw new Error("Formik context not found");
   }
   const { values } = formik;
+  const [form,meta] = useField(name)
   const [filteredOptions, setFilteredOptions] = useState(options);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showOptions, setShowOptions] = useState(false);
@@ -563,7 +584,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
         break;
     }
   };
-
+ 
   const selectOption = (
     option: T,
     setFieldValue: (name: string, value: any) => void
@@ -571,6 +592,8 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
     setTextSearch(option[labelKey]); //
     setFilteredOptions(options);
     setFieldValue(name, option[idKey]); // Establecer el valor en Formik
+    handleModified && handleModified(name,option[idKey])
+    // handleModified(name,value);
 
     setShowOptions(false);
   };
@@ -581,7 +604,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   ) => {
     setTextSearch(option[labelKey]); //
     selectOption(option, setFieldValue);
-
+    
     // setShowOptions(false);
   };
 
@@ -607,37 +630,44 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   //   //   setShowOptions(true);
   //   }
   // }, [filteredOptions]);
-
   return (
     <ColComponent responsive={responsive} autoPadding={padding}>
       <Field name={name}>
-        {({ form: { setFieldValue, errors, touched, values } }: any) => {
+        {({ field, form: { setFieldValue, errors, touched, values,setTouched} }: any) => {
           const error =
-            touched?.[name] && typeof errors?.[name] === "string"
+            touched?.[name] && typeof errors?.[name] === "string" 
+            // && (values?.[name]==0 || values?.[name]==""||values?.[name]==undefined) 
               ? (errors?.[name] as string)
               : null;
-          // console.log(name,values[name]);
+              // console.log(meta)
           // if ( values[name] == 0) {
           //   setTextSearch("")
           // }
+      
           return (
             <div
               className={`relative  w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
             >
               <input
+              // {...field}
                 disabled={disabled}
                 ref={inputRef}
                 type="text"
                 onFocus={() => {
+                  
                   if (disabled) {
                     return;
                   }
+                  // formik.setTouched((prev:any)=>({
+                  //   ...prev,[name]: true
+                  // }))
                   handleInputFocus();
                 }}
-                onBlur={() => {
+                onBlur={(e) => {
                   setTimeout(() => {
                     setShowOptions(false);
                   }, 500);
+                  formik.handleBlur(e)
                 }}
                 autoComplete="off"
                 id={name}
@@ -696,7 +726,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                   ref={menuRef} // Añadimos la referencia para la lista
                   className="absolute bg-white border border-gray-300 rounded shadow-md max-h-40 overflow-auto w-full z-10 mt-1"
                 >
-                  {filteredOptions.map((option, index) => (
+                  {Array.isArray(filteredOptions) && filteredOptions.length>0 && filteredOptions.map((option, index) => (
                     <li
                       ref={(el) => (optionRefs.current[index] = el)}
                       key={

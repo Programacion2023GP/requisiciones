@@ -13,15 +13,18 @@ import * as Yup from "yup";
 import {
   FormikAutocomplete,
   FormikImageInput,
+  FormikNumberInput,
 } from "../../components/formik/FormikInputs/FormikInput";
 import { showToast } from "../../sweetalert/Sweetalert";
 import Spinner from "../../loading/Loading";
 import { FaUserEdit } from "react-icons/fa";
+import Typography from "../../components/typografy/Typografy";
 
 type PropsTable = {
   IdDetDirectores: number;
   IDDepartamento: number;
   Nombre_Director: string|null;
+  Centro_Costo:number|null;
   Firma_Director: string | null;
   NombreCompleto?: string  |null;
   Nombre_Departamento:string|null;
@@ -34,19 +37,51 @@ const ActionButtons = ({
   // setOpen,
   // handleEdit,
 }: {
-  data: Record<string, any>;
+  data: PropsTable;
   // mutation: any;
   // setOpen: Dispatch<SetStateAction<boolean>>;
   // handleEdit: (data: Record<string, any>) => void;
   handleEdit: (provedor: PropsTable) => void;
 }) => {
-  const handleDelete = () => {
-    //   mutation.mutate({
-    //     url: `/users/delete/${data.IDUsuario}`,
-    //     method: "DELETE",
-    //   });
-  };
+  const [open,setOpen] = useState<boolean>(false)
 
+  const mutation = useMutation({
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
+    onSuccess: (data) => {
+      setOpen(false);
+      showToast(data.message, data.status);
+      queryClient.refetchQueries({
+        queryKey: ["catDepartaments/index"],
+      });
+    },
+    onError: (error: any) => {
+      const message =
+        error.response?.data?.message || "Error al realizar la acción";
+      showToast(message, "error");
+    },
+  });
+
+  const initialValues ={
+    IDDepartamento: data.IDDepartamento,
+    Centro_Costo: data.Centro_Costo,
+  }
+  const validationSchema = Yup.object({
+    IDDepartamento: Yup.number().min(1,"El departamento es requerido").required("El departamento es requerido"),
+    Centro_Costo: Yup.number().min(1,"El centro de costo es requerido").required("El centro de costo es requerido"),
+  })
+  const queryClient = useQueryClient(); // Inicializa el query client
+
+  const onSubmit = (values:Record<string,any>) => {
+    mutation.mutate({method: "PUT",url:"departaments/update",data:values})
+  }
   return (
     <>
       <div className="flex gap-2">
@@ -62,17 +97,37 @@ const ActionButtons = ({
             <FaUserEdit />
           </Button>
         </Tooltip>
-        {/* 
-          <Tooltip content="eliminar al usuario">
-            <Button
-              color="red"
-              size="small"
-              variant="solid"
-              onClick={handleDelete}
-            >
-              <MdDelete />
-            </Button>
-          </Tooltip> */}
+        <Tooltip content="Editar centro de costo">
+          <Button
+            color="yellow"
+            size="small"
+            variant="solid"
+            onClick={() => {
+             setOpen(true);
+            }}
+          >
+            < BiEdit/>
+          </Button>
+        </Tooltip>
+      <ModalComponent title="Editar centro de costo" open={open} setOpen={()=>{
+        setOpen(false)
+      }}>
+         <FormikForm
+         
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            buttonMessage="Actualizar"
+            onSubmit={onSubmit}
+            children={(values,setValue,setTouched,errors) => (
+              <>
+              <div className="mb-2">
+              </div>
+              <Typography className="w-full text-center" > {data.Nombre_Departamento}</Typography>
+                <FormikNumberInput label="Centro de costo" name="Centro_Costo" decimals={false}/>
+              </>
+            )}
+            />
+      </ModalComponent>
       </div>
     </>
   );
@@ -99,6 +154,7 @@ const CatDepartaments = () => {
     IdDetDirectores: 0,
     NombreCompleto: null,
     Nombre_Departamento:null,
+    Centro_Costo: null
   });
   const queries = useQueries({
     queries: [
@@ -132,6 +188,13 @@ const CatDepartaments = () => {
         sortable: true,
         filter: true,
       },
+      {
+        headerName: "Centro Costo",
+        field: "Centro_Costo",
+        sortable: true,
+        filter: true,
+      },
+      
     {
       headerName: "Firma",
       field: "Firma_Director", // Usamos colId para identificar la columna sin usar field
@@ -178,7 +241,6 @@ const CatDepartaments = () => {
   }
   
   const data = await response.json();
-  console.log("Respuesta del servidor:", data);
   if (data && data?.message && data?.status) {
       showToast(data?.message, data?.status);
     
