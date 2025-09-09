@@ -17,11 +17,12 @@ import PdfLeft from "./PdfLeft";
 import PdfHeader from "./PdfHeader";
 import { PdfRight } from "./PdfRight";
 import PdfFooter from "./PdfFooter";
+import Spinner from "../../loading/Loading";
 type PdfRequisitionType = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   filePath?: string;
-  children?: React.ReactNode
+  children?: React.ReactNode;
 };
 const tw = createTw({});
 
@@ -29,10 +30,11 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
   open,
   setOpen,
   filePath,
-  children
+  children,
 }) => {
   const data = Observable().ObservableGet("PdfRequisicion") as any;
   const [myData, setData] = useState<Array<Record<string, any>>>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const groupArrays = (
     array: Array<Record<string, any>>,
     length: number
@@ -41,6 +43,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
     for (let i = 0; i < array.length; i += length) {
       resultado.push(array.slice(i, i + length));
     }
+    setLoading(false);
     return resultado;
   };
 
@@ -50,9 +53,10 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
 
   return (
     <ModalComponent title="Requisición" open={open} setOpen={setOpen}>
+      {loading && <Spinner />}
       <PDFViewer width="100%" height="100%">
         <Document>
-          {myData.map((item:any) => (
+          {myData.map((item: any) => (
             <Page size="A4" orientation="landscape">
               <View style={tw("p-4")}>
                 <PdfHeader />
@@ -62,10 +66,9 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                     "border-2 border-black flex flex-row w-full h-full text-black"
                   )}
                 >
-                  <PdfLeft products={item}  pdfData={data?.data?.pdfData}/>
+                  <PdfLeft products={item} pdfData={data?.data?.pdfData} />
 
-
-                  <PdfRight  products={item} pdfData={data?.data?.pdfData} />
+                  <PdfRight products={item} pdfData={data?.data?.pdfData} />
                 </View>
 
                 <PdfFooter data={data} />

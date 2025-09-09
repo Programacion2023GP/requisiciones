@@ -19,7 +19,7 @@ import CardComponent from "../../components/card/Card";
 import Typography from "../../components/typografy/Typografy";
 import Spinner from "../../loading/Loading";
 
-const TypeVigencia=({
+const TypeVigencia = ({
   data,
   // mutation,
   // setOpen,
@@ -29,15 +29,9 @@ const TypeVigencia=({
   // mutation: any;
   // setOpen: Dispatch<SetStateAction<boolean>>;
   // handleEdit: (data: Record<string, any>) => void;
-})=>{
-  return (
-    <div className="flex gap-2">
-        {data.vigencia}
-     
-
-    </div>
-  );
-}
+}) => {
+  return <div className="flex gap-2">{data.vigencia}</div>;
+};
 const ActionButtons = ({
   data,
   handleEdit,
@@ -303,20 +297,18 @@ const SuppliersComponent = () => {
       return "provedor_accepted";
     }
     if (vigencia === "Vencido") {
-
       return "provedor_canceled";
     }
     if (vigencia === "Nuevo") {
-
       return "provedor_new";
     }
   };
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
-            {mutation.status =='pending' && (<Spinner/>)}
+      {mutation.status == "pending" && <Spinner />}
 
       <div className="ag-theme-alpine w-full mx-auto container p-6">
-        <div className="w-full justify-center flex flex-row flex-wrap gap-4 mb-2">
+        {/* <div className="w-full justify-center flex flex-row flex-wrap gap-4 mb-2">
           {[
             { title: "Certificado vencido", bg: "#f8d7da" },
             { title: "Certificado Aprobado", bg: "#d4f4dd" },
@@ -369,7 +361,7 @@ const SuppliersComponent = () => {
           }
           
           )}
-        </div>
+        </div> */}
 
         <Agtable
           getRowClass={getRowClass}
@@ -377,7 +369,7 @@ const SuppliersComponent = () => {
             buttonElement: "CatProveedores",
             table: "CatProveedores",
           }}
-          loading={suppliers.status=="pending"?true:false}
+          loading={suppliers.status == "pending" ? true : false}
           data={suppliers?.data?.data}
           isLoading={suppliers.isLoading}
           columnDefs={columnDefs}

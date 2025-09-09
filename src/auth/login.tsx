@@ -2,7 +2,10 @@ import { UseMutationResult, useMutation } from "@tanstack/react-query";
 import CardComponent from "../components/card/Card";
 import Button from "../components/form/Button";
 import FormikForm from "../components/formik/Formik";
-import { FormikInput, FormikPasswordInput } from "../components/formik/FormikInputs/FormikInput";
+import {
+  FormikInput,
+  FormikPasswordInput,
+} from "../components/formik/FormikInputs/FormikInput";
 import { ColComponent, RowComponent } from "../responsive/Responsive";
 import * as Yup from "yup";
 import { AxiosRequest } from "../axios/Axios";
@@ -10,7 +13,6 @@ import { showToast } from "../sweetalert/Sweetalert";
 import Spinner from "../loading/Loading";
 
 const LoginComponent = () => {
-  
   const colComponents = {
     "2xl": 6,
     xl: 6,
@@ -21,48 +23,56 @@ const LoginComponent = () => {
   const validationSchema = Yup.object({
     Usuario: Yup.string().required("El usuario es obligatorio"),
     Password: Yup.string().required("La contraseña es requerida"),
-  
   });
   const mutation = useMutation({
-    mutationFn: ({ url, method, data }: { url: string; method: 'POST' | 'PUT' | 'DELETE'; data?: any }) =>
-      AxiosRequest(url, method, data),
-    
+    mutationFn: ({
+      url,
+      method,
+      data,
+    }: {
+      url: string;
+      method: "POST" | "PUT" | "DELETE";
+      data?: any;
+    }) => AxiosRequest(url, method, data),
+
     onSuccess: (data) => {
-      if(data?.data && data?.data?.redirect =="/"){
-        showToast("no cuentas con permisos", 'question');
+      if (data?.data && data?.data?.redirect == "/") {
+        showToast("no cuentas con permisos", "question");
         return;
       }
-    if (data?.data) {
-      localStorage.setItem('permisos', JSON.stringify(data.data.permisos));
-      localStorage.setItem('menuPermiso', JSON.stringify(data.data.menuPermiso));
-      localStorage.setItem('group', data.data.group);
-      localStorage.setItem('token', data.data.token);
-      localStorage.setItem('name', data.data.name);
-      localStorage.setItem('role', data.data.role);
-      localStorage.setItem('redirect', data.data.redirect);
-      window.location.href = data.data.redirect
-    }
-    showToast(data.message, data.status);
+      if (data?.data) {
+        localStorage.setItem("permisos", JSON.stringify(data.data.permisos));
+        localStorage.setItem(
+          "menuPermiso",
+          JSON.stringify(data.data.menuPermiso)
+        );
+        localStorage.setItem("group", data.data.group);
+        localStorage.setItem("token", data.data.token);
+        localStorage.setItem("name", data.data.name);
+        localStorage.setItem("role", data.data.role);
+        localStorage.setItem("centro_costo", data.data.centro_costo);
 
-
-     
-  },
+        localStorage.setItem("redirect", data.data.redirect);
+        window.location.href = data.data.redirect;
+      }
+      showToast(data.message, data.status);
+    },
     onError: (error: any) => {
       console.log(error);
-      showToast(error?.message || 'Error al realizar la acción', 'error');
+      showToast(error?.message || "Error al realizar la acción", "error");
     },
-  },);
+  });
 
-  const onSubmit = (values:Record<string,any>)=>{
+  const onSubmit = (values: Record<string, any>) => {
     mutation.mutate({
       url: `/auth/login`,
-      method: 'POST',
+      method: "POST",
       data: values,
     });
-  }
+  };
   return (
     <>
-      {mutation.status =='pending' && (<Spinner/>)}
+      {mutation.status == "pending" && <Spinner />}
 
       <div className="bg-gradient-to-tr from-presidencia  bg-gray-300 w-screen h-screen flex justify-center items-center">
         <RowComponent>
@@ -85,25 +95,16 @@ const LoginComponent = () => {
                     Usuario: "",
                     Password: "",
                   }}
-                  children={() => 
-                    
-                    (
+                  children={() => (
                     <ColComponent>
-                      <FormikInput
-                        label="Usuario"
-                        name="Usuario"
-                      />
-                      <FormikPasswordInput
-                        label="Contraseña"
-                        name="Password"
-                      />
+                      <FormikInput label="Usuario" name="Usuario" />
+                      <FormikPasswordInput label="Contraseña" name="Password" />
                       <div className="mt-8">
                         <Button
-                        type="submit"
+                          type="submit"
                           color="presidencia"
                           variant="outline"
                           size="medium"
-                        
                         >
                           Iniciar sesión
                         </Button>
@@ -115,12 +116,11 @@ const LoginComponent = () => {
             />
           </ColComponent>
 
-          <ColComponent responsive={{...colComponents,sm:0,md:0}}>
+          <ColComponent responsive={{ ...colComponents, sm: 0, md: 0 }}>
             {/* Título Elegante de Requisiciones */}
             <p className="text-center font-semibold text-gray-900 text-6xl mt-10 mb-8">
               Requisiciones
             </p>
-        
           </ColComponent>
         </RowComponent>
       </div>

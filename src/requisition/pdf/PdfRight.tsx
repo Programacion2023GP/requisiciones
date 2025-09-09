@@ -17,7 +17,7 @@ type DataPdf = {
 
 export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
   return (
-    <View style={tw("text-sm text-wrap px-1  w-1/3 max-w-1/3")}>
+    <View style={tw(`text-sm text-wrap px-1  w-1/3 max-w-1/3 ${ producto.Proveedor!=null && producto.Proveedor ==producto?.[`Proveedor${index}`] && 'bg-slate-400' }`)}>
       <Text style={tw("text-wrap h-20   overflow-hidden")}>
         {producto?.[`Proveedor${index}`] || ""}
       </Text>

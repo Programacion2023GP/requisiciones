@@ -23,11 +23,11 @@ import Typography from "../../components/typografy/Typografy";
 type PropsTable = {
   IdDetDirectores: number;
   IDDepartamento: number;
-  Nombre_Director: string|null;
-  Centro_Costo:number|null;
+  Nombre_Director: string | null;
+  Centro_Costo: number | null;
   Firma_Director: string | null;
-  NombreCompleto?: string  |null;
-  Nombre_Departamento:string|null;
+  NombreCompleto?: string | null;
+  Nombre_Departamento: string | null;
 };
 
 const ActionButtons = ({
@@ -43,7 +43,7 @@ const ActionButtons = ({
   // handleEdit: (data: Record<string, any>) => void;
   handleEdit: (provedor: PropsTable) => void;
 }) => {
-  const [open,setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(false);
 
   const mutation = useMutation({
     mutationFn: ({
@@ -69,19 +69,27 @@ const ActionButtons = ({
     },
   });
 
-  const initialValues ={
+  const initialValues = {
     IDDepartamento: data.IDDepartamento,
     Centro_Costo: data.Centro_Costo,
-  }
+  };
   const validationSchema = Yup.object({
-    IDDepartamento: Yup.number().min(1,"El departamento es requerido").required("El departamento es requerido"),
-    Centro_Costo: Yup.number().min(1,"El centro de costo es requerido").required("El centro de costo es requerido"),
-  })
+    IDDepartamento: Yup.number()
+      .min(1, "El departamento es requerido")
+      .required("El departamento es requerido"),
+    Centro_Costo: Yup.number()
+      .min(1, "El centro de costo es requerido")
+      .required("El centro de costo es requerido"),
+  });
   const queryClient = useQueryClient(); // Inicializa el query client
 
-  const onSubmit = (values:Record<string,any>) => {
-    mutation.mutate({method: "PUT",url:"departaments/update",data:values})
-  }
+  const onSubmit = (values: Record<string, any>) => {
+    mutation.mutate({
+      method: "PUT",
+      url: "departaments/update",
+      data: values,
+    });
+  };
   return (
     <>
       <div className="flex gap-2">
@@ -103,58 +111,64 @@ const ActionButtons = ({
             size="small"
             variant="solid"
             onClick={() => {
-             setOpen(true);
+              setOpen(true);
             }}
           >
-            < BiEdit/>
+            <BiEdit />
           </Button>
         </Tooltip>
-      <ModalComponent title="Editar centro de costo" open={open} setOpen={()=>{
-        setOpen(false)
-      }}>
-         <FormikForm
-         
+        <ModalComponent
+          title="Editar centro de costo"
+          open={open}
+          setOpen={() => {
+            setOpen(false);
+          }}
+        >
+          <FormikForm
             initialValues={initialValues}
             validationSchema={validationSchema}
             buttonMessage="Actualizar"
             onSubmit={onSubmit}
-            children={(values,setValue,setTouched,errors) => (
+            children={(values, setValue, setTouched, errors) => (
               <>
-              <div className="mb-2">
-              </div>
-              <Typography className="w-full text-center" > {data.Nombre_Departamento}</Typography>
-                <FormikNumberInput label="Centro de costo" name="Centro_Costo" decimals={false}/>
+                <div className="mb-2"></div>
+                <Typography className="w-full text-center">
+                  {" "}
+                  {data.Nombre_Departamento}
+                </Typography>
+                <FormikNumberInput
+                  label="Centro de costo"
+                  name="Centro_Costo"
+                  decimals={false}
+                />
               </>
             )}
-            />
-      </ModalComponent>
+          />
+        </ModalComponent>
       </div>
     </>
   );
 };
 const Picture = ({ data }: { data: PropsTable }) => {
-
   return (
     <PhotoZoom
-      src={
-      `${import.meta.env.VITE_API_IMG}/${data.Firma_Director}`  
-      }
+      src={`${import.meta.env.VITE_API_IMG}/${data.Firma_Director}`}
       alt={"Firma del director " + data.Nombre_Director}
-      title={data?.Nombre_Director ||''}
+      title={data?.Nombre_Director || ""}
     ></PhotoZoom>
   );
 };
 const CatDepartaments = () => {
   const [open, setOpen] = useState<boolean>(false);
-  const [spiner, setSpiner] = useState<boolean>(false)
+  const [spiner, setSpiner] = useState<boolean>(false);
   const [initialValues, setInitialValues] = useState<PropsTable>({
     Nombre_Director: null,
     Firma_Director: null,
     IDDepartamento: 0,
     IdDetDirectores: 0,
     NombreCompleto: null,
-    Nombre_Departamento:null,
-    Centro_Costo: null
+    Nombre_Departamento: null,
+    Centro_Costo: null,
   });
   const queries = useQueries({
     queries: [
@@ -183,18 +197,18 @@ const CatDepartaments = () => {
       filter: true,
     },
     {
-        headerName: "Departamento",
-        field: "Nombre_Departamento",
-        sortable: true,
-        filter: true,
-      },
-      {
-        headerName: "Centro Costo",
-        field: "Centro_Costo",
-        sortable: true,
-        filter: true,
-      },
-      
+      headerName: "Departamento",
+      field: "Nombre_Departamento",
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Centro Costo",
+      field: "Centro_Costo",
+      sortable: true,
+      filter: true,
+    },
+
     {
       headerName: "Firma",
       field: "Firma_Director", // Usamos colId para identificar la columna sin usar field
@@ -214,73 +228,77 @@ const CatDepartaments = () => {
   ]);
   const [departaments, users] = queries;
   const onSubmit = async (values: Record<string, any>) => {
-    setSpiner(true)
-  
+    setSpiner(true);
+
     const formData = new FormData();
     formData.append("IDDepartamento", values.IDDepartamento);
     formData.append("Nombre_Director", values.NombreCompleto);
     formData.append("Firma_Director", values.Firma_Director);
-  
-  
-   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/departaments/create`, {
-        method: "POST",
-    body: formData,
-    headers: {
-      Authorization: `Bearer ${ localStorage.getItem("token")}`,
-    },
-  });
 
-  if (!response.ok) {
-    setSpiner(false)
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/departaments/create`,
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
-    const errorData = await response.json().catch(() => ({})); // Si el cuerpo no es JSON
-    showToast("no se pudo registrar al director", "error");
+      if (!response.ok) {
+        setSpiner(false);
 
-    return
-  }
-  
-  const data = await response.json();
-  if (data && data?.message && data?.status) {
-      showToast(data?.message, data?.status);
-    
-  }
-  setOpen(false)
-  queryClient.refetchQueries({
-    queryKey: ["catDepartaments/index"],
-  });
-  setSpiner(false)
+        const errorData = await response.json().catch(() => ({})); // Si el cuerpo no es JSON
+        showToast("no se pudo registrar al director", "error");
 
-} catch (error) {
-  console.error("Error al enviar el formulario:", error);
-}
+        return;
+      }
 
+      const data = await response.json();
+      if (data && data?.message && data?.status) {
+        showToast(data?.message, data?.status);
+      }
+      setOpen(false);
+      queryClient.refetchQueries({
+        queryKey: ["catDepartaments/index"],
+      });
+      setSpiner(false);
+    } catch (error) {
+      console.error("Error al enviar el formulario:", error);
+    }
   };
-  
+
   const validationSchema = Yup.object({
-    IDDepartamento: Yup.number().min(1,"El departamento es requerido").required("El departamento es requerido"),
+    IDDepartamento: Yup.number()
+      .min(1, "El departamento es requerido")
+      .required("El departamento es requerido"),
     NombreCompleto: Yup.string().required("El director es requerido"),
     Firma_Director: Yup.mixed()
-    .required("La firma es obligatoria")
-    .test("fileType", "Solo se permiten archivos de imagen", (value) => {
-      if (value && value instanceof File) {
-        return value.type.startsWith("image/");
-      }
-      return false;
-    })
-    .test("fileSize", "El archivo debe tener un tamaño máximo de 2 MB", (value) => {
-      if (value && value instanceof File) {
-        return value.size <= 2 * 1024 * 1024; // 2MB en bytes
-      }
-      return true;
-    }),
-});
-const queryClient = useQueryClient(); // Inicializa el query client
-
+      .required("La firma es obligatoria")
+      .test("fileType", "Solo se permiten archivos de imagen", (value) => {
+        if (value && value instanceof File) {
+          return value.type.startsWith("image/");
+        }
+        return false;
+      })
+      .test(
+        "fileSize",
+        "El archivo debe tener un tamaño máximo de 2 MB",
+        (value) => {
+          if (value && value instanceof File) {
+            return value.size <= 2 * 1024 * 1024; // 2MB en bytes
+          }
+          return true;
+        }
+      ),
+  });
+  const queryClient = useQueryClient(); // Inicializa el query client
 
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
-              {spiner && (<Spinner/>)}
+      {spiner && <Spinner />}
 
       <div className="ag-theme-alpine w-full mx-auto container p-6">
         <ModalComponent
@@ -295,16 +313,16 @@ const queryClient = useQueryClient(); // Inicializa el query client
             validationSchema={validationSchema}
             buttonMessage="Registrar"
             onSubmit={onSubmit}
-            children={(values,setValue,setTouched,errors) => (
+            children={(values, setValue, setTouched, errors) => (
               <>
-              <div className="mb-2"></div>
+                <div className="mb-2"></div>
 
-                  <FormikImageInput
-                    label="Subir la firma del director"
-                    name="Firma_Director"
-                    disabled={false}
-                    acceptedFileTypes="png,jpg,jpeg"
-                  />
+                <FormikImageInput
+                  label="Subir la firma del director"
+                  name="Firma_Director"
+                  disabled={false}
+                  acceptedFileTypes="png,jpg,jpeg"
+                />
                 <FormikAutocomplete
                   labelKey="NombreCompleto"
                   idKey="NombreCompleto"
@@ -313,14 +331,14 @@ const queryClient = useQueryClient(); // Inicializa el query client
                   loading={false}
                   options={users.data.data}
                 />
-                 {errors?.NombreCompleto &&  (
-                <span
-                  className="text-sm font-semibold text-red-600"
-                  id={`${errors?.NombreCompleto}-error`}
-                >
-                  {errors?.NombreCompleto}
-                </span>
-              )}
+                {errors?.NombreCompleto && (
+                  <span
+                    className="text-sm font-semibold text-red-600"
+                    id={`${errors?.NombreCompleto}-error`}
+                  >
+                    {errors?.NombreCompleto}
+                  </span>
+                )}
               </>
             )}
           />
@@ -330,7 +348,7 @@ const queryClient = useQueryClient(); // Inicializa el query client
             buttonElement: "CatDepartamentos",
             table: "CatDepartamentos",
           }}
-          loading={departaments.status=="pending"?true:false}
+          loading={departaments.status == "pending" ? true : false}
           data={departaments?.data?.data}
           isLoading={departaments.isLoading}
           columnDefs={columnDefs}

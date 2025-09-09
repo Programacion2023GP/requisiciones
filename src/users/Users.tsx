@@ -57,45 +57,45 @@ const ActionButtons = ({
     });
   };
 
-
   return (
     <>
       <div className="flex gap-2">
-      <Tooltip content="editar al usuario">
-
-        <Button
-          color="yellow"
-          size="small"
-          variant="solid"
-          onClick={() => {
-            handleEdit(data);
-          }}
-        >
-          <BiEdit />
-        </Button>
+        <Tooltip content="editar al usuario">
+          <Button
+            color="yellow"
+            size="small"
+            variant="solid"
+            onClick={() => {
+              handleEdit(data);
+            }}
+          >
+            <BiEdit />
+          </Button>
         </Tooltip>
-        <PermissionMenu IdMenu={'Permisos'} >
-
-     <Tooltip content="asignar permisos al usuario">
-     <Button
-          color="indigo"
-          size="small"
-          variant="solid"
-          onClick={() => {
-            handleEditPermission(data);
-          }}
-        >
-          <MdMenu />
-        </Button>
-     </Tooltip>
-     </PermissionMenu>
-     <Tooltip content="eliminar al usuario">
-
-        <Button color="red" size="small" variant="solid" onClick={handleDelete}>
-          <MdDelete />
-        </Button>
+        <PermissionMenu IdMenu={"Permisos"}>
+          <Tooltip content="asignar permisos al usuario">
+            <Button
+              color="indigo"
+              size="small"
+              variant="solid"
+              onClick={() => {
+                handleEditPermission(data);
+              }}
+            >
+              <MdMenu />
+            </Button>
+          </Tooltip>
+        </PermissionMenu>
+        <Tooltip content="eliminar al usuario">
+          <Button
+            color="red"
+            size="small"
+            variant="solid"
+            onClick={handleDelete}
+          >
+            <MdDelete />
+          </Button>
         </Tooltip>
-
       </div>
     </>
   );
@@ -109,6 +109,10 @@ const TypeRolUser = (data: Record<string, any>) => {
   switch (Rol) {
     case "REQUISITOR":
       classNames = "border-blue-500 text-blue-500 border-2 p-2 rounded-md"; // Borde y texto azul para 'REQUISITOR'
+      break;
+    case "DIRECTORCOMPRAS":
+      classNames =
+        "border-black bg-black text-white font-bold border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
       break;
     case "AUTORIZADOR":
       classNames = "border-green-500 text-green-500 border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
@@ -148,23 +152,23 @@ const Users = () => {
     Usuario: "",
     newKey: "", // Inicializado en 1
   });
-  
+
   const queryClient = useQueryClient(); // Inicializa el query client
-const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
-  IDUsuario: null,
-  Nombre: null,
-  Paterno: null,
-  Materno: null,
-  IDDepartamento: 0,
-  Rol: 0,
-  Usuario: "",
-  Password: "123456",
-  Permiso_Autorizar: false,
-  Permiso_Asignar: false,
-  Permiso_Cotizar: false,
-  Permiso_Surtir: false,
-  Permiso_Orden_Compra: false,
-})
+  const [usersFormik, setUsersFormik] = useState<Record<string, any>>({
+    IDUsuario: null,
+    Nombre: null,
+    Paterno: null,
+    Materno: null,
+    IDDepartamento: 0,
+    Rol: 0,
+    Usuario: "",
+    Password: "123456",
+    Permiso_Autorizar: false,
+    Permiso_Asignar: false,
+    Permiso_Cotizar: false,
+    Permiso_Surtir: false,
+    Permiso_Orden_Compra: false,
+  });
   // Realizas las consultas
   const queries = useQueries({
     queries: [
@@ -183,29 +187,28 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
   });
   const handleEdit = (data: Record<string, any>) => {
     toggleOpen(); // Optionally open the modal if you're editing
-    setUsersFormik(data)
-    
+    setUsersFormik(data);
   };
   const handleEditPermission = (data: Record<string, any>) => {
     const generateRandomNumber = () => {
-      return Math.floor(Math.random() * 10);  // Genera un número entre 0 y 9
+      return Math.floor(Math.random() * 10); // Genera un número entre 0 y 9
     };
-  
+
     const generateRandomKey = (length: number) => {
-      let key = '';
+      let key = "";
       for (let i = 0; i < length; i++) {
-        key += generateRandomNumber();  // Concatenar números aleatorios
+        key += generateRandomNumber(); // Concatenar números aleatorios
       }
       return key;
     };
-  
+
     setPermissionEditUser({
       fullName: data.NombreCompleto,
       Usuario: data.Usuario,
-      newKey: generateRandomKey(50),  // Genera una clave con 30 números aleatorios
+      newKey: generateRandomKey(50), // Genera una clave con 30 números aleatorios
     });
   };
-  
+
   // useEffect(()=>{
   //   console.log("my info",usersFormik)
   // },[usersFormik])
@@ -238,8 +241,6 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
 
   const [users, groups] = queries;
   const roles = [
-  
-  
     {
       id: "REQUISITOR",
       value: "REQUISITOR",
@@ -249,45 +250,59 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
       value: "DIRECTOR",
     },
     {
+      id: "DIRECTORCOMPRAS",
+      value: "DIRECTOR COMPRAS",
+    },
+    {
+      id: "CAPTURA",
+      value: "CAPTURA",
+    },
+    {
       id: "AUTORIZADOR",
       value: "AUTORIZADOR",
     },
   ];
 
   const [columnDefs] = useState<ColDef<TypeUsers>[]>([
-    { headerName: "Nombre", field: "Nombre", sortable: true, filter: true,    
-  },
-    {
-      headerName: "Apellido Paterno",
-      field: "Paterno",
-      sortable: true,
-      filter: true,    
-
-    },
-    {
-      headerName: "Apellido Materno",
-      field: "Materno",
-      sortable: true,
-      filter: true,    
-
-    },
+    // { headerName: "Nombre", field: "Nombre", sortable: true, filter: true },
+    // {
+    //   headerName: "Apellido Paterno",
+    //   field: "Paterno",
+    //   sortable: true,
+    //   filter: true,
+    // },
+    // {
+    //   headerName: "Apellido Materno",
+    //   field: "Materno",
+    //   sortable: true,
+    //   filter: true,
+    // },
     {
       headerName: "Nombre Completo",
       field: "NombreCompleto",
       sortable: true,
-      filter: true,    
-
+      filter: true,
+    },
+    {
+      headerName: "Departamento",
+      field: "IDDepartamento",
+      sortable: true,
+      filter: true,
+      valueGetter: (params: any) => {
+        const departamento = groups.data?.data.find(
+          (dep: any) => dep.IDDepartamento === params.data.IDDepartamento
+        );
+        return departamento?.Nombre_Departamento || "Sin asignar";
+      },
     },
 
-    { headerName: "Usuario", field: "Usuario", sortable: true, filter: true,    
-  },
+    { headerName: "Usuario", field: "Usuario", sortable: true, filter: true },
     // { headerName: "Rol", field: "Rol", sortable: true, filter: true },
     {
       headerName: "Rol",
       field: "Rol", // Usamos colId para identificar la columna sin usar field
       sortable: true,
       filter: true,
-      
 
       cellRenderer: (params: any) => <TypeRolUser data={params.data} />, // Usamos cellRendererFramework
     },
@@ -353,8 +368,12 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
     IDDepartamento: Yup.number()
       .min(1, "El departamento es obligatorio")
       .required("El departamento es obligatorio"),
-    Rol: Yup.string().oneOf(['REQUISITOR','DIRECTOR','AUTORIZADOR'], 'Selecciona un rol válido') // Aquí validamos que el valor esté entre los roles permitidos
-    .required('El rol es obligatorio'),
+    Rol: Yup.string()
+      .oneOf(
+        ["REQUISITOR", "DIRECTOR", "AUTORIZADOR", "CAPTURA", "DIRECTORCOMPRAS"],
+        "Selecciona un rol válido"
+      ) // Aquí validamos que el valor esté entre los roles permitidos
+      .required("El rol es obligatorio"),
   });
   const responsive = {
     "2xl": 6,
@@ -365,6 +384,13 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
   };
 
   const onSumbit = (values: Record<string, any>) => {
+    if (values.Rol == "DIRECTORCOMPRAS") {
+      values.Permiso_Asignar = true;
+      values.Permiso_Autorizar = true;
+      values.Permiso_Cotizar = true;
+      values.Permiso_Orden_Compra = true;
+      values.Permiso_Surtir = true;
+    }
     // Llamar a la función mutate para ejecutar la solicitud POST
     mutation.mutate({
       url: "/users/createOrUpdate",
@@ -376,13 +402,13 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
       {mutation.status == "pending" && <Spinner />}
-    {permissionEditUser.Usuario !="" && (
+      {permissionEditUser.Usuario != "" && (
         <MenuComponent
-        newKey={permissionEditUser?.newKey}
-        fullName={permissionEditUser?.fullName}
-        Usuario={permissionEditUser?.Usuario}
-      />
-    )}
+          newKey={permissionEditUser?.newKey}
+          fullName={permissionEditUser?.fullName}
+          Usuario={permissionEditUser?.Usuario}
+        />
+      )}
 
       <ModalComponent
         title="Usuarios"
@@ -395,7 +421,7 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
         <FormikForm
           // ref={formik}
           onSubmit={onSumbit}
-          buttonMessage={usersFormik.IDUsuario>0 ? 'Actualizar':'Registrar'}
+          buttonMessage={usersFormik.IDUsuario > 0 ? "Actualizar" : "Registrar"}
           validationSchema={validationSchema}
           initialValues={usersFormik}
           children={(values) => (
@@ -438,7 +464,7 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
                 idKey={"id"}
                 labelKey={"value"}
               />
-              {(values.Rol == "AUTORIZADOR" )&& (
+              {values.Rol == "AUTORIZADOR" && (
                 <>
                   <div className="w-full text-start mb-2 ml-3">
                     <Typography
@@ -514,17 +540,17 @@ const [usersFormik,setUsersFormik] = useState<Record<string, any>>({
       </ModalComponent>
 
       <div className="ag-theme-alpine w-full mx-auto container p-6">
-    <PermissionMenu IdMenu={'Usuarios'}>
-    <p className="text-center font-semibold text-2xl md:text-3xl text-gray-700 mb-4">
-          Usuarios del Sistema
-        </p>
-    </PermissionMenu>
+        <PermissionMenu IdMenu={"Usuarios"}>
+          <p className="text-center font-semibold text-2xl md:text-3xl text-gray-700 mb-4">
+            Usuarios del Sistema
+          </p>
+        </PermissionMenu>
         <Agtable
-        permissionsUserTable={{
-          buttonElement:"Usuarios",
-          table:"Usuarios"
-        }}
-          loading={users.status=="pending"?true:false}
+          permissionsUserTable={{
+            buttonElement: "Usuarios",
+            table: "Usuarios",
+          }}
+          loading={users.status == "pending" ? true : false}
           data={users?.data?.data}
           isLoading={users.isLoading}
           columnDefs={columnDefs}

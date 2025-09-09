@@ -84,9 +84,23 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       setInitialValues({});
       setSpiner(true);
     },
-    onSuccess: (data) => {
+    onSuccess: (resp) => {
       setSpiner(false);
-      setInitialValues({ ...data?.data, ObservacionesCot: "" });
+
+      console.log(resp?.data);
+      const item = data.find(
+        (it) =>
+          it.IDproveedor1 > 0 && it.IDproveedor2 > 0 && it.IDproveedor3 > 0
+      );
+
+      setInitialValues({
+        ...resp?.data,
+        IDproveedor1: item?.IDproveedor1,
+        IDproveedor2: item?.IDproveedor2,
+        IDproveedor3: item?.IDproveedor3,
+        ObservacionesCot: "",
+      });
+
       // showToast(data.message, data.status);
       if (mutationSearch.status === "success") {
         mutationSearch.reset();
@@ -186,45 +200,47 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           //   .min(1, "Selecciona un provedor")
           //   .required("Selecciona un provedor"), // Asegúrate que Proveedor pueda ser null
           IDproveedor1: Yup.number()
-          .test(
-            "unique1",
-            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-            function (value) {
-              const { IDproveedor2, IDproveedor3 } = this.parent; 
-              console.log("Valores del formulario:", this.parent); 
-              return value !== IDproveedor2 && value !== IDproveedor3; 
-            }
-          )
-          .required("El proveedor 1 es obligatorio"), 
-      
-        // Proveedor 2
-        IDproveedor2: Yup.number()
-          .min(1, "Selecciona un proveedor")
-          .test(
-            "unique2",
-            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-            function (value) {
-              const { IDproveedor1, IDproveedor3 } = this.parent; 
-              console.log("Valores del formulario:", this.parent); 
-              return value !== IDproveedor1 && value !== IDproveedor3; 
-            }
-          )
-          .required("Selecciona un proveedor"), 
-      
-        // Proveedor 3
-        IDproveedor3: Yup.number()
-          .min(1, "Selecciona un proveedor")
-          .test(
-            "unique3",
-            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-            function (value) {
-              const { IDproveedor1, IDproveedor2 } = this.parent; 
-              console.log("Valores del formulario:", this.parent); 
-              return value !== IDproveedor1 && value !== IDproveedor2; 
-            }
-          )
-          .required("Selecciona un proveedor"), 
-          
+            .test(
+              "unique1",
+              "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+              function (value) {
+                const { IDproveedor2, IDproveedor3 } = this.parent;
+                return value !== IDproveedor2 && value !== IDproveedor3;
+              }
+            )
+            .required("El proveedor 1 es obligatorio"),
+
+          // Proveedor 2
+          IDproveedor2: Yup.number()
+            .nullable() // Permite valores nulos
+            .optional() // Permite que el campo no esté presente
+            .test(
+              "unique2",
+              "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+              function (value) {
+                const { IDproveedor1, IDproveedor3 } = this.parent;
+                return (
+                  value !== IDproveedor1 &&
+                  (IDproveedor3 == null || value !== IDproveedor3)
+                );
+              }
+            ),
+          // Proveedor 3
+          IDproveedor3: Yup.number()
+            .nullable() // Permite valores nulos
+            .optional()
+
+            .test(
+              "unique3",
+              "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+              function (value) {
+                const { IDproveedor1, IDproveedor2 } = this.parent;
+                return (
+                  value !== IDproveedor1 &&
+                  (IDproveedor2 == null || value !== IDproveedor2)
+                );
+              }
+            ),
           // IDproveedor1: Yup.number()
           //   .test(
           //     "unique1",
@@ -256,7 +272,6 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           //   )
           //   .required("Selecciona un provedor"),
 
-
           //   IDproveedor3: Yup.number()
           //   .min(1, "Selecciona un proveedor")
           //   .test(
@@ -270,9 +285,6 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
           //   .required("Selecciona un provedor"),
 
-
-
-
           PrecioUnitarioSinIva1: Yup.number().required(
             "Precio unitario sin IVA es obligatorio"
           ),
@@ -283,26 +295,24 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
           ),
           // Retenciones1: Yup.number().required("Retenciones es obligatorio"),
 
-
-
-          PrecioUnitarioSinIva2: Yup.number().required(
-            "Precio unitario sin iva es obligatorio"
-          ),
-          // PorcentajeIVA2: Yup.number().required("porcentaje del iva es obligatorio"),
-          ImporteIva2: Yup.number().required("Importe iva es obligatorio"),
-          PrecioUnitarioConIva2: Yup.number().required(
-            "Precio unitario con iva es obligatorio"
-          ),
+          // PrecioUnitarioSinIva2: Yup.number().required(
+          //   "Precio unitario sin iva es obligatorio"
+          // ),
+          // // PorcentajeIVA2: Yup.number().required("porcentaje del iva es obligatorio"),
+          // ImporteIva2: Yup.number().required("Importe iva es obligatorio"),
+          // PrecioUnitarioConIva2: Yup.number().required(
+          //   "Precio unitario con iva es obligatorio"
+          // ),
           // Retenciones2: Yup.number().required("Retenciones es obligatorio"),
 
-          PrecioUnitarioSinIva3: Yup.number().required(
-            "Precio unitario sin iva es obligatorio"
-          ),
-          // PorcentajeIVA3: Yup.number().required("porcentaje del iva es obligatorio"),
-          ImporteIva3: Yup.number().required("Importe iva es obligatorio"),
-          PrecioUnitarioConIva3: Yup.number().required(
-            "Precio unitario con iva es obligatorio"
-          ),
+          // PrecioUnitarioSinIva3: Yup.number().required(
+          //   "Precio unitario sin iva es obligatorio"
+          // ),
+          // // PorcentajeIVA3: Yup.number().required("porcentaje del iva es obligatorio"),
+          // ImporteIva3: Yup.number().required("Importe iva es obligatorio"),
+          // PrecioUnitarioConIva3: Yup.number().required(
+          //   "Precio unitario con iva es obligatorio"
+          // ),
 
           // Retenciones3: Yup.number().required("Retenciones es obligatorio"),
         })
@@ -397,13 +407,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   </td>
                   <td className="border-b border-gray-200  px-4 py-3 text-center text-gray-700">
                     <div className="w-full flex justify-center">
-                      {item.IDproveedor1 > 0 &&
-                      item.IDproveedor2 > 0 &&
-                      item.IDproveedor3 > 0 ? (
-                        <MdCheck />
-                      ) : (
-                        <IoClose />
-                      )}
+                      {item.IDproveedor1 > 0 ? <MdCheck /> : <IoClose />}
                     </div>
                   </td>
                   <td className="border-b border-gray-200  px-4 py-3 text-center text-gray-700">
@@ -469,27 +473,28 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                         Proveedor {contProvedor}
                       </Typography>
 
-                      {IdRequisicion.data.status === "OC" && (
-                        <SwitchComponent
-                          enabled={
-                            values.Proveedor ===
-                            values[`IDproveedor${contProvedor}`]
-                          }
-                          label={`Seleccionar al proveedor ${contProvedor}`}
-                          enabledColor="bg-sky-200"
-                          disabledColor="bg-gray-200"
-                          onclick={() => {
-                            // Alterna el proveedor seleccionado
-                            values.Proveedor ===
-                            values[`IDproveedor${contProvedor}`]
-                              ? setFieldValue("Proveedor", null)
-                              : setFieldValue(
-                                  "Proveedor",
-                                  values[`IDproveedor${contProvedor}`]
-                                );
-                          }}
-                        />
-                      )}
+                      {IdRequisicion.data.status === "OC" &&
+                        Number(values[`IDproveedor${contProvedor}`]) > 0 && (
+                          <SwitchComponent
+                            enabled={
+                              values.Proveedor ===
+                              values[`IDproveedor${contProvedor}`]
+                            }
+                            label={`Seleccionar al proveedor ${contProvedor}`}
+                            enabledColor="bg-sky-200"
+                            disabledColor="bg-gray-200"
+                            onclick={() => {
+                              // Alterna el proveedor seleccionado
+                              values.Proveedor ===
+                              values[`IDproveedor${contProvedor}`]
+                                ? setFieldValue("Proveedor", null)
+                                : setFieldValue(
+                                    "Proveedor",
+                                    values[`IDproveedor${contProvedor}`]
+                                  );
+                            }}
+                          />
+                        )}
                       {/* {JSON.stringify(errors)} */}
                       {errors?.Proveedor && (
                         <Typography className="mb-4 text-md font-semibold text-red-500">

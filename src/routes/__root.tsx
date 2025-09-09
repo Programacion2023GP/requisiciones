@@ -1,4 +1,12 @@
-import { createRootRoute, createRootRouteWithContext, createRoute, Link, Outlet, redirect, useLocation } from "@tanstack/react-router";
+import {
+  createRootRoute,
+  createRootRouteWithContext,
+  createRoute,
+  Link,
+  Outlet,
+  redirect,
+  useLocation,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import React, { Dispatch, SetStateAction, Suspense } from "react";
 import Spinner from "../loading/Loading";
@@ -14,63 +22,54 @@ const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
 
 // Ruta principal
 
-
 export type RouterContext = {
   authentication: {
+    navigateTo: boolean; //
 
-    navigateTo:boolean; //
-    setNavigateTo:Dispatch<SetStateAction<boolean>>
-    signIn :()=>void,
-    signOut :()=>void,
-    isLoggedIn :()=>boolean
-  }
+    setNavigateTo: Dispatch<SetStateAction<boolean>>;
+    signIn: () => void;
+    signOut: () => void;
+    isLoggedIn: () => boolean;
+  };
 };
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
       <Suspense fallback={<Spinner />}>
-        <Outlet/>
+        <Outlet />
       </Suspense>
-      <TanStackRouterDevtools />
+      {/* <TanStackRouterDevtools /> */}
     </>
   ),
 
-  errorComponent: () => (
-    <NotFoundPage/>
-
-  ),
-  notFoundComponent: () =>(
-    <NotFoundPage/>
-  )
-  
+  errorComponent: () => <NotFoundPage />,
+  notFoundComponent: () => <NotFoundPage />,
 });
 const Layout = createRoute({
   path: "/",
-  loader: () =>{
+  loader: () => {
     const navigateTo = localStorage.getItem("navigateTo");
-    if (navigateTo=="Home") {
-      localStorage.setItem("navigateTo","OK");
-      return redirect({ to: localStorage.getItem("redirect") });
+    if (navigateTo == "Home") {
+      localStorage.setItem("navigateTo", "OK");
+      return redirect({ to: localStorage.getItem("redirect") || "" });
     }
   },
   beforeLoad: ({ context: { authentication } }) => {
     if (!authentication.isLoggedIn()) {
       if (window.location.pathname !== "/login") {
-        return redirect({ to: "/login" });
+        return redirect({ to: "/login" as any });
       }
     }
-
-    
   },
-  
-  getParentRoute: () => Route, 
+
+  getParentRoute: () => Route,
   component: () => (
     <>
-      <Suspense fallback={<Spinner />} >
+      <Suspense fallback={<Spinner />}>
         <LazyLayout />
       </Suspense>
-      <TanStackRouterDevtools />
+      {/* <TanStackRouterDevtools /> */}
     </>
   ),
 });
@@ -79,41 +78,46 @@ const LoginRoute = createRoute({
   path: "/login",
   beforeLoad: ({ context: { authentication } }) => {
     if (authentication.isLoggedIn()) {
-      
       // if (window.location.pathname !== "/MnuSeguridad") {
-        return redirect({ to: localStorage.getItem('redirect') });
+      return redirect({
+        to: localStorage.getItem("redirect")?? undefined,
+      });
       // }
     }
   },
-  getParentRoute: () => Route, 
-  component: () => <LoginComponent/>, 
+  getParentRoute: () => Route,
+  component: () => <LoginComponent />,
 });
 const MnuSeguridadRoute = createRoute({
   path: "/MnuSeguridad",
 
-  getParentRoute: () => Layout, 
-  component: () => <Users/>, 
+  getParentRoute: () => Layout,
+  component: () => <Users />,
 });
 
 const RequisitionRoute = createRoute({
   path: "/MnuRequisiciones",
-  getParentRoute: () =>Layout,
-  component: () => <RequisicionesAdd/>,
-
+  getParentRoute: () => Layout,
+  component: () => <RequisicionesAdd />,
 });
 
 const SuppliersRoute = createRoute({
   path: "/CatProveedores",
 
-  getParentRoute: () => Layout, 
-  component: () => <SuppliersComponent/>,  // Implement this component
+  getParentRoute: () => Layout,
+  component: () => <SuppliersComponent />, // Implement this component
 });
 const CatDepartamentos = createRoute({
   path: "/CatDepartamentos",
 
-  getParentRoute: () => Layout, 
-  component: () => <CatDepartaments/>,  // Implement this component
+  getParentRoute: () => Layout,
+  component: () => <CatDepartaments />, // Implement this component
 });
 
-Route.addChildren([Layout,LoginRoute]);
-Layout.addChildren([MnuSeguridadRoute,RequisitionRoute,SuppliersRoute,CatDepartamentos])
+Route.addChildren([Layout, LoginRoute]);
+Layout.addChildren([
+  MnuSeguridadRoute,
+  RequisitionRoute,
+  SuppliersRoute,
+  CatDepartamentos,
+]);

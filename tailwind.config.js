@@ -10,7 +10,7 @@ module.exports = {
   theme: {
     extend: {
       colors:{
-        "presidencia":"#006633",
+        "presidencia":"#4B0000",
       }
     },
   },

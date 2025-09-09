@@ -112,7 +112,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       );
     },
   });
-  const dataForm = {
+  const dataFormik = {
     IDDepartamento: 0,
     Observaciones: "",
     Solicitante: "",
@@ -123,15 +123,24 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
   };
   const object = Yup.object({
     Solicitante: Yup.string().required("El solicitante es requerido"),
-    IDDepartamento: Yup.number()
-      .min(1, "El departamento es requerido")
-      .required("El departamento es requerido"),
+    IDDepartamento:
+      localStorage.getItem("role") === "CAPTURA"
+        ? Yup.number().nullable()
+        : Yup.number()
+            .transform(
+              (value, originalValue) => (isNaN(value) ? null : value) // Si no es un número, lo convierte en null
+            )
+            .min(1, "El departamento es requerido")
+            .required("El departamento es requerido"),
+    Centro_Costo:
+      localStorage.getItem("role") === "CAPTURA"
+        ? Yup.number().nullable()
+        : Yup.number()
+            .min(1, "El costo es requerido")
+            .required("El costo es requerido"),
     IDTipo: Yup.number()
       .min(1, "El tipo es requerido")
       .required("El tipo es requerido"),
-    Centro_Costo: Yup.number()
-      .min(1, "El costo es requerido")
-      .required("El costo es requerido"),
     Observaciones: Yup.string().required("Las observaciones es requerido"),
     Cantidad1: Yup.number()
       .min(1, "La cantidad debe ser mayor a 0")
@@ -152,43 +161,39 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
   const [openPdf, setOpenPdf] = useState<boolean>(false);
 
   useEffect(() => {
-const FormRequisicion = ObservableGet("FormRequisicion") as Record<string, any>;
+    const FormRequisicion = ObservableGet("FormRequisicion") as Record<
+      string,
+      any
+    >;
+    let dataForm = FormRequisicion?.data?.data;
 
+    dataForm = Array.isArray(dataForm) ? dataForm[0] : dataForm;
 
+    const finalJson: Record<string, any> = { ...dataForm };
 
-let dataForm = FormRequisicion.data.data;
+    console.log("Inicio del procesamiento:", finalJson);
 
-dataForm = Array.isArray(dataForm) ? dataForm[0] : dataForm;
+    const conteo: number[] = [];
+    if (Array.isArray(FormRequisicion?.data?.data)) {
+      FormRequisicion.data.data.forEach((item: any, index: number) => {
+        finalJson[`Cantidad${index + 1}`] = item.Cantidad;
+        finalJson[`Descripcion${index + 1}`] = item.Descripcion;
+        conteo.push(index + 1);
+      });
+    }
+    delete finalJson["Cantidad"];
+    delete finalJson["Descripcion"];
 
+    setValues(Object.keys(finalJson).length > 0 ? finalJson : dataFormik);
+    setCont(Array.isArray(FormRequisicion?.data?.data) ? conteo : [1]);
 
-const finalJson: Record<string, any> = { ...dataForm };
-
-console.log("Inicio del procesamiento:", finalJson);
-
-const conteo: number[] = [];
-if (Array.isArray(FormRequisicion.data.data)) {
-  FormRequisicion.data.data.forEach((item: any, index: number) => {
-    finalJson[`Cantidad${index + 1}`] = item.Cantidad;
-    finalJson[`Descripcion${index + 1}`] = item.Descripcion;
-    conteo.push(index + 1);
-  });
-}
-delete finalJson['Cantidad'];
-delete finalJson['Descripcion'];
-
-setValues(finalJson);
-console.log("Fin del procesamiento:", finalJson);
-
-setCont(Array.isArray(FormRequisicion.data.data) ? conteo : [1]);
-
-setValidationSchema(object);
+    setValidationSchema(object);
   }, [open]);
 
   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
   const { ObservablePost } = Observable();
 
   const onSumbit = async (values: Record<string, any>) => {
-    console.log("onS",values)
     setValues(values);
     const products = Object.keys(values)
       .filter((key) => key.startsWith("Cantidad"))
@@ -203,7 +208,10 @@ setValidationSchema(object);
       const result = await ObservablePost("PdfRequisicion", {
         data: {
           products: products,
-          pdfData: { Nombre_CC: values.Centro_Costo },
+          pdfData: {
+            Nombre_CC: values.Centro_Costo,
+            Observaciones: values.Observaciones,
+          },
           status: "CP",
         },
       });
@@ -261,6 +269,9 @@ setValidationSchema(object);
     }
 
     // Limpia los valores y validaciones dinámicas asociadas
+    delete formik.current?.values[`Cantidad${index}`];
+    delete formik.current?.values[`Descripcion${index}`];
+
     setValues((prev: any) => {
       const updatedValues = { ...prev };
       delete updatedValues[`Cantidad${index}`]; // Eliminar el valor de Cantidad
@@ -374,7 +385,7 @@ setValidationSchema(object);
           }
         />
       )}
-      {values && (
+      {values && Object.keys(values).length > 0 && (
         <ModalComponent
           open={open}
           setOpen={() => {
@@ -394,26 +405,31 @@ setValidationSchema(object);
               children={(v) => {
                 return (
                   <>
-                    <FormikAutocomplete
-                      responsive={responsive}
-                      loading={groups.isLoading}
-                      name="IDDepartamento"
-                      label={"selecciona el departamento"}
-                      options={groups.data?.data}
-                      idKey={"IDDepartamento"}
-                      labelKey={"Nombre_Departamento"}
-                      handleModified={handleModified}
-                      handleModifiedOptions={{ name: "IDDepartamento" }}
-                    />
-                    <FormikAutocomplete
-                      responsive={responsive}
-                      loading={groups.isLoading}
-                      name="Centro_Costo"
-                      label={"selecciona el centro de costo"}
-                      options={groups.data?.data}
-                      idKey={"Centro_Costo"}
-                      labelKey={"Centro_Costo"}
-                    />
+                    {localStorage.getItem("role") != "CAPTURA" && (
+                      <>
+                        <FormikAutocomplete
+                          responsive={responsive}
+                          loading={groups.isLoading}
+                          name="IDDepartamento"
+                          label={"selecciona el departamento"}
+                          options={groups.data?.data}
+                          idKey={"IDDepartamento"}
+                          labelKey={"Nombre_Departamento"}
+                          handleModified={handleModified}
+                          handleModifiedOptions={{ name: "IDDepartamento" }}
+                        />
+                        <FormikAutocomplete
+                          responsive={responsive}
+                          loading={groups.isLoading}
+                          name="Centro_Costo"
+                          label={"selecciona el centro de costo"}
+                          options={groups.data?.data}
+                          idKey={"Centro_Costo"}
+                          labelKey={"Centro_Costo"}
+                        />
+                      </>
+                    )}
+
                     <FormikAutocomplete
                       responsive={responsive}
                       loading={types.isLoading}

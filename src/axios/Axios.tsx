@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL, // URL base
   headers: {
     "Content-Type": "application/json",
-    
+
     Authorization: `Bearer ${localStorage.getItem("token")}`, // Obtener el token de localStorage
   },
 });
@@ -63,6 +63,7 @@ export const AxiosRequest = async (
       // localStorage.clear();
       // window.location.href = "/";
     } else {
+      console.log(error);
       return error.response.data;
     }
 

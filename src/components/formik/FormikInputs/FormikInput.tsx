@@ -643,7 +643,6 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
           // if ( values[name] == 0) {
           //   setTextSearch("")
           // }
-      
           return (
             <div
               className={`relative  w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
@@ -666,7 +665,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 onBlur={(e) => {
                   setTimeout(() => {
                     setShowOptions(false);
-                  }, 500);
+                  }, 300);
                   formik.handleBlur(e)
                 }}
                 autoComplete="off"

@@ -1,37 +1,29 @@
-import { Text, View } from "@react-pdf/renderer"
+import { Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
 import Observable from "../../extras/observable";
 const tw = createTw({});
-type DataPdf ={
-    data:any
-}
-const PdfFooter :React.FC<DataPdf> = ({data})=>{
-    return (
-        <View style={tw("flex flex-row")}>
-        {[
-          {
-              responsable: data?.data?.products[0][`Nombre_Director`],
-            departamento: data?.data?.pdfData?.Nombre_Departamento,
-          },
-          {
-            responsable: data?.data?.pdfData?.Responsable_Compras,
-            departamento: "Gerardo Alberto Reyes Betancourt",
-          },
-        ].map((it) => (
-          <View
-            style={tw(
-              "w-1/2 flex items-center justify-center   p-2"
-            )}
-          >
-            <Text style={tw("text-sm flex-shrink mb-1")}>
-              {it.responsable}
-            </Text>
-            <Text style={tw("text-sm flex-shrink")}>
-              {it.departamento}
-            </Text>
-          </View>
-        ))}
-      </View>
-    )
-}
+type DataPdf = {
+  data: any;
+};
+const PdfFooter: React.FC<DataPdf> = ({ data }) => {
+  return (
+    <View style={tw("flex flex-row")}>
+      {[
+        {
+          responsable: data?.data?.products[0][`Nombre_Director`],
+          departamento: data?.data?.pdfData?.Nombre_Departamento,
+        },
+        {
+          responsable: data?.data?.pdfData?.Responsable_Compras,
+          departamento: data?.data?.pdfData?.Responsable_Compras,
+        },
+      ].map((it) => (
+        <View style={tw("w-1/2 flex items-center justify-center   p-2")}>
+          <Text style={tw("text-sm flex-shrink mb-1")}>{it.responsable}</Text>
+          <Text style={tw("text-sm flex-shrink")}>{it.departamento}</Text>
+        </View>
+      ))}
+    </View>
+  );
+};
 export default PdfFooter;

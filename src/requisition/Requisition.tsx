@@ -65,7 +65,7 @@ const RequisicionesAdd = () => {
   });
   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
   const queryClient = useQueryClient();
-  const { ObservablePost,ObservableDelete } = Observable();
+  const { ObservablePost, ObservableDelete } = Observable();
   const [open, setOpen] = useState<boolean>(false);
 
   const [reloadTable, setReloadTable] = useState(false);
@@ -83,7 +83,7 @@ const RequisicionesAdd = () => {
       sortable: true,
       filter: true,
       filterParams: {
-        defaultValue: "2024",
+        defaultValue: "2025",
       },
     },
     {
@@ -146,7 +146,19 @@ const RequisicionesAdd = () => {
       headerName: "Status",
       field: "Status",
       sortable: true,
-      filter: true,
+      // filter: true,
+      valueFormatter: (params: any) => {
+        const value = params.value;
+        const map: Record<string, string> = {
+          ca: "Captura",
+          va: "Validado",
+          re: "Rechazado",
+          su: "Surtida",
+
+          // otros valores si aplican
+        };
+        return map[value] || value; // Retorna el valor legible
+      },
       cellRenderer: (params: any) => <StatusColumn data={params.data} />,
     },
     {
@@ -162,20 +174,20 @@ const RequisicionesAdd = () => {
       filter: true,
     },
     {
-      headerName: "Usuario asignado",
+      headerName: "asignado",
       field: "UsuarioAS",
       sortable: true,
       filter: true,
     },
     {
-      headerName: "Usuario UsuarioVoBo",
+      headerName: "VoBo",
       field: "UsuarioVoBo",
       sortable: true,
       filter: true,
     },
 
     {
-      headerName: "Usuario captura",
+      headerName: "captura",
       field: "UsuarioCaptura",
       sortable: true,
       filter: true,
@@ -202,7 +214,7 @@ const RequisicionesAdd = () => {
           <Button
             onClick={() => {
               setOpen(true);
-              ObservableDelete('FormRequisicion')
+              ObservableDelete("FormRequisicion");
             }}
             size="medium"
             color="blue"
@@ -293,11 +305,40 @@ const RequisicionesAdd = () => {
                 key={key}
                 message={message}
                 className={className}
-                open={chipsOpen === key} // Comprobamos si el `key` del chip es el que está abierto
+                open={
+                  key === ""
+                    ? Object.values(chipsOpen).every((v) => !v)
+                    : chipsOpen[key]
+                } // Check if this specific chip is open
                 setOpen={() => {
                   setReloadTable(false);
 
-                  setChipsOpen((prev) => (prev === key ? null : key));
+                  if (key === "") {
+                    // Handle "Todos los status" case - close all chips
+                    setChipsOpen({
+                      rechazada: false,
+                      captura: false,
+                      autorizada: false,
+                      asignado: false,
+                      cotizado: false,
+                      ordenDeCompra: false,
+                      surtida: false,
+                      realizada: false,
+                    });
+                  } else {
+                    // Toggle the specific chip and close all others
+                    setChipsOpen((prev) => ({
+                      rechazada: false,
+                      captura: false,
+                      autorizada: false,
+                      asignado: false,
+                      cotizado: false,
+                      ordenDeCompra: false,
+                      surtida: false,
+                      realizada: false,
+                      [key]: !prev[key], // Toggle only this chip
+                    }));
+                  }
                 }}
                 children={() => (
                   <YearSelect
@@ -317,7 +358,16 @@ const RequisicionesAdd = () => {
                       // setFilters(value)
                     }}
                     setClosed={() => {
-                      setChipsOpen(null);
+                      setChipsOpen({
+                        rechazada: false,
+                        captura: false,
+                        autorizada: false,
+                        asignado: false,
+                        cotizado: false,
+                        ordenDeCompra: false,
+                        surtida: false,
+                        realizada: false,
+                      });
                     }}
                   />
                 )}
@@ -339,7 +389,7 @@ const RequisicionesAdd = () => {
               restart: reloadTable,
             }}
             filtersActive={{
-              Ejercicio: "2024",
+              Ejercicio: "2025",
             }}
             columnDefs={columnDefs}
             buttonElement={buttonElement}

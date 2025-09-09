@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import * as AiIcons from "react-icons/ai";
@@ -8,17 +8,10 @@ import * as MdIcons from "react-icons/md";
 import * as FiIcons from "react-icons/fi";
 import * as GiIcons from "react-icons/gi";
 import * as RiIcons from "react-icons/ri";
-import { 
-  FaFolder, 
-  FaFolderOpen, 
-  FaSpinner 
-} from "react-icons/fa6";
-import { 
-  IoMdArrowDropdown, 
-  IoMdArrowDropup 
-} from "react-icons/io";
+import { FaFolder, FaFolderOpen, FaSpinner } from "react-icons/fa6";
+import { IoMdArrowDropdown, IoMdArrowDropup } from "react-icons/io";
 import { CiLogout } from "react-icons/ci";
-import Logo from '../../assets/logo-gpd.png';
+import Logo from "../../assets/logo-gpd.png";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showToast } from "../../sweetalert/Sweetalert";
 
@@ -29,7 +22,7 @@ const IconLibraries = {
   ...MdIcons,
   ...FiIcons,
   ...GiIcons,
-  ...RiIcons
+  ...RiIcons,
 };
 
 // Rest of the code remains the same as in the previous artifact
@@ -39,7 +32,7 @@ export interface MenuItem {
   Menu: string;
   MenuPadre: number | null;
   children?: MenuItem[];
-  EstadoPermiso?: boolean;
+  EstadoPermiso: boolean;
   Icon?: string;
 }
 
@@ -123,9 +116,9 @@ const SidebarComponent = () => {
       {/* Glowing Logo Container */}
       <div className="relative p-6 border-b border-gray-700/30">
         <div className="absolute inset-0 bg-presidencia/10 blur-2xl -z-10"></div>
-        <img 
-          src={Logo} 
-          alt="Logo" 
+        <img
+          src={Logo}
+          alt="Logo"
           className="w-40 mx-auto transform transition-all hover:scale-105 hover:rotate-3 hover:shadow-lg"
         />
       </div>
@@ -138,9 +131,15 @@ const SidebarComponent = () => {
             : null;
 
           if (menu.IdMenu === "MnuCatalogos" && menu.children?.length) {
+            const activeChildren = menu.children.filter(
+              (child) => child.EstadoPermiso 
+            );
+
+            if (!activeChildren.length) return null; // No hay hijos activos, no renderizamos nada
+
             return (
               <Dropdown key={menu.Id} label={menu.Menu}>
-                {menu.children.map((child) => {
+                {activeChildren.map((child) => {
                   const ChildIcon = child.Icon
                     ? IconLibraries[child.Icon as keyof typeof IconLibraries]
                     : null;
@@ -182,9 +181,9 @@ const SidebarComponent = () => {
       </nav>
 
       {/* Logout Section with Hover Effects */}
-      {menus.status === "success" && (
+      {/* {menus.status === "success" && ( */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700/30">
-          <button 
+          <button
             onClick={logout}
             className="
               w-full 
@@ -203,12 +202,12 @@ const SidebarComponent = () => {
               duration-300 
               group
             "
-          >
+            >
             <CiLogout className="text-xl  group-hover:rotate-12 transition-transform" />
             <span>Cerrar Sesión</span>
           </button>
         </div>
-      )}
+        {/* )} */}
     </div>
   );
 };
@@ -223,7 +222,7 @@ const Item: React.FC<{
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setCurrentLocation(location.pathname.split('/')[1]);
+      setCurrentLocation(location.pathname.split("/")[1]);
     }, 100);
     return () => clearTimeout(timer);
   }, [location]);
@@ -248,7 +247,9 @@ const Item: React.FC<{
       `}
     >
       {icon && <span className="text-blue-400">{icon}</span>}
-      <span className={`text-sm ${isActive ? "text-blue-400 font-semibold" : "group-hover:text-white"}`}>
+      <span
+        className={`text-sm ${isActive ? "text-blue-400 font-semibold" : "group-hover:text-white"}`}
+      >
         {label}
       </span>
     </Link>
@@ -267,7 +268,7 @@ const Dropdown: React.FC<{
 
   return (
     <div className="px-4">
-      <div 
+      <div
         onClick={toggleDropdown}
         className="
           flex 
@@ -285,12 +286,16 @@ const Dropdown: React.FC<{
         "
       >
         <div className="flex items-center gap-3">
-          {isOpen ? <FaFolderOpen className="text-blue-400" /> : <FaFolder className="text-blue-400" />}
-          <span className="text-sm font-medium group-hover:text-blue-500">{label}</span>
+          {isOpen ? (
+            <FaFolderOpen className="text-blue-400" />
+          ) : (
+            <FaFolder className="text-blue-400" />
+          )}
+          <span className="text-sm font-medium group-hover:text-blue-500">
+            {label}
+          </span>
         </div>
-        <span>
-          {isOpen ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}
-        </span>
+        <span>{isOpen ? <IoMdArrowDropup /> : <IoMdArrowDropdown />}</span>
       </div>
 
       {isOpen && (

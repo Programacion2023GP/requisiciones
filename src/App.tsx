@@ -14,13 +14,14 @@ import { Route } from "./routes/__root";
 import { AuthContext, UseAuth } from "./extras/useAuth";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { createHashHistory } from "@tanstack/react-router";
 type RouterContext = {
   authentication: typeof UseAuth; // Usa `typeof` para capturar el tipo
 };
 export type context = {
   authentication: {
-    navigateTo:boolean; //
-    setNavigateTo:Dispatch<SetStateAction<boolean>>
+    navigateTo: boolean; //
+    setNavigateTo: Dispatch<SetStateAction<boolean>>;
     signIn: () => void;
     signOut: () => void;
   };
@@ -28,6 +29,8 @@ export type context = {
 
 const router = createRouter({
   routeTree: Route,
+  history: createHashHistory(),
+  
   context: { authentication: undefined! },
 });
 
@@ -38,20 +41,17 @@ declare module "@tanstack/react-router" {
 }
 
 const queryClient = new QueryClient({
-
   defaultOptions: {
-
     queries: {
       staleTime: Infinity,
-      
     },
   },
 });
 function Requisiciones() {
   useEffect(() => {
-    const handleBeforeUnload = (event:any) => {
+    const handleBeforeUnload = (event: any) => {
       console.log("El usuario está saliendo del sitio.");
-      localStorage.setItem("navigateTo","Home");
+      localStorage.setItem("navigateTo", "Home");
       // event.preventDefault();
       // event.returnValue = "¿Estás seguro de que quieres salir?";
     };
@@ -65,12 +65,17 @@ function Requisiciones() {
   const authentication = UseAuth();
   return (
     <QueryClientProvider client={queryClient}>
-            {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
 
       <RouterProvider
         router={router}
-        context={{ authentication }}
-      ></RouterProvider>
+        context={{
+          authentication: {
+            ...authentication,
+            navigateTo: authentication.navigateTo ?? false,
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

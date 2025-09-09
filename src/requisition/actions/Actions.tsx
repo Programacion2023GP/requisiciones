@@ -21,12 +21,15 @@ import DetailsRequistion from "../details/DetailsRequisition";
 import TracingComponent from "../tracing/Tracing";
 import DropdownComponent from "../../components/drop/DropDown";
 import { TbReport } from "react-icons/tb";
+import ModalComponent from "../../components/modal/Modal";
+import FormikForm from "../../components/formik/Formik";
+import { FormikNumberInput } from "../../components/formik/FormikInputs/FormikInput";
 
 const Actions: React.FC<{
   data: Record<string, any>;
   setReloadTable: Dispatch<SetStateAction<boolean>>;
-  setOpenForm:Dispatch<SetStateAction<boolean>>
-}> = ({ data, setReloadTable,setOpenForm }) => {
+  setOpenForm: Dispatch<SetStateAction<boolean>>;
+}> = ({ data, setReloadTable, setOpenForm }) => {
   const [open, setOpen] = useState({
     pdf: false,
     autorized: false,
@@ -36,7 +39,7 @@ const Actions: React.FC<{
   });
   const [spiner, setSpiner] = useState<boolean>(false);
   const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
-
+  const [openSu, setOpenSu] = useState<boolean>(false);
   const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
   const [autorized, SetAutorized] = useState(false);
   const { ObservablePost } = Observable();
@@ -76,13 +79,13 @@ const Actions: React.FC<{
       method,
       data,
       pdfData,
-      status
+      status,
     }: {
       url: string;
       method: "POST" | "PUT" | "DELETE";
       data?: any;
       pdfData: Record<string, any>;
-      status:string
+      status: string;
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
       setSpiner(true);
@@ -128,35 +131,29 @@ const Actions: React.FC<{
     }) => AxiosRequest(url, method, data),
     onMutate(variables) {
       setSpiner(true);
-   
     },
-    onSuccess: async(data) => {
+    onSuccess: async (data) => {
       setSpiner(false);
-      try{
-      const result = await ObservablePost("FormRequisicion", {
-        data: {
-          data: data.data,
-        },
-      });
-    } catch (e) {
-
-    } finally {
-      setOpenForm(true)
-      // setOpen((prev) => ({
-      //   autorized: false,
-      //   cotizacion: false,
-      //   pdf: false,
-      //   view: true,
-      //   tracing: false,
-      // }));
-    }
-
-
-
+      try {
+        const result = await ObservablePost("FormRequisicion", {
+          data: {
+            data: data.data,
+          },
+        });
+      } catch (e) {
+      } finally {
+        setOpenForm(true);
+        // setOpen((prev) => ({
+        //   autorized: false,
+        //   cotizacion: false,
+        //   pdf: false,
+        //   view: true,
+        //   tracing: false,
+        // }));
+      }
     },
     onError: (error: any) => {
       setSpiner(false);
-      
     },
   });
   const newStatus = (status: string): string => {
@@ -290,8 +287,8 @@ const Actions: React.FC<{
     if (group === null) {
       return false;
     }
-
     let idGroup = parseInt(group, 10);
+    console.log(idTipo, idGroup);
     if (
       (idGroup == 84 && idTipo == 5) ||
       (idGroup == 83 && idTipo == 7) ||
@@ -411,28 +408,29 @@ const Actions: React.FC<{
                   </Button>
                 </Tooltip>
               </div> */}
-            {data.Status =="CP" && (
-              <div className="w-fit">
-                <Tooltip content="Editar">
-                  <Button
-                    color="yellow"
-                    variant="solid"
-                    size="small"
-                    onClick={() => {
-                      mutationEdit.mutate({
-                        method: "POST",
-                        url: "/requisiciones/showRequisicion",
-                        data: {
-                          Id: data.Id,
-                        },
-                      });
-                    }}
-                  >
-                  <MdEdit />
-                  </Button>
-                </Tooltip>
-              </div>
-            )}
+              {(data.Status == "CP" ||
+                localStorage.getItem("role") == "DIRECTORCOMPRAS") && (
+                <div className="w-fit">
+                  <Tooltip content="Editar">
+                    <Button
+                      color="yellow"
+                      variant="solid"
+                      size="small"
+                      onClick={() => {
+                        mutationEdit.mutate({
+                          method: "POST",
+                          url: "/requisiciones/showRequisicion",
+                          data: {
+                            Id: data.Id,
+                          },
+                        });
+                      }}
+                    >
+                      <MdEdit />
+                    </Button>
+                  </Tooltip>
+                </div>
+              )}
               {data.Status !== "SU" &&
                 localStorage.getItem("role") == "COMPRAS" && (
                   <div className="w-fit">
@@ -463,7 +461,6 @@ const Actions: React.FC<{
                     </Tooltip>
                   </div>
                 )}
-
               {data.Status == "AU" &&
                 data.AutEspecial == 1 &&
                 !data.UsuarioVoBo &&
@@ -488,7 +485,6 @@ const Actions: React.FC<{
                     </Tooltip>
                   </PermissionMenu>
                 )}
-
               <div className="w-fit">
                 <Tooltip content="Pdf">
                   <Button
@@ -547,7 +543,9 @@ const Actions: React.FC<{
               </div>
               {!data.UsuarioAS &&
                 newStatus(data.Status) == "AS" &&
-                permisos.Permiso_Asignar == 1 && (
+                permisos?.Permiso_Asignar == 1 &&
+                (buttonVobo(data.IDTipo) === false ||
+                  (buttonVobo(data.IDTipo) && data.UsuarioVoBo != null)) && (
                   <div className="w-fit">
                     <Tooltip content="Asignar requisitor">
                       <Button
@@ -576,53 +574,61 @@ const Actions: React.FC<{
                     </Tooltip>
                   </div>
                 )}
-
               <div className="w-fit ">
                 {(newStatus(data.Status) == "CO" ||
-                  newStatus(data.Status) == "OC") && (permisos[newStatus(data.Status) == 'CO' ? 'Permiso_Cotizar' : 'Permiso_Orden_Compra']) == 1 &&
-                  (
-                  <Tooltip
-                    content={
-                      newStatus(data.Status) == "CO"
-                        ? "cotizar"
-                        : "seleccionar provedor"
-                    }
-                  >
-                    <Button
-                      color={newStatus(data.Status) == "CO" ? "orange" : "pink"}
-                      variant="solid"
-                      size="small"
-                      onClick={async () => {
-                        try {
-                          // customLog(`${JSON.stringify(data)}`, "green");
-                          const result = await ObservablePost("IdRequisicion", {
-                            data: {
-                              IDRequisicion: data.IDRequisicion,
-                              Ejercicio: data.Ejercicio,
-
-                              status: newStatus(data.Status),
-                            },
-                          });
-                        } catch (e) {
-                        } finally {
-                          setOpen((prev) => ({
-                            autorized: false,
-                            cotizacion: true,
-                            pdf: false,
-                            view: false,
-                            tracing: false,
-                          }));
-                        }
-                      }}
+                  newStatus(data.Status) == "OC") &&
+                  permisos &&
+                  permisos[
+                    newStatus(data.Status) == "CO"
+                      ? "Permiso_Cotizar"
+                      : "Permiso_Orden_Compra"
+                  ] == 1 && (
+                    <Tooltip
+                      content={
+                        newStatus(data.Status) == "CO"
+                          ? "cotizar"
+                          : "seleccionar provedor"
+                      }
                     >
-                      {newStatus(data.Status) == "CO"
-                        ? "cotizar"
-                        : "seleccionar provedor"}
-                    </Button>
-                  </Tooltip>
-                )}
-              </div>
+                      <Button
+                        color={
+                          newStatus(data.Status) == "CO" ? "orange" : "pink"
+                        }
+                        variant="solid"
+                        size="small"
+                        onClick={async () => {
+                          try {
+                            // customLog(`${JSON.stringify(data)}`, "green");
+                            const result = await ObservablePost(
+                              "IdRequisicion",
+                              {
+                                data: {
+                                  IDRequisicion: data.IDRequisicion,
+                                  Ejercicio: data.Ejercicio,
 
+                                  status: newStatus(data.Status),
+                                },
+                              }
+                            );
+                          } catch (e) {
+                          } finally {
+                            setOpen((prev) => ({
+                              autorized: false,
+                              cotizacion: true,
+                              pdf: false,
+                              view: false,
+                              tracing: false,
+                            }));
+                          }
+                        }}
+                      >
+                        {newStatus(data.Status) == "CO"
+                          ? "cotizar"
+                          : "seleccionar provedor"}
+                      </Button>
+                    </Tooltip>
+                  )}
+              </div>
               {newStatus(data.Status) !== "CP" &&
                 // newStatus(data.Status) !== "SU" &&
                 newStatus(data.Status) !== "AS" &&
@@ -637,23 +643,25 @@ const Actions: React.FC<{
                   >
                     <div
                       onClick={async () => {
-                        showConfirmationAlert(
-                          `El estatus se cambiara a ${newStatus(data.Status)} `,
-                          "Esta acción no se puede deshacer."
-                        ).then((isConfirmed) => {
-                          if (isConfirmed) {
-                            mutation.mutate({
-                              method: "PUT",
-                              url: "/requisiciones/update",
-                              data: {
-                                Status: newStatus(data.Status),
-                                id: data.Id,
-                              },
-                            });
-                          } else {
-                            showToast("La acción fue cancelada.", "error");
-                          }
-                        });
+                        newStatus(data.Status) != "SU"
+                          ? showConfirmationAlert(
+                              `El estatus se cambiara a ${newStatus(data.Status)} `,
+                              "Esta acción no se puede deshacer."
+                            ).then((isConfirmed) => {
+                              if (isConfirmed) {
+                                mutation.mutate({
+                                  method: "PUT",
+                                  url: "/requisiciones/update",
+                                  data: {
+                                    Status: newStatus(data.Status),
+                                    id: data.Id,
+                                  },
+                                });
+                              } else {
+                                showToast("La acción fue cancelada.", "error");
+                              }
+                            })
+                          : setOpenSu(true);
                       }}
                       className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
                     >
@@ -665,6 +673,40 @@ const Actions: React.FC<{
                 )}
             </div>
           </DropdownComponent>
+          <ModalComponent
+            title="Surtir la orden"
+            open={openSu}
+            setOpen={() => {
+              setOpenSu(false);
+            }}
+            children={
+              <>
+                <div className="mb-6"> </div>
+                <FormikForm
+                  buttonMessage="Surtir"
+                  initialValues={{ ClavePresupuestal: 1 }}
+                  children={() => (
+                    <FormikNumberInput
+                      label="Clave Presupuestal"
+                      name="ClavePresupuestal"
+                      decimals={false}
+                    />
+                  )}
+                  onSubmit={(values) => {
+                    mutation.mutate({
+                      method: "PUT",
+                      url: "/requisiciones/update",
+                      data: {
+                        Status: newStatus(data.Status),
+                        id: data.Id,
+                        ClavePresupuestal: values.ClavePresupuestal,
+                      },
+                    });
+                  }}
+                />
+              </>
+            }
+          />
         </>
       )}
     </>
