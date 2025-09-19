@@ -74,7 +74,7 @@ const LoginComponent = () => {
     <>
       {mutation.status == "pending" && <Spinner />}
 
-      <div className="bg-gradient-to-tr from-presidencia  bg-gray-300 w-screen h-screen flex justify-center items-center">
+      <div className="bg bg-gradient-to-tr from-presidencia  bg-gray-300 w-screen h-screen flex justify-center items-center">
         <RowComponent>
           <ColComponent responsive={colComponents}>
             {/* Tarjeta de Login Estilizada */}
@@ -118,9 +118,12 @@ const LoginComponent = () => {
 
           <ColComponent responsive={{ ...colComponents, sm: 0, md: 0 }}>
             {/* Título Elegante de Requisiciones */}
-            <p className="text-center font-semibold text-gray-900 text-6xl mt-10 mb-8">
+            <p className="text-center font-semibold text-white text-6xl mt-10">
               Requisiciones
             </p>
+               <div className="text-center font-semibold text-white text-xs ">
+             {import.meta.env.VITE_VERSION}
+            </div>
           </ColComponent>
         </RowComponent>
       </div>

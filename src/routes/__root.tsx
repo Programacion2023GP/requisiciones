@@ -52,7 +52,18 @@ const Layout = createRoute({
     const navigateTo = localStorage.getItem("navigateTo");
     if (navigateTo == "Home") {
       localStorage.setItem("navigateTo", "OK");
-      return redirect({ to: localStorage.getItem("redirect") || "" });
+let redirectPath = localStorage.getItem("redirect") || "";
+
+// Quita todos los hashes
+redirectPath = redirectPath.replace(/#+/g, "");
+
+// Además, si empieza con una / extra, normalízalo
+redirectPath = redirectPath.replace(/^\/+/, "/");
+
+console.log("aqui estamos", redirectPath);
+
+return redirect({ to: redirectPath });
+
     }
   },
   beforeLoad: ({ context: { authentication } }) => {

@@ -87,7 +87,6 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
     onSuccess: (resp) => {
       setSpiner(false);
 
-      console.log(resp?.data);
       const item = data.find(
         (it) =>
           it.IDproveedor1 > 0 && it.IDproveedor2 > 0 && it.IDproveedor3 > 0
@@ -95,10 +94,10 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
       setInitialValues({
         ...resp?.data,
-        IDproveedor1: item?.IDproveedor1,
-        IDproveedor2: item?.IDproveedor2,
-        IDproveedor3: item?.IDproveedor3,
-        ObservacionesCot: "",
+        // IDproveedor1: item?.IDproveedor1,
+        // IDproveedor2: item?.IDproveedor2,
+        // IDproveedor3: item?.IDproveedor3,
+        // ObservacionesCot: "",
       });
 
       // showToast(data.message, data.status);
@@ -458,6 +457,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
               <div className="w-full space-y-8 px-2 overflow-auto">
                 {[1, 2, 3].map((contProvedor) => {
                   // Clase dinámica de fondo
+                  console.log(values)
                   const bgClass =
                     values.Proveedor === values[`IDproveedor${contProvedor}`] &&
                     values[`IDproveedor${contProvedor}`] > 0
@@ -470,7 +470,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                       className={`w-full ${bgClass} p-6 rounded-lg shadow-lg`}
                     >
                       <Typography className="mb-4 text-lg font-semibold text-slate-800">
-                        Proveedor {contProvedor}
+                        Proveedor {contProvedor} 
                       </Typography>
 
                       {IdRequisicion.data.status === "OC" &&

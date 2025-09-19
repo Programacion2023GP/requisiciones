@@ -312,8 +312,8 @@ const RequisicionesAdd = () => {
                 } // Check if this specific chip is open
                 setOpen={() => {
                   setReloadTable(false);
-
                   if (key === "") {
+                    console.log(key)
                     // Handle "Todos los status" case - close all chips
                     setChipsOpen({
                       rechazada: false,
@@ -326,6 +326,8 @@ const RequisicionesAdd = () => {
                       realizada: false,
                     });
                   } else {
+                    console.log("dd",key)
+
                     // Toggle the specific chip and close all others
                     setChipsOpen((prev) => ({
                       rechazada: false,
@@ -341,6 +343,9 @@ const RequisicionesAdd = () => {
                   }
                 }}
                 children={() => (
+                  <>
+                  {
+                  (chipsOpen.asignado || chipsOpen.autorizada || chipsOpen.captura || chipsOpen.cotizado || chipsOpen.ordenDeCompra || chipsOpen.realizada || chipsOpen.rechazada || chipsOpen.surtida) && (
                   <YearSelect
                     onChange={(value) => {
                       console.log(sql);
@@ -358,6 +363,7 @@ const RequisicionesAdd = () => {
                       // setFilters(value)
                     }}
                     setClosed={() => {
+                    
                       setChipsOpen({
                         rechazada: false,
                         captura: false,
@@ -370,6 +376,10 @@ const RequisicionesAdd = () => {
                       });
                     }}
                   />
+                  )   
+                  }
+                  </>
+                
                 )}
               />
             ))}

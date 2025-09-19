@@ -391,12 +391,36 @@ const Users = () => {
       values.Permiso_Orden_Compra = true;
       values.Permiso_Surtir = true;
     }
+       if (values.Rol == "DIRECTOR") {
+      values.Permiso_Autorizar = true;
+   
+    }
+       if (values.Rol == "REQUISITOR") {
+      values.Permiso_Cotizar = true;
+   
+    }
     // Llamar a la función mutate para ejecutar la solicitud POST
     mutation.mutate({
       url: "/users/createOrUpdate",
       method: "POST",
       data: values,
     });
+  };
+    const handleModified = (   values: Record<string, any>,
+    setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void) => {
+      console.log(values)
+const year = new Date().getFullYear();
+
+setFieldValue(
+  "Usuario",
+  (values["Nombre"] || "") +
+    ((values["Paterno"] && values["Paterno"][0]) || "") +
+    ((values["Materno"] && values["Materno"][0]) || "") +
+    "-" +
+    year
+);
+
+
   };
   const handlePermissions = () => {};
   return (
@@ -430,15 +454,20 @@ const Users = () => {
                 name="Nombre"
                 label="Nombre"
                 responsive={responsive}
-              />
+                handleModified={handleModified}
+
+/>
               <FormikInput
                 name="Paterno"
                 label="Apellido paterno"
                 responsive={responsive}
-              />
+
+                handleModified={handleModified}
+/>
               <FormikInput
                 name="Materno"
                 label="Apellido Materno"
+                handleModified={handleModified}
                 responsive={responsive}
               />
               <FormikInput

@@ -65,8 +65,11 @@ const HeaderComponent: React.FC<HeaderComponentProps> = ({ button }) => {
       {mutation.status === "pending" && <Spinner />}
       
       <div className="flex items-center space-x-3">{button}</div>
-      
+       <div className="text-center font-semibold text-gray-900 text-xs mt-10 mb-8">
+             {import.meta.env.VITE_VERSION}
+            </div>
       <div className="flex items-center space-x-4">
+
         <Typography 
           className="text-blue/80 hover:text-blue transition-colors" 
           size="lg" 
