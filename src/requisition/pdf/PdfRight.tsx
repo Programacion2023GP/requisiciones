@@ -46,28 +46,28 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
                      producto?.[`PrecioUnitarioSinIva${index}`],
                      true,
                      false,
-                  ) || ""}
+                  ) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
                   {formatCurrency(
                      producto?.[`ImporteIva${index}`],
                      true,
                      false,
-                  ) || ""}
+                  ) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
                   {formatCurrency(
                      producto?.[`PrecioUnitarioConIva${index}`],
                      true,
                      false,
-                  ) || ""}
+                  ) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
                   {formatCurrency(
                      producto?.[`Retenciones${index}`],
                      true,
                      false,
-                  ) || ""}
+                  ) || 0}
                </Text>
             </View>
          </View>
