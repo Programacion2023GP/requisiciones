@@ -291,7 +291,7 @@ const Users = () => {
       filter: true,
       valueGetter: (params: any) => {
         const departamento = groups.data?.data.find(
-          (dep: any) => dep.IDDepartamento === Number(params.data.IDDepartamento)
+          (dep: any) => dep.IDDepartamento == Number(params.data.IDDepartamento)
         );
         return departamento?.Nombre_Departamento || "Sin asignar";
       },
