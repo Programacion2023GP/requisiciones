@@ -67,7 +67,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
 
                         <View
                            style={tw(
-                              "border-2 border-black flex flex-row w-full h-full text-black",
+                              "border-2 rounded-xl border-black flex flex-row w-full h-full text-black",
                            )}>
                            <PdfLeft
                               products={item}
