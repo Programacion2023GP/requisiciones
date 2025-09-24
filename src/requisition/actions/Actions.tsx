@@ -408,7 +408,7 @@ const Actions: React.FC<{
                   </Button>
                 </Tooltip>
               </div> */}
-              {(data.Status == "CP" ||
+              {(data.Status == "CP" &&  data.IDDepartamento ==Number(localStorage.getItem('group')) ||
                 localStorage.getItem("role") == "DIRECTORCOMPRAS") && (
                 <div className="w-fit">
                   <Tooltip content="Editar">
@@ -687,7 +687,7 @@ const Actions: React.FC<{
                   initialValues={{ ClavePresupuestal: 1 }}
                   children={() => (
                     <FormikNumberInput
-                      label="Clave Presupuestal"
+                      label="Numero de orden de compra"
                       name="ClavePresupuestal"
                       decimals={false}
                     />

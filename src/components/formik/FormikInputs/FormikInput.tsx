@@ -6,6 +6,7 @@ import { FaMinus, FaPlus } from "react-icons/fa";
 import { IoMdArrowDropdown } from "react-icons/io";
 
 type InputWithLabelProps = {
+  id?: string,
   label: string;
   name: string;
   responsive?: {
@@ -18,6 +19,7 @@ type InputWithLabelProps = {
   type?: "number" | "text" | "date";
   disabled?: boolean;
   padding?: boolean;
+  value?: any
 
   handleModified?: (
     values: Record<string, any>,
@@ -30,6 +32,8 @@ export const FormikTextArea: React.FC<InputWithLabelProps> = ({
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
   handleModified,
   disabled = false,
+  id
+
 }) => {
   return (
     <ColComponent responsive={responsive} autoPadding>
@@ -44,6 +48,7 @@ export const FormikTextArea: React.FC<InputWithLabelProps> = ({
           }
           return (
             <div
+              id={id}
               className={`relative z-0 w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
             >
               <textarea
@@ -80,24 +85,33 @@ export const FormikTextArea: React.FC<InputWithLabelProps> = ({
 };
 export const FormikInput: React.FC<InputWithLabelProps> = ({
   label,
+  value,
   name,
+  id,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
   type = "text",
   disabled = false,
   handleModified,
-  padding=true
+  padding = true
+
 }) => {
   const [field, meta] = useField(name);
-  const  formik = useFormikContext()
+  const formik = useFormikContext()
+  useEffect(() => {
+    if (value !== undefined && value !== null) {
+      formik.setFieldValue(name, value, false);
+    }
+  }, [value]);
+
 
   // console.log("rendering input")
-  
+
 
   return (
     <ColComponent responsive={responsive} autoPadding={padding}>
       <FastField name={name}>
         {({ field, form: { errors, touched, values, setFieldValue } }: any) => {
-         
+
           const error =
             touched?.[name] && typeof errors?.[name] === "string"
               ? (errors?.[name] as string)
@@ -106,38 +120,64 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
             handleModified(values, setFieldValue);
           }
           return (
-            <div
-              className={`relative z-0 w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
-            >
-              <input
-                {...field}
-                disabled={disabled} // Si el input está desabilitado, no se puede editar
-                type={type}
-                value={
-                  values?.[name] !== undefined && values?.[name] !== null
-                    ? values?.[name]
-                    : ""
-                }
-                id={name}
-                placeholder=" "
-                autoComplete="off"
-                className={`peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200 `}
-              />
-              <label
-                htmlFor={name}
-                className={`absolute left-0 -top-3.5 text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-black`}
-              >
-                {label}
-              </label>
-              {(meta.error && (meta.touched || formik.status)) && (
-                <span
-                  className="text-sm font-semibold text-red-600"
-                  id={`${name}-meta.error`}
+            <>
+
+              {disabled ? (
+                <div className={`relative z-0 w-full mb-5 ${disabled ? "cursor-not-allowed " : ""}`}>
+                  <label
+                    htmlFor={name}
+                    className="absolute left-0 -top-3.5  text-sm transition-all duration-300
+               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base
+               peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-black"
+                  >
+                    {label}
+                  </label>
+
+                  <div
+                    className={`pt-4 pb-2 block w-full border-b-2 
+                ${disabled ? "cursor-not-allowed" : ""}`}
+                  >
+                    {values?.[name] || ""}
+                  </div>
+                </div>
+
+              ) : (
+                <div
+                  id={id}
+                  className={`relative z-0 w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
                 >
-                  {meta.error}
-                </span>
+                  <input
+                    {...field}
+                    disabled={disabled} // Si el input está desabilitado, no se puede editar
+                    type={type}
+                    value={
+                      values?.[name] !== undefined && values?.[name] !== null
+                        ? values?.[name]
+                        : ""
+                    }
+                    id={name}
+                    placeholder=" "
+                    autoComplete="off"
+                    className={`peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200 `}
+                  />
+                  <label
+                    htmlFor={name}
+                    className={`absolute left-0 -top-3.5 text-gray-500 text-sm transition-all duration-300 peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-3.5 peer-focus:text-sm peer-focus:text-black`}
+                  >
+                    {label}
+                  </label>
+                  {(meta.error && (meta.touched || formik.status)) && (
+                    <span
+                      className="text-sm font-semibold text-red-600"
+                      id={`${name}-meta.error`}
+                    >
+                      {meta.error}
+                    </span>
+                  )}
+                </div>
               )}
-            </div>
+            </>
+
           );
         }}
       </FastField>
@@ -206,31 +246,31 @@ export const FormikImageInput: React.FC<FormikImageInputProps> = ({
       <div className="flex flex-col items-center justify-center space-y-4">
         {/* Área para la vista previa de la imagen o el botón de carga */}
         <div className="relative w-full h-60">
-          {preview &&(
+          {preview && (
             <img
               src={preview}
               alt="Preview"
               className="w-full h-full object-cover border-4 border-cyan-500 shadow-lg transition-transform duration-300 hover:scale-105 cursor-pointer"
               onClick={handleImageClick} // Hacer clic en la imagen para cambiarla
             />
-          ) }
-            <div
-              className={`${preview ? 'invisible hidden w-0 h-0':'w-full h-full'} flex items-center justify-center  bg-gray-100 border-4 border-dashed border-gray-300 rounded-full cursor-pointer`}
-              style={{ minHeight: "8rem" }}
-            >
-              <input
-                ref={fileInputRef} // Asignamos la referencia al input
-                id={name}
-                name={name}
-                type="file"
-                accept={acceptedFileTypes}
-                onChange={handleChange}
-                disabled={disabled}
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-              <AiOutlineCamera className="text-gray-600 text-3xl" />
-            </div>
-          
+          )}
+          <div
+            className={`${preview ? 'invisible hidden w-0 h-0' : 'w-full h-full'} flex items-center justify-center  bg-gray-100 border-4 border-dashed border-gray-300 rounded-full cursor-pointer`}
+            style={{ minHeight: "8rem" }}
+          >
+            <input
+              ref={fileInputRef} // Asignamos la referencia al input
+              id={name}
+              name={name}
+              type="file"
+              accept={acceptedFileTypes}
+              onChange={handleChange}
+              disabled={disabled}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+            <AiOutlineCamera className="text-gray-600 text-3xl" />
+          </div>
+
         </div>
 
         {/* Mostrar nombre del archivo seleccionado */}
@@ -274,7 +314,8 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
   decimals = true,
   romanNumerals = false,
   padding = false,
-  
+  id
+
 }) => {
   const formatNumber = (value: number) => {
     if (romanNumerals) {
@@ -359,11 +400,13 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
                 {/* Input numérico */}
                 <input
                   {...field}
+
                   type="text" // Cambiado a texto
                   value={formatNumber(Number(field.value) || 0)} // Usamos el formato de número
-                  id={name}
+                  id={id || name}
                   placeholder=" "
-                  onChange={(e) => {handleInputChange(e, setFieldValue) 
+                  onChange={(e) => {
+                    handleInputChange(e, setFieldValue)
 
                     formik.handleChange(e)
                   }} // Maneja el cambio del input
@@ -475,6 +518,7 @@ type AutocompleteProps<T extends Record<string, any>> = {
   name: string;
   loading: boolean;
   options: Array<T>;
+  id?: string,
   idKey: keyof T;
   labelKey: keyof T;
   responsive?: {
@@ -486,13 +530,13 @@ type AutocompleteProps<T extends Record<string, any>> = {
   };
   disabled?: boolean;
   padding?: boolean; // Agregar espacio entre cada opción
-  handleModifiedOptions?:{
-    name:string;
+  handleModifiedOptions?: {
+    name: string;
 
   };
   handleModified?: (
-    name:string,
-    values:string|number,
+    name: string,
+    values: string | number,
   ) => any;
 };
 
@@ -505,7 +549,8 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   loading,
   responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
   disabled = false,
-  padding =true,
+  padding = true,
+  id,
   handleModified,
   handleModifiedOptions
 
@@ -515,7 +560,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
     throw new Error("Formik context not found");
   }
   const { values } = formik;
-  const [form,meta] = useField(name)
+  const [form, meta] = useField(name)
   const [filteredOptions, setFilteredOptions] = useState(options);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showOptions, setShowOptions] = useState(false);
@@ -584,7 +629,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
         break;
     }
   };
- 
+
   const selectOption = (
     option: T,
     setFieldValue: (name: string, value: any) => void
@@ -592,7 +637,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
     setTextSearch(option[labelKey]); //
     setFilteredOptions(options);
     setFieldValue(name, option[idKey]); // Establecer el valor en Formik
-    handleModified && handleModified(name,option[idKey])
+    handleModified && handleModified(name, option[idKey])
     // handleModified(name,value);
 
     setShowOptions(false);
@@ -604,7 +649,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   ) => {
     setTextSearch(option[labelKey]); //
     selectOption(option, setFieldValue);
-    
+
     // setShowOptions(false);
   };
 
@@ -631,29 +676,31 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
   //   }
   // }, [filteredOptions]);
   return (
-    <ColComponent responsive={responsive} autoPadding={padding}>
+    <ColComponent responsive={responsive} autoPadding={padding}  >
       <Field name={name}>
-        {({ field, form: { setFieldValue, errors, touched, values,setTouched} }: any) => {
+        {({ field, form: { setFieldValue, errors, touched, values, setTouched } }: any) => {
           const error =
-            touched?.[name] && typeof errors?.[name] === "string" 
-            // && (values?.[name]==0 || values?.[name]==""||values?.[name]==undefined) 
+            touched?.[name] && typeof errors?.[name] === "string"
+              // && (values?.[name]==0 || values?.[name]==""||values?.[name]==undefined) 
               ? (errors?.[name] as string)
               : null;
-              // console.log(meta)
+          // console.log(meta)
           // if ( values[name] == 0) {
           //   setTextSearch("")
           // }
           return (
             <div
-              className={`relative  w-full mb-5 ${disabled && "cursor-not-allowed opacity-40"}`}
+              id={id}
+              className={`relative  w-full mb-5 ${disabled && " cursor-not-allowed"}`}
             >
               <input
-              // {...field}
+                // {...field}
+
                 disabled={disabled}
                 ref={inputRef}
                 type="text"
                 onFocus={() => {
-                  
+
                   if (disabled) {
                     return;
                   }
@@ -674,7 +721,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 value={
                   (Array.isArray(options) &&
                     options.find((item) => item[idKey] === values?.[name])?.[
-                      labelKey
+                    labelKey
                     ]) ||
                   textSearch
                 }
@@ -687,6 +734,9 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 // }}
                 // onBlur={handleInputFocus}
                 onChange={(e) => {
+                  if (disabled) {
+                    return
+                  }
                   handleFilter(e.target.value);
                   setFieldValue(name, e.target.value); // Actualizar el valor en Formik
                 }}
@@ -716,8 +766,8 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 onClick={handleInputFocus}
                 className="absolute top-6 right-0 cursor-pointer"
               >
-              
-                <IoMdArrowDropdown />
+
+               {!disabled && <IoMdArrowDropdown />}
               </div>
 
               {showOptions && (
@@ -725,16 +775,15 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                   ref={menuRef} // Añadimos la referencia para la lista
                   className="absolute bg-white border border-gray-300 rounded shadow-md max-h-40 overflow-auto w-full z-10 mt-1"
                 >
-                  {Array.isArray(filteredOptions) && filteredOptions.length>0 && filteredOptions.map((option, index) => (
+                  {Array.isArray(filteredOptions) && filteredOptions.length > 0 && filteredOptions.map((option, index) => (
                     <li
                       ref={(el) => (optionRefs.current[index] = el)}
                       key={
                         option[idKey] ? String(option[idKey]) : String(index)
                       } // Fallback to index if idKey is undefined
                       onClick={() => handleOptionClick(option, setFieldValue)}
-                      className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${
-                        activeIndex === index ? "bg-blue-200" : ""
-                      }`}
+                      className={`px-4 py-2 cursor-pointer hover:bg-blue-100 ${activeIndex === index ? "bg-blue-200" : ""
+                        }`}
                     >
                       {String(option[labelKey])}
                     </li>

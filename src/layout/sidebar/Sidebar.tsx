@@ -146,6 +146,7 @@ const SidebarComponent = () => {
 
                   return (
                     <Item
+                      id={child.IdMenu}
                       key={child.IdMenu}
                       href={child.IdMenu}
                       label={child.Menu}
@@ -163,6 +164,8 @@ const SidebarComponent = () => {
               menu.children.length > 0 &&
               addSectionMenu(menu.children) ? (
                 <Item
+                      id={menu.IdMenu}
+
                   key={menu.IdMenu}
                   href={menu.IdMenu}
                   label={menu.Menu}
@@ -216,7 +219,8 @@ const Item: React.FC<{
   label: string;
   href?: string;
   icon: React.ReactNode;
-}> = ({ href, label, icon }) => {
+  id?:string,
+}> = ({ href, label, icon,id }) => {
   const location = useLocation();
   const [currentLocation, setCurrentLocation] = useState<string | null>(null);
 
@@ -231,6 +235,7 @@ const Item: React.FC<{
 
   return (
     <Link
+    id={id}
       to={href || "#"}
       className={`
         px-4 

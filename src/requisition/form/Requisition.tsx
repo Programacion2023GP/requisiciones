@@ -41,6 +41,7 @@ const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
           <ColComponent responsive={{ "2xl": 4, lg: 6, md: 6 }}>
             <div className="flex flex-col shadow-sm border-2 border-gray-300 bg-white rounded-md py-6 px-2 mb-2 relative">
               <BsTrash3Fill
+              id="form-requisition-deleteproduct"
                 className="absolute right-1 top-2 text-red-500 w-5 h-5 cursor-pointer z-50"
                 onClick={() => {
                   dropInitialValue(item);
@@ -51,20 +52,21 @@ const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
               >
                 {/* Capa bloqueante, se asegura de cubrir completamente el área */}
                 <div
-                  className={`w-full h-full absolute top-0 left-0 ${
-                    item != cont[cont.length - 1]
-                      ? "cursor-not-allowed z-[500]  pointer-events-auto"
-                      : ""
-                  }`}
+                  className={`w-full h-full absolute top-0 left-0 ${item != cont[cont.length - 1]
+                    ? "cursor-not-allowed z-[500]  pointer-events-auto"
+                    : ""
+                    }`}
                 />
                 {/* Campos de entrada de Formik */}
                 <FormikNumberInput
+                  id={`form-requisition-quantityproduct${item}`}
                   name={`Cantidad${item}`}
                   label="Cantidad"
                   decimals={false}
                 />
 
-                <FormikInput name={`Descripcion${item}`} label="Descripción" />
+                <FormikInput name={`Descripcion${item}`} label="Descripción" id={`form-requisition-descriptionproduct${item}`}
+                />
               </div>
             </div>
           </ColComponent>
@@ -113,11 +115,11 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     },
   });
   const dataFormik = {
-    IDDepartamento: 0,
+    IDDepartamento: parseInt(localStorage.getItem("group") ?? "0", 10),
     Observaciones: "",
     Solicitante: "",
     IDTipo: 0,
-    Centro_Costo: 0,
+    Centro_Costo: parseInt(localStorage.getItem("centro_costo") ?? "0", 10),
     Cantidad1: 0,
     Descripcion1: "",
   };
@@ -127,17 +129,17 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       localStorage.getItem("role") === "CAPTURA"
         ? Yup.number().nullable()
         : Yup.number()
-            .transform(
-              (value, originalValue) => (isNaN(value) ? null : value) // Si no es un número, lo convierte en null
-            )
-            .min(1, "El departamento es requerido")
-            .required("El departamento es requerido"),
+          .transform(
+            (value, originalValue) => (isNaN(value) ? null : value) // Si no es un número, lo convierte en null
+          )
+          .min(1, "El departamento es requerido")
+          .required("El departamento es requerido"),
     Centro_Costo:
       localStorage.getItem("role") === "CAPTURA"
         ? Yup.number().nullable()
         : Yup.number()
-            .min(1, "El costo es requerido")
-            .required("El costo es requerido"),
+          .min(1, "El costo es requerido")
+          .required("El costo es requerido"),
     IDTipo: Yup.number()
       .min(1, "El tipo es requerido")
       .required("El tipo es requerido"),
@@ -246,9 +248,23 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
         queryFn: () => GetAxios("tipos/index"),
         refetchOnWindowFocus: true,
       },
+      {
+        queryKey: ["departaments/director", localStorage.getItem("group")],
+        queryFn: () => GetAxios(
+          `departaments/director/${localStorage.getItem("group")}`
+        ),
+
+      },
+
     ],
   });
-  const [groups, types] = queries;
+  const [groups, types, director] = queries;
+  //   useEffect(() => {
+  //     console.log(open,director.data.data)
+  //     const nombre = director.data?.data?.[0]?.Nombre_Director || "";
+  //     formik.current?.setFieldValue("Solicitante", nombre);
+
+  // }, [director.data,open]);
   const handleModified = (name: string, value: number | string) => {
     const val = value as number;
     name === "IDDepartamento" &&
@@ -258,7 +274,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
         groups.data?.data.find((it: any) => it.IDDepartamento == value)
           .Centro_Costo > 0
           ? groups.data?.data.find((it: any) => it.IDDepartamento == value)
-              .Centro_Costo
+            .Centro_Costo
           : 0
       );
   };
@@ -397,19 +413,21 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
           <div className=" mt-2 p-2">
             <FormikForm
               // key={cont[cont.length - 1]}
+              id="form-requisition-submit"
               onSubmit={onSumbit}
               ref={formik}
               buttonMessage={"Vista previa"}
               validationSchema={validationSchema}
               initialValues={values}
-              children={(v) => {
+              children={(v, setValue) => {
                 return (
                   <>
-                    {localStorage.getItem("role") != "CAPTURA" && (
-                      <>
+                        
                         <FormikAutocomplete
+                        disabled={localStorage.getItem("role") != "SISTEMAS"}
                           responsive={responsive}
                           loading={groups.isLoading}
+
                           name="IDDepartamento"
                           label={"selecciona el departamento"}
                           options={groups.data?.data}
@@ -419,6 +437,8 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                           handleModifiedOptions={{ name: "IDDepartamento" }}
                         />
                         <FormikAutocomplete
+                        disabled={localStorage.getItem("role") != "SISTEMAS"}
+
                           responsive={responsive}
                           loading={groups.isLoading}
                           name="Centro_Costo"
@@ -427,8 +447,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                           idKey={"Centro_Costo"}
                           labelKey={"Centro_Costo"}
                         />
-                      </>
-                    )}
+                  
 
                     <FormikAutocomplete
                       responsive={responsive}
@@ -438,20 +457,26 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                       options={types.data?.data}
                       idKey={"IDTipo"}
                       labelKey={"Descripcion"}
+                      id="requisition-type"
                     />
                     <FormikInput
                       responsive={responsive}
                       name="Solicitante"
                       label="Solicitante"
+                      value={director.data?.data?.[0]?.Nombre_Director || ""}
+                      id="requisition-solicitante"
                     />
                     <FormikTextArea
+                      id="requisition-observation"
                       label="Observaciones"
                       name="Observaciones"
                     />
-                    <CollapseComponent title="Detalles de la requisición">
+                    <CollapseComponent title="Detalles de la requisición" id="requisition-products" buttonId="btn-requisition-products"
+                    >
                       <div className="mt-2"></div>
                       <div className="w-fit mb-4">
                         <Button
+                          id="form-requisition-addproduct"
                           type="button"
                           color="teal"
                           variant="solid"

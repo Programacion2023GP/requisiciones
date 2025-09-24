@@ -13,6 +13,7 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>(
       children,
       buttonMessage,
       handleActions,
+    id
     },
     ref
   ) => {
@@ -41,6 +42,7 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>(
               <div className="flex justify-end">
                 {buttonMessage && (
                   <button
+                    id={id}
                     type="submit"
                     className="bg-blue-600 text-white px-6 py-2 text-sm rounded-lg shadow-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
                     onClick={(e) => {

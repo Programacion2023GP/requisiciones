@@ -94,6 +94,18 @@ const SuppliersComponent = () => {
     Telefono2: "",
     EMail: "",
   });
+    const queries = useQueries({
+    queries: [
+      {
+        queryKey: ["suppliers/index"],
+        queryFn: () => GetAxios("provedores/index"),
+        refetchOnWindowFocus: true,
+      },
+
+      // Puedes agregar más peticiones aquí
+    ],
+  });
+  const [suppliers] = queries;
   const validationSchema = Yup.object({
     Nombre_RazonSocial: Yup.string()
       .required("El nombre o razón social es obligatorio")
@@ -109,7 +121,11 @@ const SuppliersComponent = () => {
       .matches(
         /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/,
         "Debe ser un RFC válido con formato correcto"
-      ),
+      )   .test(
+      "unique-rfc",
+      "Este RFC ya existe",
+      (value) => !suppliers?.data?.data.some(item => item.RFC === value)
+    ),
     Telefono1: Yup.string()
       .required("El teléfono principal es obligatorio")
       .matches(
@@ -126,18 +142,7 @@ const SuppliersComponent = () => {
       .required("El correo electrónico es obligatorio")
       .email("Debe ser un correo electrónico válido"),
   });
-  const queries = useQueries({
-    queries: [
-      {
-        queryKey: ["suppliers/index"],
-        queryFn: () => GetAxios("provedores/index"),
-        refetchOnWindowFocus: true,
-      },
 
-      // Puedes agregar más peticiones aquí
-    ],
-  });
-  const [suppliers] = queries;
   const handleEdit = (provedor: ProvedorType): void => {
     setInitialValues(provedor);
     setOpen(true);

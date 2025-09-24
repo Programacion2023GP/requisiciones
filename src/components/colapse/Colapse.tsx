@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AiOutlineDown, AiOutlineUp } from "react-icons/ai"; // Importa los iconos de react-icons
 
-const CollapseComponent: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => {
+const CollapseComponent: React.FC<{ children: React.ReactNode; title: string,id?:string,buttonId?:string  }> = ({ children, title,id,buttonId }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleCollapse = () => {
@@ -9,10 +9,11 @@ const CollapseComponent: React.FC<{ children: React.ReactNode; title: string }> 
   };
 
   return (
-    <div className="w-full border-2 border-gray-300 rounded-lg  shadow-md">
+    <div id={id} className="w-full border-2 border-gray-300 rounded-lg  shadow-md">
       <div className="flex justify-between items-center p-1 bg-gray-100 hover:bg-gray-200 transition-all duration-300">
         <p className="ml-2 text-md font-semibold text-gray-700 w-full">{title}</p>
         <button
+        id={buttonId}
         type="button"
           onClick={toggleCollapse}
           className="text-gray-600 p-2 rounded-md hover:text-gray-900 focus:outline-none transition-all duration-300"

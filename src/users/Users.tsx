@@ -182,6 +182,7 @@ const Users = () => {
         queryFn: () => GetAxios("departamentos/index"),
         refetchOnWindowFocus: true,
       },
+
       // Puedes agregar más peticiones aquí
     ],
   });
@@ -290,7 +291,7 @@ const Users = () => {
       filter: true,
       valueGetter: (params: any) => {
         const departamento = groups.data?.data.find(
-          (dep: any) => dep.IDDepartamento === params.data.IDDepartamento
+          (dep: any) => dep.IDDepartamento === Number(params.data.IDDepartamento)
         );
         return departamento?.Nombre_Departamento || "Sin asignar";
       },
@@ -319,7 +320,7 @@ const Users = () => {
           setOpen={setOpen}
           handleEdit={handleEdit}
           handleEditPermission={handleEditPermission}
-          // Assert non-null, but make sure formikRef.current is initialized
+        // Assert non-null, but make sure formikRef.current is initialized
         />
       ), // Usamos cellRendererFramework
     },
@@ -384,6 +385,7 @@ const Users = () => {
   };
 
   const onSumbit = (values: Record<string, any>) => {
+    values.Password =`${values.Usuario}*`
     if (values.Rol == "DIRECTORCOMPRAS") {
       values.Permiso_Asignar = true;
       values.Permiso_Autorizar = true;
@@ -391,13 +393,13 @@ const Users = () => {
       values.Permiso_Orden_Compra = true;
       values.Permiso_Surtir = true;
     }
-       if (values.Rol == "DIRECTOR") {
+    if (values.Rol == "DIRECTOR") {
       values.Permiso_Autorizar = true;
-   
+
     }
-       if (values.Rol == "REQUISITOR") {
+    if (values.Rol == "REQUISITOR") {
       values.Permiso_Cotizar = true;
-   
+
     }
     // Llamar a la función mutate para ejecutar la solicitud POST
     mutation.mutate({
@@ -406,23 +408,33 @@ const Users = () => {
       data: values,
     });
   };
-    const handleModified = (   values: Record<string, any>,
-    setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void) => {
-      console.log(values)
-const year = new Date().getFullYear();
+  const handleModified = (
+    values: Record<string, any>,
+    setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void
+  ) => {
 
-setFieldValue(
-  "Usuario",
-  (values["Nombre"] || "") +
-    ((values["Paterno"] && values["Paterno"][0]) || "") +
-    ((values["Materno"] && values["Materno"][0]) || "") +
-    "-" +
-    year
-);
+    const year = new Date().getFullYear().toString().slice(-2); // últimos 2 dígitos del año
 
+    const capitalizeFirst = (str: string) =>
+      str ? str.charAt(0).toUpperCase() : "";
 
+    const capitalizeFull = (str: string) =>
+      str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+    // Solo el primer nombre (split por espacio)
+    const firstName = values["Nombre"]?.split(" ")[0] || "";
+
+    setFieldValue(
+      "Usuario",
+      capitalizeFull(firstName) +
+      capitalizeFirst(values["Paterno"]) +
+      capitalizeFirst(values["Materno"]) +
+      "-" +
+      year
+    );
   };
-  const handlePermissions = () => {};
+
+  const handlePermissions = () => { };
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
       {mutation.status == "pending" && <Spinner />}
@@ -456,14 +468,14 @@ setFieldValue(
                 responsive={responsive}
                 handleModified={handleModified}
 
-/>
+              />
               <FormikInput
                 name="Paterno"
                 label="Apellido paterno"
                 responsive={responsive}
 
                 handleModified={handleModified}
-/>
+              />
               <FormikInput
                 name="Materno"
                 label="Apellido Materno"
@@ -471,6 +483,7 @@ setFieldValue(
                 responsive={responsive}
               />
               <FormikInput
+                disabled
                 name="Usuario"
                 label="Usuario con el que va a iniciar sesión"
                 responsive={responsive}
@@ -493,7 +506,7 @@ setFieldValue(
                 idKey={"id"}
                 labelKey={"value"}
               />
-              {values.Rol == "AUTORIZADOR" && (
+              {(values.Rol == "AUTORIZADOR" || values.Rol == "CAPTURA") && (
                 <>
                   <div className="w-full text-start mb-2 ml-3">
                     <Typography
@@ -584,7 +597,7 @@ setFieldValue(
           isLoading={users.isLoading}
           columnDefs={columnDefs}
           buttonElement={buttonElement}
-          // data={users.data?.data}
+        // data={users.data?.data}
         />
       </div>
     </div>

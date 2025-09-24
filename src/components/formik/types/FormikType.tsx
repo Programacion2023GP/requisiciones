@@ -16,4 +16,5 @@ export type FormikType = {
   buttonMessage?: string;
   onSubmit: (values: Record<string, any>) => void;
   ref?: React.Ref<FormikProps<Record<string, any>>>; // Correcta definición del tipo para refs
+  id?:string
 };

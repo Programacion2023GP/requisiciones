@@ -1,6 +1,7 @@
 import React, { memo, forwardRef } from "react";
 
 type ButtonProps = {
+  id?:string
   color:
     | "blue"
     | "green"
@@ -20,7 +21,7 @@ type ButtonProps = {
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ color, variant, size = "medium", children, onClick, type = "button" }, ref) => {
+  ({ color, variant, size = "medium", children, onClick, type = "button",id }, ref) => {
     // Clases de color según el color seleccionado
     const colorClasses = {
       orange: "bg-orange-500 text-white hover:bg-orange-600 focus:ring-orange-500",
@@ -54,6 +55,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     return (
       <button
+        id={id}
         ref={ref}
         onClick={onClick}
         type={type} // Usamos directamente el valor de 'type'

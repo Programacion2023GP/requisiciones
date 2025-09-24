@@ -143,6 +143,48 @@ const RequisicionesAdd = () => {
     },
 
     {
+      headerName: "FechaAsignacion",
+      field: "FechaAsignacion",
+      filter: "agDateColumnFilter",
+      resizable: true,
+      cellRenderer: (data: { value: string | number | Date }) => {
+        // Asegúrate de que la fecha se muestre en un formato adecuado
+        return data.value ? new Date(data.value).toLocaleDateString() : "";
+      },
+      filterParams: {
+        comparator: (dateFromFilter, cellValue) => {
+          if (cellValue == null) {
+            return 0;
+          }
+
+          // Convertir cellValue a un objeto Date
+          const cellDate = new Date(cellValue);
+
+          // Si la conversión a Date es incorrecta, retorna 0 (filtro no encontrado)
+          if (isNaN(cellDate.getTime())) {
+            return 0;
+          }
+
+          // Eliminar las horas, minutos, segundos y milisegundos de ambas fechas
+          const cellDateOnly = new Date(cellDate);
+          const filterDateOnly = new Date(dateFromFilter);
+
+          // Establecer la hora a las 00:00:00 para ambas fechas
+          cellDateOnly.setHours(0, 0, 0, 0);
+          filterDateOnly.setHours(0, 0, 0, 0);
+
+          // Comparar solo las fechas (sin considerar horas, minutos o segundos)
+          if (cellDateOnly < filterDateOnly) {
+            return -1;
+          } else if (cellDateOnly > filterDateOnly) {
+            return 1;
+          }
+
+          return 0; // Si son iguales
+        },
+      },
+    },
+    {
       headerName: "Status",
       field: "Status",
       sortable: true,
@@ -212,6 +254,7 @@ const RequisicionesAdd = () => {
       <Tooltip content="Agregar Requisición">
         <div className="mb-4">
           <Button
+          id="btn-add-requisition"
             onClick={() => {
               setOpen(true);
               ObservableDelete("FormRequisicion");
@@ -326,7 +369,6 @@ const RequisicionesAdd = () => {
                       realizada: false,
                     });
                   } else {
-                    console.log("dd",key)
 
                     // Toggle the specific chip and close all others
                     setChipsOpen((prev) => ({

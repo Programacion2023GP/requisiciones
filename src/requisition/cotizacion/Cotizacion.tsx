@@ -14,7 +14,7 @@ import SwitchComponent from "../../components/switch/Swichcomponent";
 import Observable from "../../extras/observable";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
-import { showToast } from "../../sweetalert/Sweetalert";
+import { showConfirmationAlert, showToast } from "../../sweetalert/Sweetalert";
 import Button from "../../components/form/Button";
 import { IoMdSend } from "react-icons/io";
 import Spinner from "../../loading/Loading";
@@ -85,20 +85,31 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       setSpiner(true);
     },
     onSuccess: (resp) => {
+      console.log("response", resp?.data)
       setSpiner(false);
 
-      const item = data.find(
-        (it) =>
-          it.IDproveedor1 > 0 && it.IDproveedor2 > 0 && it.IDproveedor3 > 0
-      );
+      const raw = resp?.data || {};
+      const parsed: Record<string, any> = { ...raw };
 
-      setInitialValues({
-        ...resp?.data,
-        // IDproveedor1: item?.IDproveedor1,
-        // IDproveedor2: item?.IDproveedor2,
-        // IDproveedor3: item?.IDproveedor3,
-        // ObservacionesCot: "",
+      // Normalizar campos que son numéricos
+      Object.keys(raw).forEach((key) => {
+        if (
+          key.match(/(PrecioUnitarioSinIva|PorcentajeIVA|ImporteIva|PrecioUnitarioConIva|Retenciones)\d?$/) &&
+          raw[key] !== null
+        ) {
+          parsed[key] = Number(raw[key]); // convertir a número
+        }
       });
+      console.log("parsed", parsed)
+      setInitialValues(parsed);
+      // const item = data.find(
+      //   (it) =>
+      //     it.IDproveedor1 > 0 && it.IDproveedor2 > 0 && it.IDproveedor3 > 0
+      // );
+      // setInitialValues({
+      //   ...resp?.data,
+
+      // });
 
       // showToast(data.message, data.status);
       if (mutationSearch.status === "success") {
@@ -121,7 +132,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       url: string;
       method: "POST" | "PUT" | "DELETE";
       data?: any;
-    }) => AxiosRequest(url, method, IdRequisicion.data),
+    }) => AxiosRequest(url, method, IdRequisicion?.data),
     onMutate(variables) {
       setData([]);
       setSpiner(true);
@@ -166,11 +177,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
         method: "POST",
         url: "/requisiciones/products",
         data: {
-          ...IdRequisicion.data,
+          ...IdRequisicion?.data,
         },
       });
       // setReloadTable(true);
       setInitialValues({});
+      console.log("cotizacion search")
       showToast(data.message, data.status);
       // if (mutation.status === "success") {
       //   mutation.reset();
@@ -185,141 +197,167 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
   });
 
   const handleSubmit = (values: any) => {
-    mutation.mutate({
-      url: "/requisicionesdetails/update",
-      method: "PUT",
-      data: { ...values, newStatus: IdRequisicion.data.status },
-    });
+    console.log(values)
+    if (
+      values.IDproveedor1 !== null && values.IDproveedor1 !== undefined && values.IDproveedor1 !== "" && !isNaN(Number(values.IDproveedor1)) &&
+      values.IDproveedor2 !== null && values.IDproveedor2 !== undefined && values.IDproveedor2 !== "" && !isNaN(Number(values.IDproveedor2)) &&
+      values.IDproveedor3 !== null && values.IDproveedor3 !== undefined && values.IDproveedor3 !== "" && !isNaN(Number(values.IDproveedor3))
+    ) {
+      mutation.mutate({
+        url: "/requisicionesdetails/update",
+        method: "PUT",
+        data: { ...values, newStatus: IdRequisicion?.data?.status },
+      });
+
+    }
+    else {
+      showConfirmationAlert(
+        `Advertencia`,
+        "¿La cotización no cuenta con los 3 provedores deseas continuar?."
+      ).then((isConfirmed) => {
+        if (isConfirmed) {
+          mutation.mutate({
+            url: "/requisicionesdetails/update",
+            method: "PUT",
+            data: { ...values, newStatus: IdRequisicion?.data?.status },
+          });
+        } else {
+          showToast("La acción fue cancelada.", "error");
+        }
+      });
+
+    }
+
   };
 
   const validationSchema =
     IdRequisicion?.data?.status == "CO"
       ? Yup.object({
-          // Proveedor: Yup.number()
-          //   .min(1, "Selecciona un provedor")
-          //   .required("Selecciona un provedor"), // Asegúrate que Proveedor pueda ser null
-          IDproveedor1: Yup.number()
-            .test(
-              "unique1",
-              "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-              function (value) {
-                const { IDproveedor2, IDproveedor3 } = this.parent;
-                return value !== IDproveedor2 && value !== IDproveedor3;
-              }
-            )
-            .required("El proveedor 1 es obligatorio"),
+        // Proveedor: Yup.number()
+        //   .min(1, "Selecciona un provedor")
+        //   .required("Selecciona un provedor"), // Asegúrate que Proveedor pueda ser null
+        IDproveedor1: Yup.number()
+          .test(
+            "unique1",
+            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+            function (value) {
+              const { IDproveedor2, IDproveedor3 } = this.parent;
+              return value !== IDproveedor2 && value !== IDproveedor3;
+            }
+          )
+          .required("El proveedor 1 es obligatorio"),
 
-          // Proveedor 2
-          IDproveedor2: Yup.number()
-            .nullable() // Permite valores nulos
-            .optional() // Permite que el campo no esté presente
-            .test(
-              "unique2",
-              "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-              function (value) {
-                const { IDproveedor1, IDproveedor3 } = this.parent;
-                return (
-                  value !== IDproveedor1 &&
-                  (IDproveedor3 == null || value !== IDproveedor3)
-                );
-              }
-            ),
-          // Proveedor 3
-          IDproveedor3: Yup.number()
-            .nullable() // Permite valores nulos
-            .optional()
-
-            .test(
-              "unique3",
-              "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-              function (value) {
-                const { IDproveedor1, IDproveedor2 } = this.parent;
-                return (
-                  value !== IDproveedor1 &&
-                  (IDproveedor2 == null || value !== IDproveedor2)
-                );
-              }
-            ),
-          // IDproveedor1: Yup.number()
-          //   .test(
-          //     "unique1",
-          //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-          //     function (value) {
-          //       console.log("Valores del formulario:", this.parent); // 👀 Verificar qué llega aquí
-          //       const { IDProveedor1, IDProveedor3 } = this.parent || {}; // Evitar undefined
-          //       return value !== IDProveedor1 && value !== IDProveedor3;
-          //     }
-          //   )
-          //   .required("El proveedor 1 es obligatorio"),
-
-          //   IDproveedor2: Yup.number()
-          //   .min(1, "Selecciona un provedor")
-          //   .test(
-          //     "unique",
-          //     "El provedor ya esta seleccionado en los demas provedores seleccione otro",
-          //     (value) =>
-          //       value ==
-          //       (formik?.current?.values["IDproveedor3"] ||
-          //         formik?.current?.values["IDproveedor1"])
-
-          //     // {
-          //     // const { IDproveedor1, IDproveedor3 } = formik?.current?.values;
-          //     // console.log( Number(value) == Number(IDproveedor1),Number(value) == Number(IDproveedor3),value );
-          //     //  (Number(value) == Number(IDproveedor1) || Number(value) == Number(IDproveedor3));
-
-          //     // }
-          //   )
-          //   .required("Selecciona un provedor"),
-
-          //   IDproveedor3: Yup.number()
-          //   .min(1, "Selecciona un proveedor")
-          //   .test(
-          //     "unique3",
-          //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-          //     function (value) {
-          //       const { IDproveedor1, IDproveedor2 } = this.parent; // Accede a los valores del formulario
-          //       return value !== IDproveedor1 && value !== IDproveedor2;
-          //     }
-          //   )
-
-          //   .required("Selecciona un provedor"),
-
-          PrecioUnitarioSinIva1: Yup.number().required(
-            "Precio unitario sin IVA es obligatorio"
+        // Proveedor 2
+        IDproveedor2: Yup.number()
+          .nullable() // Permite valores nulos
+          .optional() // Permite que el campo no esté presente
+          .test(
+            "unique2",
+            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+            function (value) {
+              const { IDproveedor1, IDproveedor3 } = this.parent;
+              return (
+                value !== IDproveedor1 &&
+                (IDproveedor3 == null || value !== IDproveedor3)
+              );
+            }
           ),
-          // PorcentajeIVA1: Yup.number().required("porcentaje del iva es obligatorio"),
-          ImporteIva1: Yup.number().required("Importe iva es obligatorio"),
-          PrecioUnitarioConIva1: Yup.number().required(
-            "Precio unitario con iva es obligatorio"
+        // Proveedor 3
+        IDproveedor3: Yup.number()
+          .nullable() // Permite valores nulos
+          .optional()
+
+          .test(
+            "unique3",
+            "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+            function (value) {
+              const { IDproveedor1, IDproveedor2 } = this.parent;
+              return (
+                value !== IDproveedor1 &&
+                (IDproveedor2 == null || value !== IDproveedor2)
+              );
+            }
           ),
-          // Retenciones1: Yup.number().required("Retenciones es obligatorio"),
+        // IDproveedor1: Yup.number()
+        //   .test(
+        //     "unique1",
+        //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+        //     function (value) {
+        //       console.log("Valores del formulario:", this.parent); // 👀 Verificar qué llega aquí
+        //       const { IDProveedor1, IDProveedor3 } = this.parent || {}; // Evitar undefined
+        //       return value !== IDProveedor1 && value !== IDProveedor3;
+        //     }
+        //   )
+        //   .required("El proveedor 1 es obligatorio"),
 
-          // PrecioUnitarioSinIva2: Yup.number().required(
-          //   "Precio unitario sin iva es obligatorio"
-          // ),
-          // // PorcentajeIVA2: Yup.number().required("porcentaje del iva es obligatorio"),
-          // ImporteIva2: Yup.number().required("Importe iva es obligatorio"),
-          // PrecioUnitarioConIva2: Yup.number().required(
-          //   "Precio unitario con iva es obligatorio"
-          // ),
-          // Retenciones2: Yup.number().required("Retenciones es obligatorio"),
+        //   IDproveedor2: Yup.number()
+        //   .min(1, "Selecciona un provedor")
+        //   .test(
+        //     "unique",
+        //     "El provedor ya esta seleccionado en los demas provedores seleccione otro",
+        //     (value) =>
+        //       value ==
+        //       (formik?.current?.values["IDproveedor3"] ||
+        //         formik?.current?.values["IDproveedor1"])
 
-          // PrecioUnitarioSinIva3: Yup.number().required(
-          //   "Precio unitario sin iva es obligatorio"
-          // ),
-          // // PorcentajeIVA3: Yup.number().required("porcentaje del iva es obligatorio"),
-          // ImporteIva3: Yup.number().required("Importe iva es obligatorio"),
-          // PrecioUnitarioConIva3: Yup.number().required(
-          //   "Precio unitario con iva es obligatorio"
-          // ),
+        //     // {
+        //     // const { IDproveedor1, IDproveedor3 } = formik?.current?.values;
+        //     // console.log( Number(value) == Number(IDproveedor1),Number(value) == Number(IDproveedor3),value );
+        //     //  (Number(value) == Number(IDproveedor1) || Number(value) == Number(IDproveedor3));
 
-          // Retenciones3: Yup.number().required("Retenciones es obligatorio"),
-        })
+        //     // }
+        //   )
+        //   .required("Selecciona un provedor"),
+
+        //   IDproveedor3: Yup.number()
+        //   .min(1, "Selecciona un proveedor")
+        //   .test(
+        //     "unique3",
+        //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
+        //     function (value) {
+        //       const { IDproveedor1, IDproveedor2 } = this.parent; // Accede a los valores del formulario
+        //       return value !== IDproveedor1 && value !== IDproveedor2;
+        //     }
+        //   )
+
+        //   .required("Selecciona un provedor"),
+
+        PrecioUnitarioSinIva1: Yup.number().required(
+          "Precio unitario sin IVA es obligatorio"
+        ),
+        // PorcentajeIVA1: Yup.number().required("porcentaje del iva es obligatorio"),
+        ImporteIva1: Yup.number().required("Importe iva es obligatorio"),
+        PrecioUnitarioConIva1: Yup.number().required(
+          "Precio unitario con iva es obligatorio"
+        ),
+        // Retenciones1: Yup.number().required("Retenciones es obligatorio"),
+
+        // PrecioUnitarioSinIva2: Yup.number().required(
+        //   "Precio unitario sin iva es obligatorio"
+        // ),
+        // // PorcentajeIVA2: Yup.number().required("porcentaje del iva es obligatorio"),
+        // ImporteIva2: Yup.number().required("Importe iva es obligatorio"),
+        // PrecioUnitarioConIva2: Yup.number().required(
+        //   "Precio unitario con iva es obligatorio"
+        // ),
+        // Retenciones2: Yup.number().required("Retenciones es obligatorio"),
+
+        // PrecioUnitarioSinIva3: Yup.number().required(
+        //   "Precio unitario sin iva es obligatorio"
+        // ),
+        // // PorcentajeIVA3: Yup.number().required("porcentaje del iva es obligatorio"),
+        // ImporteIva3: Yup.number().required("Importe iva es obligatorio"),
+        // PrecioUnitarioConIva3: Yup.number().required(
+        //   "Precio unitario con iva es obligatorio"
+        // ),
+
+        // Retenciones3: Yup.number().required("Retenciones es obligatorio"),
+      })
       : Yup.object({
-          Proveedor: Yup.number()
-            .min(1, "Selecciona un provedor")
-            .required("Selecciona un provedor"),
-        });
+        Proveedor: Yup.number()
+          .min(1, "Selecciona un provedor")
+          .required("Selecciona un provedor"),
+      });
 
   const handleModified = (
     values: Record<string, any>,
@@ -365,8 +403,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       method: "POST",
       url: "/requisiciones/products",
       data: {
-        IDRequisicion: IdRequisicion.data.IdRequisicion,
-        Ejercicio: IdRequisicion.data.Ejercicio,
+        IDRequisicion: IdRequisicion?.data?.IdRequisicion,
+        Ejercicio: IdRequisicion?.data?.Ejercicio,
       },
     });
   }, []);
@@ -443,7 +481,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       {initialValues?.IDDetalle && (
         <FormikForm
           buttonMessage={
-            IdRequisicion.data.status == "CO"
+            IdRequisicion?.data?.status == "CO"
               ? "Cotizar"
               : "Seleccionar provedor"
           }
@@ -457,10 +495,9 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
               <div className="w-full space-y-8 px-2 overflow-auto">
                 {[1, 2, 3].map((contProvedor) => {
                   // Clase dinámica de fondo
-                  console.log(values)
                   const bgClass =
                     values.Proveedor === values[`IDproveedor${contProvedor}`] &&
-                    values[`IDproveedor${contProvedor}`] > 0
+                      values[`IDproveedor${contProvedor}`] > 0
                       ? "bg-sky-100"
                       : "bg-gray-50";
 
@@ -470,10 +507,10 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                       className={`w-full ${bgClass} p-6 rounded-lg shadow-lg`}
                     >
                       <Typography className="mb-4 text-lg font-semibold text-slate-800">
-                        Proveedor {contProvedor} 
+                        Proveedor {contProvedor}
                       </Typography>
 
-                      {IdRequisicion.data.status === "OC" &&
+                      {IdRequisicion?.data?.status === "OC" &&
                         Number(values[`IDproveedor${contProvedor}`]) > 0 && (
                           <SwitchComponent
                             enabled={
@@ -486,12 +523,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                             onclick={() => {
                               // Alterna el proveedor seleccionado
                               values.Proveedor ===
-                              values[`IDproveedor${contProvedor}`]
+                                values[`IDproveedor${contProvedor}`]
                                 ? setFieldValue("Proveedor", null)
                                 : setFieldValue(
-                                    "Proveedor",
-                                    values[`IDproveedor${contProvedor}`]
-                                  );
+                                  "Proveedor",
+                                  values[`IDproveedor${contProvedor}`]
+                                );
                             }}
                           />
                         )}
@@ -541,14 +578,14 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                 <FormikInput
                                   handleModified={
                                     title == "Precio Uni. S/IVA" ||
-                                    title == "PorcentajeIVA"
+                                      title == "PorcentajeIVA"
                                       ? handleModified
                                       : undefined
                                   }
                                   disabled={
                                     title == "Importe IVA" ||
-                                    title == "Precio Uni. C/IVA" ||
-                                    IdRequisicion.data.status == "OC"
+                                      title == "Precio Uni. C/IVA" ||
+                                      IdRequisicion?.data?.status == "OC"
                                       ? true
                                       : false
                                   }
@@ -570,7 +607,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   <FormikTextArea
                     label="Observaciones de la Cotización"
                     name="ObservacionesCot"
-                    disabled={IdRequisicion.data.status == "OC" ? true : false}
+                    disabled={IdRequisicion?.data?.status == "OC" ? true : false}
                   />
                 </div>
               </div>

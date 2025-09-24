@@ -3,6 +3,7 @@ export type RowProps = {
   
   };
   export type ColProps = {
+    id?:string
     responsive?: {
       sm?: number;
       md?: number;

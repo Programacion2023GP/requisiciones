@@ -48,6 +48,11 @@ const YearSelect: React.FC<YearSelectProps> = ({ onChange, setClosed }) => {
         queryFn: () => GetAxios(`autorizadores/cotizadores`),
         refetchOnWindowFocus: true,
       },
+            {
+        queryKey: ["departaments/director"],
+        queryFn: () => GetAxios(`departaments/director/${localStorage.getItem('group')}`),
+        refetchOnWindowFocus: true,
+      },
       //   {
       //     queryKey: ["users/index"],
       //     queryFn: () => GetAxios("users/index"),
@@ -163,6 +168,7 @@ const YearSelect: React.FC<YearSelectProps> = ({ onChange, setClosed }) => {
               decimals={false}
             />
             <FormikInput
+              
               name="Solicitante"
               label="Solicitante"
               padding={false}

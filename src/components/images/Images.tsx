@@ -1,73 +1,106 @@
-import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
-import { IoIosClose } from 'react-icons/io'; // React Icons para el ícono de cerrar
+import React, { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
+import { IoIosClose } from "react-icons/io";
+import { motion, AnimatePresence } from "framer-motion";
 
-// Tipado para las props del componente
 interface PhotoZoomProps {
   src: string;
   alt: string;
   description?: string;
-  title?: string; // Nueva prop title
+  title?: string;
 }
 
-// Componente PhotoZoom
 const PhotoZoom: React.FC<PhotoZoomProps> = ({ src, alt, description, title }) => {
-  const [isZoomed, setIsZoomed] = useState<boolean>(false);
-  // Toggle para abrir y cerrar el zoom
-  const toggleZoom = () => setIsZoomed((prev) => !prev);
+  const [isZoomed, setIsZoomed] = useState(false);
 
-  // Función para cerrar el zoom solo cuando se haga clic en el ícono de la X
+  const toggleZoom = () => setIsZoomed((prev) => !prev);
   const handleClose = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Evita que el clic se propague al contenedor de zoom
+    e.stopPropagation();
     setIsZoomed(false);
   };
+
+  // Cerrar con tecla ESC
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsZoomed(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Bloquear scroll cuando está abierto
+  useEffect(() => {
+    if (isZoomed) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [isZoomed]);
 
   return (
     <div className="relative inline-block cursor-zoom-in">
       <img
         src={src}
         alt={alt}
-        className="rounded-lg shadow-lg transition-transform transform hover:scale-105"
+        className="rounded-lg shadow-md transition-transform transform hover:scale-105"
         onClick={toggleZoom}
       />
-      {description && <p className="mt-3 text-sm text-gray-600 text-center">{description}</p>}
+      {description && (
+        <p className="mt-2 text-sm text-gray-600 text-center">{description}</p>
+      )}
 
-      {isZoomed &&
-        ReactDOM.createPortal(
-          <div
-            className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-70 flex justify-center items-center z-50 backdrop-blur-sm"
-            onClick={toggleZoom} // Cierra el zoom al hacer clic en el fondo
-          >
-            <div className="relative">
-              {/* Ícono de cerrar mejorado */}
-              <button
-                onClick={handleClose}
-                className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-lg transition-all transform hover:scale-125 hover:bg-gray-300 focus:outline-none cursor-pointer"
+      {ReactDOM.createPortal(
+        <AnimatePresence>
+          {isZoomed && (
+            <motion.div
+              className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50 backdrop-blur-sm"
+              onClick={toggleZoom}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="relative flex flex-col items-center"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                onClick={(e) => e.stopPropagation()} // evita cerrar al hacer clic en la imagen
               >
-                <IoIosClose size={32} color="black" />
-              </button>
+                {/* Botón cerrar */}
+                <button
+                  onClick={handleClose}
+                  className="absolute -top-12 right-0 p-2 bg-white rounded-full shadow-lg transition-transform hover:scale-110 hover:bg-gray-200 focus:outline-none"
+                >
+                  <IoIosClose size={32} className="text-black" />
+                </button>
 
-              {/* Título sobre la imagen */}
-              {title && (
-                <h2 className="absolute top-4 left-1/2 transform -translate-x-1/2 text-white text-2xl font-semibold z-10">
-                  {title}
-                </h2>
-              )}
+                {/* Título */}
+                {title && (
+                  <h2 className="mb-4 text-white text-2xl font-semibold drop-shadow-lg text-center">
+                    {title}
+                  </h2>
+                )}
 
-              {/* Contenedor de la imagen aumentada con animación y borde */}
-              <div
-                className="bg-contain bg-no-repeat bg-center border-4 border-white rounded-lg shadow-2xl transition-transform transform hover:scale-105"
-                style={{
-                  backgroundImage: `url(${src})`,
-                  width: '90vw',
-                  height: '90vh',
-                  backgroundSize: 'contain',
-                }}
-              />
-            </div>
-          </div>,
-          document.body // Renderiza el portal en el body
-        )}
+                {/* Imagen */}
+                <img
+                  src={src}
+                  alt={alt}
+                  className="max-w-screen-lg max-h-screen rounded-lg shadow-2xl object-contain"
+                />
+
+                {/* Descripción */}
+                {description && (
+                  <p className="mt-4 text-gray-200 text-sm text-center max-w-lg">
+                    {description}
+                  </p>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };

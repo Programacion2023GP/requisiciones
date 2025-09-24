@@ -1,7 +1,7 @@
-import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Agtable } from "../../components/table/Agtable";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ColDef } from "ag-grid-community";
 import Tooltip from "../../components/toltip/Toltip";
 import Button from "../../components/form/Button";
@@ -17,8 +17,9 @@ import {
 } from "../../components/formik/FormikInputs/FormikInput";
 import { showToast } from "../../sweetalert/Sweetalert";
 import Spinner from "../../loading/Loading";
-import { FaUserEdit } from "react-icons/fa";
+import { FaUserClock, FaUserEdit } from "react-icons/fa";
 import Typography from "../../components/typografy/Typografy";
+import CardComponent from "../../components/card/Card";
 
 type PropsTable = {
   IdDetDirectores: number;
@@ -44,6 +45,7 @@ const ActionButtons = ({
   handleEdit: (provedor: PropsTable) => void;
 }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [openDirectores, setOpenDirectores] = useState<boolean>(false)
 
   const mutation = useMutation({
     mutationFn: ({
@@ -117,6 +119,18 @@ const ActionButtons = ({
             <BiEdit />
           </Button>
         </Tooltip>
+        <Tooltip content="Historial Directores">
+          <Button
+            color="indigo"
+            size="small"
+            variant="solid"
+            onClick={() => {
+              setOpenDirectores(true);
+            }}
+          >
+            <FaUserClock />
+          </Button>
+        </Tooltip>
         <ModalComponent
           title="Editar centro de costo"
           open={open}
@@ -145,6 +159,10 @@ const ActionButtons = ({
             )}
           />
         </ModalComponent>
+
+        <ModalComponent title={`Historial de directores del departamento`} open={openDirectores} setOpen={() => { setOpenDirectores(false) }}>
+        <Directores data={data}/>
+        </ModalComponent>
       </div>
     </>
   );
@@ -153,14 +171,80 @@ const Picture = ({ data }: { data: PropsTable }) => {
   return (
     <PhotoZoom
       src={`${import.meta.env.VITE_API_IMG}/${data.Firma_Director}`}
-      alt={"Firma del director " + data.Nombre_Director}
+      alt={"Firma del director " + (data.Nombre_Director !=null? data.Nombre_Director:"" )}
       title={data?.Nombre_Director || ""}
     ></PhotoZoom>
   );
 };
+
+
+const Directores = ({ data }: { data: PropsTable }) => {
+  const [columnDefs] = useState<ColDef<PropsTable>[]>([
+    {
+      headerName: "Director",
+      field: "Nombre_Director",
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Departamento",
+      field: "Nombre_Departamento",
+      sortable: true,
+      filter: true,
+    },
+    {
+      headerName: "Centro Costo",
+      field: "Centro_Costo",
+      sortable: true,
+      filter: true,
+    },
+
+    {
+      headerName: "Firma",
+      field: "Firma_Director", // Usamos colId para identificar la columna sin usar field
+      sortable: true,
+      filter: true,
+
+      cellRenderer: (params: any) => <Picture data={params.data} />, // Usamos cellRendererFramework
+    },
+  
+  ]);
+   const queries = useQueries({
+    queries: [
+      {
+        queryKey: ["director/index", data?.NombreCompleto], // 👈 clave dependiente
+        queryFn: () => GetAxios(`departaments/director/${data?.IDDepartamento}`),
+        refetchOnWindowFocus: true,
+      },
+   
+      // Puedes agregar más peticiones aquí
+    ],
+  });
+  const [directores] = queries
+   useEffect(() => {
+    if (data?.IDDepartamento) {
+      directores.refetch();
+    }
+  }, [data?.IDDepartamento]);
+  return (
+    <Agtable
+      loading={directores.isLoading}
+      data={directores?.data?.data}
+      isLoading={directores.isLoading}
+      columnDefs={columnDefs}
+      buttonElement={<></>}
+      permissionsUserTable={{
+        buttonElement: "",
+        table: "CatDepartamentos",
+      }}
+    />
+  );
+};
+
 const CatDepartaments = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [spiner, setSpiner] = useState<boolean>(false);
+  const [modal, setModal] = useState<boolean>(false)
   const [initialValues, setInitialValues] = useState<PropsTable>({
     Nombre_Director: null,
     Firma_Director: null,
@@ -251,7 +335,7 @@ const CatDepartaments = () => {
         setSpiner(false);
 
         const errorData = await response.json().catch(() => ({})); // Si el cuerpo no es JSON
-        showToast("no se pudo registrar al director", "error");
+        showToast("No se pudo registrar al director", "error");
 
         return;
       }
@@ -329,7 +413,11 @@ const CatDepartaments = () => {
                   label={"Selecciona al nuevo director"}
                   name={"NombreCompleto"}
                   loading={false}
-                  options={users.data.data}
+                  options={users.data.data
+                    ? users.data.data.filter(it => it?.Rol === 'DIRECTOR'||it?.Rol === 'DIRECTORCOMPRAS')
+                    : []
+                  }
+
                 />
                 {errors?.NombreCompleto && (
                   <span
@@ -343,6 +431,12 @@ const CatDepartaments = () => {
             )}
           />
         </ModalComponent>
+        {/* <ModalComponent  open={openDirectores}   setOpen={() => {
+            setOpenDirectores(false);
+          }}>
+            <Directores data={d}/>
+
+          </ModalComponent> */}
         <Agtable
           permissionsUserTable={{
             buttonElement: "CatDepartamentos",
@@ -353,8 +447,10 @@ const CatDepartaments = () => {
           isLoading={departaments.isLoading}
           columnDefs={columnDefs}
           buttonElement={<></>}
-          // data={users.data?.data}
+        // data={users.data?.data}
         />
+        <ModalComponent children={undefined} open={modal} setOpen={() => { setModal(false) }} />
+
       </div>
     </div>
   );
