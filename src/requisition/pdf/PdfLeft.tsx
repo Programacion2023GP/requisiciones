@@ -30,11 +30,14 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                         "ml-2 text-wrap flex  items-center justify-center",
                      )}>
                      <Text style={tw(`${styles.pdf.textVal} text-wrap`)}>
-                        {new Date().toLocaleDateString("es-ES", {
-                           day: "2-digit",
-                           month: "long",
-                           year: "numeric",
-                        })}
+                        {new Date(pdfData?.FechaCaptura).toLocaleDateString(
+                           "es-ES",
+                           {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                           },
+                        )}
                      </Text>
                   </View>
                </View>
@@ -151,12 +154,12 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                </View>
             ))}
 
-         {/* OBSERVACIONES */}
+         {/* DESCRIPCIÓN */}
          <View
             style={tw(
                `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap`,
             )}>
-            <Text style={tw(`text-sm font-bold`)}>Observaciones:</Text>
+            <Text style={tw(`text-sm font-bold`)}>Descripción:</Text>
             <Text style={tw(`text-sm`)}>{pdfData?.Observaciones}</Text>
          </View>
 

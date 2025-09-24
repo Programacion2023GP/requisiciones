@@ -1,5 +1,5 @@
 const pdf = {
-   title: "text-[15px] font-black text-center",
+   title: "text-[16px] font-black text-center",
    subtitle: "text-[12px] font-bold",
    box: "flex items-center justify-center border border-black rounded-md p-1",
    textKey: "text-[8px]",
