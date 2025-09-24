@@ -38,7 +38,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, content }) => {
               left: tooltipPosition.left,
               zIndex: 1000,
             }}
-            className="bg-presidencia text-white font-bold text-sm rounded py-1 px-2 transform -translate-y-3/4"
+            className="px-2 py-1 text-sm font-bold text-white transform rounded bg-presidencia -translate-y-3/4"
           >
             {content}
           </div>,
