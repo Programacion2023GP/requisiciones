@@ -41,7 +41,7 @@ const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
           <ColComponent responsive={{ "2xl": 4, lg: 6, md: 6 }}>
             <div className="flex flex-col shadow-sm border-2 border-gray-300 bg-white rounded-md py-6 px-2 mb-2 relative">
               <BsTrash3Fill
-              id="form-requisition-deleteproduct"
+                id="form-requisition-deleteproduct"
                 className="absolute right-1 top-2 text-red-500 w-5 h-5 cursor-pointer z-50"
                 onClick={() => {
                   dropInitialValue(item);
@@ -119,6 +119,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     Observaciones: "",
     Solicitante: "",
     IDTipo: 0,
+    FechaCaptura:"",
     Centro_Costo: parseInt(localStorage.getItem("centro_costo") ?? "0", 10),
     Cantidad1: 0,
     Descripcion1: "",
@@ -143,6 +144,8 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     IDTipo: Yup.number()
       .min(1, "El tipo es requerido")
       .required("El tipo es requerido"),
+      FechaCaptura: Yup.string()
+      .required("La fecha es requerida"),
     Observaciones: Yup.string().required("Las observaciones es requerido"),
     Cantidad1: Yup.number()
       .min(1, "La cantidad debe ser mayor a 0")
@@ -422,32 +425,32 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
               children={(v, setValue) => {
                 return (
                   <>
-                        
-                        <FormikAutocomplete
-                        disabled={localStorage.getItem("role") != "SISTEMAS"}
-                          responsive={responsive}
-                          loading={groups.isLoading}
 
-                          name="IDDepartamento"
-                          label={"selecciona el departamento"}
-                          options={groups.data?.data}
-                          idKey={"IDDepartamento"}
-                          labelKey={"Nombre_Departamento"}
-                          handleModified={handleModified}
-                          handleModifiedOptions={{ name: "IDDepartamento" }}
-                        />
-                        <FormikAutocomplete
-                        disabled={localStorage.getItem("role") != "SISTEMAS"}
+                    <FormikAutocomplete
+                      disabled={localStorage.getItem("role") != "SISTEMAS"}
+                      responsive={responsive}
+                      loading={groups.isLoading}
 
-                          responsive={responsive}
-                          loading={groups.isLoading}
-                          name="Centro_Costo"
-                          label={"selecciona el centro de costo"}
-                          options={groups.data?.data}
-                          idKey={"Centro_Costo"}
-                          labelKey={"Centro_Costo"}
-                        />
-                  
+                      name="IDDepartamento"
+                      label={"selecciona el departamento"}
+                      options={groups.data?.data}
+                      idKey={"IDDepartamento"}
+                      labelKey={"Nombre_Departamento"}
+                      handleModified={handleModified}
+                      handleModifiedOptions={{ name: "IDDepartamento" }}
+                    />
+                    <FormikAutocomplete
+                      disabled={localStorage.getItem("role") != "SISTEMAS"}
+
+                      responsive={responsive}
+                      loading={groups.isLoading}
+                      name="Centro_Costo"
+                      label={"selecciona el centro de costo"}
+                      options={groups.data?.data}
+                      idKey={"Centro_Costo"}
+                      labelKey={"Centro_Costo"}
+                    />
+
 
                     <FormikAutocomplete
                       responsive={responsive}
@@ -465,6 +468,13 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                       label="Solicitante"
                       value={director.data?.data?.[0]?.Nombre_Director || ""}
                       id="requisition-solicitante"
+                    />
+                    <FormikInput
+                      // responsive={responsive}
+                      name="FechaCaptura"
+                      type="date"
+                      label="Fecha de factura"
+                      id="requisition-factura"
                     />
                     <FormikTextArea
                       id="requisition-observation"

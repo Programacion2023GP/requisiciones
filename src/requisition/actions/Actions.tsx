@@ -353,9 +353,10 @@ const Actions: React.FC<{
                 }));
               }}
             />
-            //   <PermissionMenu IdMenu="SeguimientoRequis">
-            // </PermissionMenu>
+
           )}
+
+
           {open.cotizacion && (
             <CotizacionComponent
               setReloadTable={setReloadTable}
@@ -408,29 +409,29 @@ const Actions: React.FC<{
                   </Button>
                 </Tooltip>
               </div> */}
-              {(data.Status == "CP" &&  data.IDDepartamento ==Number(localStorage.getItem('group')) ||
+              {(data.Status == "CP" && data.IDDepartamento == Number(localStorage.getItem('group')) ||
                 localStorage.getItem("role") == "DIRECTORCOMPRAS") && (
-                <div className="w-fit">
-                  <Tooltip content="Editar">
-                    <Button
-                      color="yellow"
-                      variant="solid"
-                      size="small"
-                      onClick={() => {
-                        mutationEdit.mutate({
-                          method: "POST",
-                          url: "/requisiciones/showRequisicion",
-                          data: {
-                            Id: data.Id,
-                          },
-                        });
-                      }}
-                    >
-                      <MdEdit />
-                    </Button>
-                  </Tooltip>
-                </div>
-              )}
+                  <div className="w-fit">
+                    <Tooltip content="Editar">
+                      <Button
+                        color="yellow"
+                        variant="solid"
+                        size="small"
+                        onClick={() => {
+                          mutationEdit.mutate({
+                            method: "POST",
+                            url: "/requisiciones/showRequisicion",
+                            data: {
+                              Id: data.Id,
+                            },
+                          });
+                        }}
+                      >
+                        <MdEdit />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
               {data.Status !== "SU" &&
                 localStorage.getItem("role") == "COMPRAS" && (
                   <div className="w-fit">
@@ -485,29 +486,56 @@ const Actions: React.FC<{
                     </Tooltip>
                   </PermissionMenu>
                 )}
-              <div className="w-fit">
-                <Tooltip content="Pdf">
-                  <Button
-                    color="presidencia"
-                    variant="solid"
-                    size="small"
-                    onClick={async () => {
-                      mutationPdf.mutate({
-                        method: "POST",
-                        url: "/requisiciones/detailsRequisicion",
-                        pdfData: data,
-                        status: data.Status,
-                        data: {
-                          IDRequisicion: data,
-                          Ejercicio: data.Ejercicio,
-                        },
-                      });
-                    }}
-                  >
-                    <BsFiletypePdf />
-                  </Button>
-                </Tooltip>
-              </div>
+              {(localStorage.getItem("role") === "CAPTURA" || localStorage.getItem("role") === "DIRECTOR")
+                ? (data.Status === "CP" || data.Status === "AU") && (
+
+                  <div className="w-fit">
+                    <Tooltip content="Pdf">
+                      <Button
+                        color="presidencia"
+                        variant="solid"
+                        size="small"
+                        onClick={async () => {
+                          mutationPdf.mutate({
+                            method: "POST",
+                            url: "/requisiciones/detailsRequisicion",
+                            pdfData: data,
+                            status: data.Status,
+                            data: {
+                              IDRequisicion: data,
+                              Ejercicio: data.Ejercicio,
+                            },
+                          });
+                        }}
+                      >
+                        <BsFiletypePdf />
+                      </Button>
+                    </Tooltip>
+                  </div>
+
+                ) :   <div className="w-fit">
+                    <Tooltip content="Pdf">
+                      <Button
+                        color="presidencia"
+                        variant="solid"
+                        size="small"
+                        onClick={async () => {
+                          mutationPdf.mutate({
+                            method: "POST",
+                            url: "/requisiciones/detailsRequisicion",
+                            pdfData: data,
+                            status: data.Status,
+                            data: {
+                              IDRequisicion: data,
+                              Ejercicio: data.Ejercicio,
+                            },
+                          });
+                        }}
+                      >
+                        <BsFiletypePdf />
+                      </Button>
+                    </Tooltip>
+                  </div>}
               <div className="w-fit">
                 <PermissionMenu IdMenu="SeguimientoRequis">
                   <Tooltip content="Seguimiento de la requisición">
@@ -579,9 +607,9 @@ const Actions: React.FC<{
                   newStatus(data.Status) == "OC") &&
                   permisos &&
                   permisos[
-                    newStatus(data.Status) == "CO"
-                      ? "Permiso_Cotizar"
-                      : "Permiso_Orden_Compra"
+                  newStatus(data.Status) == "CO"
+                    ? "Permiso_Cotizar"
+                    : "Permiso_Orden_Compra"
                   ] == 1 && (
                     <Tooltip
                       content={
@@ -645,22 +673,22 @@ const Actions: React.FC<{
                       onClick={async () => {
                         newStatus(data.Status) != "SU"
                           ? showConfirmationAlert(
-                              `El estatus se cambiara a ${newStatus(data.Status)} `,
-                              "Esta acción no se puede deshacer."
-                            ).then((isConfirmed) => {
-                              if (isConfirmed) {
-                                mutation.mutate({
-                                  method: "PUT",
-                                  url: "/requisiciones/update",
-                                  data: {
-                                    Status: newStatus(data.Status),
-                                    id: data.Id,
-                                  },
-                                });
-                              } else {
-                                showToast("La acción fue cancelada.", "error");
-                              }
-                            })
+                            `El estatus se cambiara a ${newStatus(data.Status)} `,
+                            "Esta acción no se puede deshacer."
+                          ).then((isConfirmed) => {
+                            if (isConfirmed) {
+                              mutation.mutate({
+                                method: "PUT",
+                                url: "/requisiciones/update",
+                                data: {
+                                  Status: newStatus(data.Status),
+                                  id: data.Id,
+                                },
+                              });
+                            } else {
+                              showToast("La acción fue cancelada.", "error");
+                            }
+                          })
                           : setOpenSu(true);
                       }}
                       className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}
