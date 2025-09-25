@@ -23,7 +23,7 @@ import DropdownComponent from "../../components/drop/DropDown";
 import { TbReport } from "react-icons/tb";
 import ModalComponent from "../../components/modal/Modal";
 import FormikForm from "../../components/formik/Formik";
-import { FormikNumberInput } from "../../components/formik/FormikInputs/FormikInput";
+import { FormikInput, FormikNumberInput, FormikTextArea } from "../../components/formik/FormikInputs/FormikInput";
 
 const Actions: React.FC<{
   data: Record<string, any>;
@@ -42,6 +42,7 @@ const Actions: React.FC<{
   const [openSu, setOpenSu] = useState<boolean>(false);
   const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
   const [autorized, SetAutorized] = useState(false);
+  const [canceled,setCanceled] = useState(false)
   const { ObservablePost } = Observable();
   const mutation = useMutation({
     mutationFn: ({
@@ -410,7 +411,7 @@ const Actions: React.FC<{
                 </Tooltip>
               </div> */}
               {(data.Status == "CP" && data.IDDepartamento == Number(localStorage.getItem('group')) ||
-                localStorage.getItem("role") == "DIRECTORCOMPRAS") && (
+                (localStorage.getItem("role") == "DIRECTORCOMPRAS"||localStorage.getItem("role") == "REQUISITOR")) && (
                   <div className="w-fit">
                     <Tooltip content="Editar">
                       <Button
@@ -432,8 +433,8 @@ const Actions: React.FC<{
                     </Tooltip>
                   </div>
                 )}
-              {data.Status !== "SU" &&
-                localStorage.getItem("role") == "COMPRAS" && (
+              {data.Status != "CP" &&
+                (
                   <div className="w-fit">
                     <Tooltip content="Cancelar">
                       <Button
@@ -441,20 +442,21 @@ const Actions: React.FC<{
                         variant="solid"
                         size="small"
                         onClick={() => {
-                          showConfirmationAlert(
-                            `El estatus se cambiara a  CA `,
-                            "Esta acción no se puede deshacer."
-                          ).then((isConfirmed) => {
-                            if (isConfirmed) {
-                              mutation.mutate({
-                                method: "PUT",
-                                url: "/requisiciones/update",
-                                data: { Status: "CA", id: data.Id },
-                              });
-                            } else {
-                              showToast("La acción fue cancelada.", "error");
-                            }
-                          });
+                          setCanceled(true)
+                          // showConfirmationAlert(
+                          //   `El estatus se cambiara a  CA `,
+                          //   "Esta acción no se puede deshacer."
+                          // ).then((isConfirmed) => {
+                          //   if (isConfirmed) {
+                          //     mutation.mutate({
+                          //       method: "PUT",
+                          //       url: "/requisiciones/update",
+                          //       data: { Status: "CA", id: data.Id },
+                          //     });
+                          //   } else {
+                          //     showToast("La acción fue cancelada.", "error");
+                          //   }
+                          // });
                         }}
                       >
                         <MdCancel />
@@ -735,6 +737,45 @@ const Actions: React.FC<{
               </>
             }
           />
+
+
+
+
+  <ModalComponent
+            title="Cancelación de requisición"
+            open={canceled}
+            setOpen={() => {
+              setCanceled(false);
+            }}
+            children={
+              <>
+                <div className="mb-6"> </div>
+                <FormikForm
+                  buttonMessage="Cancelar"
+                  initialValues={{ Motivo_Cancelacion: "" }}
+                  children={() => (
+                    <FormikTextArea
+                      label="Motivo de cancelación"
+                      name="Motivo_Cancelacion"
+                    />
+                  )}
+                  onSubmit={(values) => {
+                    mutation.mutate({
+                      method: "PUT",
+                      url: "/requisiciones/update",
+                      data: {
+                        Status: newStatus(data.Status),
+                        id: data.Id,
+                        Motivo_Cancelacion: values.Motivo_Cancelacion,
+                      },
+                    });
+                  }}
+                />
+              </>
+            }
+          />
+
+
         </>
       )}
     </>

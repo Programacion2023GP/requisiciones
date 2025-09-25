@@ -17,6 +17,8 @@ export type TypeUsers ={
     Materno: string;
     NombreCompleto: string;
     IDDepartamento: number;
+    Nombre_Departamento?: string;
+
     Rol: string;
     Password: string;
     Activo: boolean;

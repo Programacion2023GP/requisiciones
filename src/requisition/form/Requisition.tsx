@@ -62,7 +62,7 @@ const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
                   id={`form-requisition-quantityproduct${item}`}
                   name={`Cantidad${item}`}
                   label="Cantidad"
-                  decimals={false}
+                  decimals={true}
                 />
 
                 <FormikInput name={`Descripcion${item}`} label="Descripción" id={`form-requisition-descriptionproduct${item}`}
@@ -301,6 +301,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     setValidationSchema(
       (
         prev: Yup.ObjectSchema<{
+          
           Solicitante: string;
           IDDepartamento: number;
           IDTipo: number;
@@ -466,7 +467,6 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                       responsive={responsive}
                       name="Solicitante"
                       label="Solicitante"
-                      value={director.data?.data?.[0]?.Nombre_Director || ""}
                       id="requisition-solicitante"
                     />
                     <FormikInput

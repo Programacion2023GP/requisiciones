@@ -29,6 +29,18 @@ type PropsTable = {
   Firma_Director: string | null;
   NombreCompleto?: string | null;
   Nombre_Departamento: string | null;
+  IDUsuario?: number;
+
+};
+
+type PropsForm  = {
+  IdDetDirectores: number;
+  IDDepartamento: number;
+  IDUsuario: number;
+  Centro_Costo: number | null;
+  Firma_Director: string | null;
+  NombreCompleto?: string | null;
+  Nombre_Departamento: string | null;
 };
 
 const ActionButtons = ({
@@ -246,13 +258,15 @@ const CatDepartaments = () => {
   const [spiner, setSpiner] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false)
   const [initialValues, setInitialValues] = useState<PropsTable>({
-    Nombre_Director: null,
+    IDUsuario: 0,
+    Nombre_Director:"",
     Firma_Director: null,
     IDDepartamento: 0,
     IdDetDirectores: 0,
     NombreCompleto: null,
     Nombre_Departamento: null,
     Centro_Costo: null,
+    
   });
   const queries = useQueries({
     queries: [
@@ -313,10 +327,10 @@ const CatDepartaments = () => {
   const [departaments, users] = queries;
   const onSubmit = async (values: Record<string, any>) => {
     setSpiner(true);
-
+    console.log(values)
     const formData = new FormData();
     formData.append("IDDepartamento", values.IDDepartamento);
-    formData.append("Nombre_Director", values.NombreCompleto);
+    formData.append("IDUsuario", values.IDUsuario);
     formData.append("Firma_Director", values.Firma_Director);
 
     try {
@@ -358,7 +372,7 @@ const CatDepartaments = () => {
     IDDepartamento: Yup.number()
       .min(1, "El departamento es requerido")
       .required("El departamento es requerido"),
-    NombreCompleto: Yup.string().required("El director es requerido"),
+    // IDUsuario: Yup.string().required("El director es requerido"),
     Firma_Director: Yup.mixed()
       .required("La firma es obligatoria")
       .test("fileType", "Solo se permiten archivos de imagen", (value) => {
@@ -409,12 +423,12 @@ const CatDepartaments = () => {
                 />
                 <FormikAutocomplete
                   labelKey="NombreCompleto"
-                  idKey="NombreCompleto"
+                  idKey="IDUsuario"
                   label={"Selecciona al nuevo director"}
-                  name={"NombreCompleto"}
+                  name={"IDUsuario"}
                   loading={false}
                   options={users.data.data
-                    ? users.data.data.filter(it => it?.Rol === 'DIRECTOR'||it?.Rol === 'DIRECTORCOMPRAS')
+                    ? users.data.data.filter(it => it?.Rol === 'DIRECTOR' ||it?.Rol === 'DIRECTORCOMPRAS')
                     : []
                   }
 

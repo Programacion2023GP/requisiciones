@@ -75,9 +75,9 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                         "text-wrap flex w-full items-center justify-center",
                      )}>
                      <Text style={tw(`${styles.pdf.textVal} text-wrap`)}>
-                        {pdfData?.FechaAsignacion
+                        {pdfData?.FechaCaptura
                            ? `${new Date(
-                                pdfData.FechaAsignacion,
+                                pdfData.FechaCaptura,
                              ).toLocaleDateString("es-ES", {
                                 day: "2-digit",
                                 month: "long",

@@ -24,6 +24,7 @@ import FormikForm from "../components/formik/Formik";
 import * as Yup from "yup";
 import {
   FormikAutocomplete,
+  FormikCheckbox,
   FormikInput,
   FormikSwitch,
 } from "../components/formik/FormikInputs/FormikInput";
@@ -173,13 +174,13 @@ const Users = () => {
   const queries = useQueries({
     queries: [
       {
-        queryKey: ["users/index"],
-        queryFn: () => GetAxios("users/index"),
+        queryKey: ["departamentos/index"],
+        queryFn: () => GetAxios("departamentos/index"),
         refetchOnWindowFocus: true,
       },
       {
-        queryKey: ["departamentos/index"],
-        queryFn: () => GetAxios("departamentos/index"),
+        queryKey: ["users/index"],
+        queryFn: () => GetAxios("users/index"),
         refetchOnWindowFocus: true,
       },
 
@@ -239,8 +240,8 @@ const Users = () => {
       );
     },
   });
+  const [groups,users] = queries;
 
-  const [users, groups] = queries;
   const roles = [
     {
       id: "REQUISITOR",
@@ -265,40 +266,23 @@ const Users = () => {
   ];
 
   const [columnDefs] = useState<ColDef<TypeUsers>[]>([
-    // { headerName: "Nombre", field: "Nombre", sortable: true, filter: true },
-    // {
-    //   headerName: "Apellido Paterno",
-    //   field: "Paterno",
-    //   sortable: true,
-    //   filter: true,
-    // },
-    // {
-    //   headerName: "Apellido Materno",
-    //   field: "Materno",
-    //   sortable: true,
-    //   filter: true,
-    // },
+
     {
       headerName: "Nombre Completo",
       field: "NombreCompleto",
       sortable: true,
       filter: true,
     },
-    {
-      headerName: "Departamento",
-      field: "IDDepartamento",
-      sortable: true,
-      filter: true,
-      valueGetter: (params: any) => {
-        const departamento = groups.data?.data.find(
-          (dep: any) => dep.IDDepartamento == Number(params.data.IDDepartamento)
-        );
-        return departamento?.Nombre_Departamento || "Sin asignar";
-      },
-    },
+  {
+  headerName: "Departamento",
+  field: "Nombre_Departamento",
+  sortable: true,
+  filter: true,
+  
+}
+,
 
     { headerName: "Usuario", field: "Usuario", sortable: true, filter: true },
-    // { headerName: "Rol", field: "Rol", sortable: true, filter: true },
     {
       headerName: "Rol",
       field: "Rol", // Usamos colId para identificar la columna sin usar field
@@ -310,9 +294,7 @@ const Users = () => {
     {
       headerName: "Acciones",
       colId: "buttons",
-      // field: "Rol", // Usamos colId para identificar la columna sin usar field
-      // sortable: true,
-      // filter: true,
+   
       cellRenderer: (params: any) => (
         <ActionButtons
           data={params.data}
@@ -320,9 +302,8 @@ const Users = () => {
           setOpen={setOpen}
           handleEdit={handleEdit}
           handleEditPermission={handleEditPermission}
-        // Assert non-null, but make sure formikRef.current is initialized
         />
-      ), // Usamos cellRendererFramework
+      ),
     },
   ]);
 
@@ -438,7 +419,7 @@ const Users = () => {
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
       {mutation.status == "pending" && <Spinner />}
-      {permissionEditUser.Usuario != "" && (
+      {permissionEditUser.Usuario != "" && (    
         <MenuComponent
           newKey={permissionEditUser?.newKey}
           fullName={permissionEditUser?.fullName}
@@ -497,6 +478,8 @@ const Users = () => {
                 idKey={"IDDepartamento"}
                 labelKey={"Nombre_Departamento"}
               />
+            
+                
               <FormikAutocomplete
                 responsive={responsive}
                 loading={false}
@@ -576,6 +559,7 @@ const Users = () => {
                   />
                 </>
               )}
+              
             </>
           )}
         />
