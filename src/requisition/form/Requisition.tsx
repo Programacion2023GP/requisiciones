@@ -301,6 +301,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     setValidationSchema(
       (
         prev: Yup.ObjectSchema<{
+          
           Solicitante: string;
           IDDepartamento: number;
           IDTipo: number;
@@ -466,7 +467,6 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                       responsive={responsive}
                       name="Solicitante"
                       label="Solicitante"
-                      value={director.data?.data?.[0]?.Nombre_Director || ""}
                       id="requisition-solicitante"
                     />
                     <FormikInput

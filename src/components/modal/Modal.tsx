@@ -30,7 +30,7 @@ export const ModalComponent: React.FC<ModalProps> = memo(
 
       return ReactDOM.createPortal(
          <div
-            className={`fixed inset-0 flex items-center justify-center z-[300] bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-out w-full h-full ${fullScreen ? "px-10 py-2" : ""}  ${
+            className={`fixed inset-0 flex items-center justify-center z-[300] bg-opacity-50 backdrop-blur-sm transition-opacity duration-300 ease-out w-full h-full   ${
                open
                   ? "opacity-100 pointer-events-auto"
                   : "opacity-0 pointer-events-none"
@@ -41,7 +41,7 @@ export const ModalComponent: React.FC<ModalProps> = memo(
             } ${position === "bottom" ? "bottom-0 left-0" : ""}`}
             style={{ transition: "opacity 0.3s" }}>
             <div
-               className={`relative w-full  ${fullScreen ? "h-full" : "sm:w-4/5 md:w-3/4 lg:w-3/4 xl:w-full max-w-5xl"} mx-auto rounded-2xl shadow-xl bg-white transform transition-transform duration-300 ease-out ${open ? "scale-105" : "scale-95"}`}>
+               className={`relative w-full  sm:w-4/5 md:w-3/4 lg:w-3/4 xl:w-full max-w-5xl mx-auto rounded-2xl shadow-xl bg-white transform transition-transform duration-300 ease-out ${open ? "scale-105" : "scale-95"}`}>
                <div className="flex items-center justify-between p-5 text-white shadow-lg bg-gradient-to-r bg-presidencia rounded-t-2xl">
                   <p className="text-xl font-semibold sm:text-2xl">{title}</p>
                   <div className="flex items-center justify-center">
@@ -88,10 +88,10 @@ export const ModalComponent: React.FC<ModalProps> = memo(
                   <div
                      className="overflow-y-auto overflow-x-hidden max-h-[80vh] custom-scrollbar"
                      style={{
-                        maxHeight: fullScreen ? "100vh" : "calc(80vh - 60px)",
+                        maxHeight: "calc(80vh - 60px)",
                      }}>
                      <div
-                        className={`text-gray-800 ${fullScreen ? "h-[50rem]" : "h-[40rem]"}`}>
+                        className={`text-gray-800  h-[40rem]`}>
                         {children}
                      </div>
                   </div>

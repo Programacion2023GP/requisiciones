@@ -16,7 +16,7 @@ type InputWithLabelProps = {
     xl?: number;
     "2xl"?: number;
   };
-  type?: "number" | "text" | "date";
+  type?: "number" | "text" | "date"|"checkbox";
   disabled?: boolean;
   padding?: boolean;
   value?: any
@@ -185,7 +185,99 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
   );
 };
 
+type CheckboxWithLabelProps = {
+  label: string;
+  name: string;
+  id?: string;
+  value?: boolean;
+  responsive?: {
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
+    "2xl"?: number;
+  };
+  disabled?: boolean;
+  handleModified?: (values: any, setFieldValue: any) => void;
+  padding?: boolean;
+};
 
+export const FormikCheckbox: React.FC<CheckboxWithLabelProps> = ({
+  label,
+  value,
+  name,
+  id,
+  responsive = { sm: 12, md: 12, lg: 12, xl: 12, "2xl": 12 },
+  disabled = false,
+  handleModified,
+  padding = true,
+}) => {
+  const [field, meta] = useField({ name, type: "checkbox" });
+  const formik = useFormikContext();
+
+  useEffect(() => {
+    if (value !== undefined && value !== null) {
+      formik.setFieldValue(name, value, false);
+    }
+  }, [value]);
+
+  return (
+    <ColComponent responsive={responsive} autoPadding={padding}>
+      <FastField name={name}>
+        {({ field, form: { errors, touched, values, setFieldValue } }: any) => {
+          const error =
+            touched?.[name] && typeof errors?.[name] === "string"
+              ? (errors?.[name] as string)
+              : null;
+
+          if (handleModified) {
+            handleModified(values, setFieldValue);
+          }
+
+          return (
+            <div
+              id={id}
+              className={`relative z-0 w-full mb-5 flex items-center gap-2 ${
+                disabled ? "cursor-not-allowed opacity-40" : ""
+              }`}
+            >
+              <input
+                {...field}
+                id={name}
+                type="checkbox"
+                disabled={disabled}
+                // checked={values?.[name] || false}
+                onChange={(e) =>
+                  setFieldValue(name, e.target.checked, true)
+                }
+                className={`peer w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-black ${
+                  disabled ? "cursor-not-allowed" : ""
+                }`}
+              />
+              <label
+                htmlFor={name}
+                className={`text-gray-700 peer-checked:text-black ${
+                  disabled ? "cursor-not-allowed" : ""
+                }`}
+              >
+                {label}
+              </label>
+
+              {(meta.error && (meta.touched || formik.status)) && (
+                <span
+                  className="absolute left-0 top-6 text-sm font-semibold text-red-600"
+                  id={`${name}-meta.error`}
+                >
+                  {meta.error}
+                </span>
+              )}
+            </div>
+          );
+        }}
+      </FastField>
+    </ColComponent>
+  );
+};
 
 
 import { AiOutlineCamera } from "react-icons/ai"; // Icono de cámara para el botón
