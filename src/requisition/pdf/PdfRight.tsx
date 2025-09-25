@@ -146,15 +146,15 @@ export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
                `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap`,
             )}>
             <Text style={tw("text-sm font-bold")}>Observaciones:</Text>
-            <Text style={tw("text-sm text-wrap")}>{observaciones}</Text>
+            <Text style={tw("text-sm text-wrap")}>{images.firmaDirectorCompras}</Text>
          </View>
 
          {/* FIRMA */}
          <View style={tw(styles.pdf.firmContainer)}>
-            {/* <Image
+            <Image
                style={tw(styles.pdf.firma)}
                src={images.firmaDirectorCompras}
-            /> */}
+            />
          </View>
       </View>
    );
