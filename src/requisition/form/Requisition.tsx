@@ -62,7 +62,7 @@ const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
                   id={`form-requisition-quantityproduct${item}`}
                   name={`Cantidad${item}`}
                   label="Cantidad"
-                  decimals={false}
+                  decimals={true}
                 />
 
                 <FormikInput name={`Descripcion${item}`} label="Descripción" id={`form-requisition-descriptionproduct${item}`}
