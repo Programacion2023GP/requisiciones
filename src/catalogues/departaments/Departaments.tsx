@@ -182,7 +182,7 @@ const ActionButtons = ({
 const Picture = ({ data }: { data: PropsTable }) => {
   return (
     <PhotoZoom
-      src={`${import.meta.env.VITE_API_IMG}/${data.Firma_Director}`}
+      src={`${data.Firma_Director}`}
       alt={"Firma del director " + (data.Nombre_Director !=null? data.Nombre_Director:"" )}
       title={data?.Nombre_Director || ""}
     ></PhotoZoom>

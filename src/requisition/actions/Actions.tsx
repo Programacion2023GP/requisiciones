@@ -498,13 +498,14 @@ const Actions: React.FC<{
                         variant="solid"
                         size="small"
                         onClick={async () => {
+                       console.log("info",data)
                           mutationPdf.mutate({
                             method: "POST",
                             url: "/requisiciones/detailsRequisicion",
                             pdfData: data,
                             status: data.Status,
                             data: {
-                              IDRequisicion: data,
+                              IDRequisicion: data.IDRequisicion,
                               Ejercicio: data.Ejercicio,
                             },
                           });
@@ -528,7 +529,7 @@ const Actions: React.FC<{
                             pdfData: data,
                             status: data.Status,
                             data: {
-                              IDRequisicion: data,
+                              IDRequisicion: data.IDRequisicion,
                               Ejercicio: data.Ejercicio,
                             },
                           });

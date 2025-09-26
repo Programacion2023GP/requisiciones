@@ -160,14 +160,14 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap`,
             )}>
             <Text style={tw(`text-sm font-bold`)}>Descripción:</Text>
-            <Text style={tw(`text-sm`)}>{"https://api.requisiciones.gomezpalacio.gob.mx/storage/firma_directores/96/firma_68d5b7e7e7512.png"}</Text>
+            <Text style={tw(`text-sm`)}>{pdfData?.Observaciones}</Text>
          </View>
 
          {/* FIRMA */}
          <View style={tw(styles.pdf.firmContainer)}>
             <Image
                style={tw(styles.pdf.firma)}
-               src={`https://api.requisiciones.gomezpalacio.gob.mx/storage/firma_directores/96/firma_68d5b7e7e7512.png`}
+               src={`${pdfData?.Firma_Director}`}
             />
          </View>
       </View>
