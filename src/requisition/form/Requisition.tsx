@@ -58,11 +58,13 @@ const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
                     }`}
                 />
                 {/* Campos de entrada de Formik */}
-                <FormikNumberInput
+                <FormikInput
+
                   id={`form-requisition-quantityproduct${item}`}
                   name={`Cantidad${item}`}
                   label="Cantidad"
-                  decimals={true}
+                  type="number"
+                // decimals={true}
                 />
 
                 <FormikInput name={`Descripcion${item}`} label="Descripción" id={`form-requisition-descriptionproduct${item}`}
@@ -119,7 +121,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     Observaciones: "",
     Solicitante: "",
     IDTipo: 0,
-    FechaCaptura:"",
+    FechaCaptura: "",
     Centro_Costo: parseInt(localStorage.getItem("centro_costo") ?? "0", 10),
     Cantidad1: 0,
     Descripcion1: "",
@@ -144,7 +146,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     IDTipo: Yup.number()
       .min(1, "El tipo es requerido")
       .required("El tipo es requerido"),
-      FechaCaptura: Yup.string()
+    FechaCaptura: Yup.string()
       .required("La fecha es requerida"),
     Observaciones: Yup.string().required("Las observaciones es requerido"),
     Cantidad1: Yup.number()
@@ -301,7 +303,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
     setValidationSchema(
       (
         prev: Yup.ObjectSchema<{
-          
+
           Solicitante: string;
           IDDepartamento: number;
           IDTipo: number;

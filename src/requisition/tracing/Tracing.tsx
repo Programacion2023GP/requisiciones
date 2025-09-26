@@ -13,7 +13,8 @@ const timelineIcons = {
   "Orden de compra": <FaCheckCircle className="text-teal-500 w-6 h-6" />,
 };
 
-type Requisition = {
+export type Requisition = {
+  IDRequisicion:number,
   UsuarioCaptura: string | null;
   FechaCaptura: string | null;
   UsuarioAU: string | null;
@@ -24,6 +25,7 @@ type Requisition = {
   FechaCotizacion: string | null;
   UsuarioOC: string | null;
   FechaOrdenCompra: string | null;
+  Status: string | null;
 };
 
 type DataT = {

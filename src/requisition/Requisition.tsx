@@ -241,11 +241,12 @@ const RequisicionesAdd = () => {
       // sortable: true,
       // filter: true,
       cellRenderer: (params: any) => (
-        <Actions
+      <>  <Actions
           data={params.data}
           setReloadTable={setReloadTable}
           setOpenForm={setOpen}
         />
+        </>
       ), // Usamos cellRendererFramework
     },
   ]);

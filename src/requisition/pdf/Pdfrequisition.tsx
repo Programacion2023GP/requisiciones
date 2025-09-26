@@ -35,6 +35,9 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
    const data = Observable().ObservableGet("PdfRequisicion") as any;
    const [myData, setData] = useState<Array<Record<string, any>>>([]);
    const [loading, setLoading] = useState<boolean>(true);
+   const [totalPorProveedor, setTotalPorProveedor] = useState<
+      Array<{ opcion: number; proveedor: string; totalNeto: number }>
+   >([]);
    const groupArrays = (
       array: Array<Record<string, any>>,
       length: number,
@@ -47,8 +50,67 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
       return resultado;
    };
 
+   const calculateTotalPerSupplier = (
+      products: Array<Record<string, any>> = [],
+   ): Array<{ opcion: number; proveedor: string; totalNeto: number }> => {
+      // Calculo todos los totalNeto individuales
+      const totals: Array<{
+         opcion: number;
+         proveedor: string;
+         totalNeto: number;
+      }> = [];
+
+      [1, 2, 3].forEach((i) => {
+         products.forEach((producto) => {
+            const proveedor = producto[`Proveedor${i}`] ?? "";
+            const cantidad = Number(producto?.Cantidad || 0);
+
+            const precioSinIva = Number(
+               producto?.[`PrecioUnitarioSinIva${i}`] || 0,
+            );
+            const ivaPct = Number(producto?.[`PorcentajeIVA${i}`] || 0);
+            const retPct = Number(producto?.[`Retenciones${i}`] || 0);
+
+            const subtotal = precioSinIva * cantidad;
+            const ivaCalculado = subtotal * (ivaPct / 100);
+            const totalConIva = subtotal + ivaCalculado;
+            const retencionCalculada = totalConIva * (retPct / 100);
+            const totalNeto = totalConIva - retencionCalculada;
+
+            totals.push({ opcion: i, proveedor, totalNeto });
+         });
+      });
+
+      // Agrupo por proveedor y opcion sumando totalNeto
+      const acumulador = new Map<
+         number,
+         { opcion: number; proveedor: string; totalNeto: number }
+      >();
+      totals.forEach(({ opcion, proveedor, totalNeto }) => {
+         const proveedorKey = `${opcion}__${proveedor || "__SIN_PROVEEDOR__"}`;
+         if (acumulador.has(opcion)) {
+            const prev = acumulador.get(opcion)!;
+            acumulador.set(opcion, {
+               ...prev,
+               totalNeto: prev.totalNeto + totalNeto,
+            });
+         } else {
+            acumulador.set(opcion, {
+               opcion,
+               proveedor: proveedor || "",
+               totalNeto,
+            });
+         }
+      });
+
+      // Devuelvo array con { opcion, proveedor, totalNeto }
+      return Array.from(acumulador.values());
+   };
+
    useEffect(() => {
-      setData(groupArrays(data?.data?.products, 2));
+      const products = data?.data?.products ?? [];
+      setTotalPorProveedor(calculateTotalPerSupplier(products));
+      setData(groupArrays(products, 2));
    }, []);
 
    return (
@@ -60,7 +122,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
          {loading && <Spinner />}
          <PDFViewer width="100%" height="100%">
             <Document>
-               {myData.map((item: any) => (
+               {myData.map((item: any, indexData) => (
                   <Page size="A4" orientation="landscape">
                      <View style={tw("p-4")}>
                         <PdfHeader />
@@ -80,12 +142,13 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                               "AUTORIZADOR",
                               "REQUISITOR",
                            ].includes(localStorage.getItem("role") ?? "") && (
-                                 <PdfRight
-                                    products={item}
-                                    pdfData={data?.data?.pdfData}
-                                 />
-                              )}
-
+                              <PdfRight
+                                 products={item}
+                                 pdfData={data?.data?.pdfData}
+                                 totalPorProveedor={totalPorProveedor}
+                                 isLastChunk={indexData === myData.length - 1}
+                              />
+                           )}
                         </View>
 
                         <PdfFooter data={data} />

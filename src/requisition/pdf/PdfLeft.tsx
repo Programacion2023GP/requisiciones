@@ -134,7 +134,7 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                <View
                   key={index}
                   style={tw(
-                     `flex flex-row h-20 w-full justify-between text-wrap`,
+                     `flex flex-row h-24 w-full justify-between text-wrap`,
                   )}>
                   <Text
                      style={tw(
