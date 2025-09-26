@@ -167,7 +167,7 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
          <View style={tw(styles.pdf.firmContainer)}>
             <Image
                style={tw(styles.pdf.firma)}
-               src={`${import.meta.env.VITE_API_IMG}/${pdfData?.Firma_Director}`}
+               src={`${pdfData?.Firma_Director}`}
             />
          </View>
       </View>

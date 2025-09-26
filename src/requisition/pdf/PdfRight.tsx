@@ -17,6 +17,18 @@ type DataPdf = {
 };
 
 export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
+   const cantidad = Number(producto?.Cantidad || 1);
+   const precioUnitario = Number(
+      producto?.[`PrecioUnitarioSinIva${index}`] || 0,
+   );
+   const importe = precioUnitario * cantidad;
+   const ivaCalculado = Number(producto?.[`ImporteIva${index}`]) * cantidad;
+   const totalConIva =
+      Number(producto?.[`PrecioUnitarioConIva${index}`]) * cantidad;
+   const retencionCalculada =
+      totalConIva * Number((producto?.[`Retenciones${index}`] || 0) / 100);
+   const totalNeto = totalConIva - retencionCalculada;
+
    return (
       <View
          style={tw(
@@ -35,39 +47,29 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
          </View>
          <View style={tw("w-full flex flex-row")}>
             <View style={tw("flex flex-col w-1/2")}>
-               <Text style={tw(styles.pdf.textKey)}>Precio</Text>
+               <Text style={tw(styles.pdf.textKey)}>
+                  {formatCurrency(precioUnitario, true, false) || 0}
+               </Text>
                <Text style={tw(styles.pdf.textKey)}>I.V.A.</Text>
                <Text style={tw(styles.pdf.textKey)}>Total C/IVA</Text>
                <Text style={tw(styles.pdf.textKey)}>Retenciones</Text>
+               <Text style={tw(styles.pdf.textKey)}>Total Neto</Text>
             </View>
             <View style={tw("flex flex-col w-1/2 text-start ml-2")}>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
-                  {formatCurrency(
-                     producto?.[`PrecioUnitarioSinIva${index}`],
-                     true,
-                     false,
-                  ) || 0}
+                  {formatCurrency(importe, true, false) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
-                  {formatCurrency(
-                     producto?.[`ImporteIva${index}`],
-                     true,
-                     false,
-                  ) || 0}
+                  {formatCurrency(ivaCalculado, true, false) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
-                  {formatCurrency(
-                     producto?.[`PrecioUnitarioConIva${index}`],
-                     true,
-                     false,
-                  ) || 0}
+                  {formatCurrency(totalConIva, true, false) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
-                  {formatCurrency(
-                     producto?.[`Retenciones${index}`],
-                     true,
-                     false,
-                  ) || 0}
+                  {formatCurrency(retencionCalculada, true, false) || 0}
+               </Text>
+               <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
+                  {formatCurrency(totalNeto, true, false) || 0}
                </Text>
             </View>
          </View>
@@ -124,12 +126,21 @@ export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
                            )}>
                            {formatCurrency(
                               products.reduce((total, producto) => {
-                                 return (
-                                    total +
-                                    (Number(
-                                       producto?.[`PrecioUnitarioConIva${i}`],
-                                    ) || 0)
+                                 const precioConIva = Number(
+                                    producto?.[`PrecioUnitarioConIva${i}`] || 0,
                                  );
+                                 const cantidad = Number(
+                                    producto?.[`Cantidad`] || 0,
+                                 );
+                                 const retPct = Number(
+                                    producto?.[`Retenciones${i}`] || 0,
+                                 );
+
+                                 const totalConIva = precioConIva * cantidad;
+                                 const retencion = totalConIva * (retPct / 100);
+                                 const totalNeto = totalConIva - retencion;
+
+                                 return total + totalNeto;
                               }, 0),
                               true,
                               false,
@@ -151,10 +162,10 @@ export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
 
          {/* FIRMA */}
          <View style={tw(styles.pdf.firmContainer)}>
-            {/* <Image
+            <Image
                style={tw(styles.pdf.firma)}
                src={images.firmaDirectorCompras}
-            /> */}
+            />
          </View>
       </View>
    );
