@@ -7,6 +7,7 @@ import { formatCurrency } from "../../utils/functions";
 const tw = createTw({});
 
 type TypeProvedor = {
+   idxProducto: number;
    producto: Record<string, any>;
    index: number;
 };
@@ -14,29 +15,46 @@ type TypeProvedor = {
 type DataPdf = {
    products: Array<Record<string, any>>;
    pdfData: Record<string, any>;
+   totalPorProveedor: Array<{
+      opcion: number;
+      proveedor: string;
+      totalNeto: number;
+   }>;
+   isLastChunk?: boolean;
 };
 
-export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
-   const cantidad = Number(producto?.Cantidad || 1);
-   const precioUnitario = Number(
-      producto?.[`PrecioUnitarioSinIva${index}`] || 0,
-   );
-   const importe = precioUnitario * cantidad;
-   const ivaCalculado = Number(producto?.[`ImporteIva${index}`]) * cantidad;
-   const totalConIva =
-      Number(producto?.[`PrecioUnitarioConIva${index}`]) * cantidad;
-   const retencionCalculada =
-      totalConIva * Number((producto?.[`Retenciones${index}`] || 0) / 100);
+export const ProvedorInfo: React.FC<TypeProvedor> = ({
+   idxProducto,
+   producto,
+   index,
+}) => {
+   console.log("🚀 ~ ProvedorInfo ~ idxProducto:", idxProducto);
+   const cantidad = Number(producto?.Cantidad || 0);
+   const precioSinIva = Number(producto?.[`PrecioUnitarioSinIva${index}`] || 0);
+   const ivaPct = Number(producto?.[`PorcentajeIVA${index}`] || 0); // nuevo campo
+   const retPct = Number(producto?.[`Retenciones${index}`] || 0);
+
+   // Cálculos paso a paso
+   const subtotal = precioSinIva * cantidad;
+   const ivaCalculado = subtotal * (ivaPct / 100);
+   const totalConIva = subtotal + ivaCalculado;
+   const retencionCalculada = totalConIva * (retPct / 100);
    const totalNeto = totalConIva - retencionCalculada;
 
    return (
       <View
          style={tw(
-            `text-sm text-wrap px-1 w-1/3 max-w-1/3 ${producto.Proveedor != null && producto.Proveedor == producto?.[`Proveedor${index}`] && "bg-slate-400 rounded-md"} `,
+            `text-sm text-wrap px-1 w-1/3 max-w-1/3 ${
+               producto.Proveedor != null &&
+               producto.Proveedor == producto?.[`Proveedor${index}`] &&
+               "bg-slate-400 rounded-md"
+            } `,
          )}>
-         <Text style={tw("text-wrap h-16 overflow-hidden")}>
-            {producto?.[`Proveedor${index}`] || ""}
-         </Text>
+         {idxProducto === 0 && (
+            <Text style={tw("text-wrap h-16 overflow-hidden")}>
+               {producto?.[`Proveedor${index}`] || ""}
+            </Text>
+         )}
          <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
             <View style={tw(`${styles.pdf.box} w-1/2`)}>
                <Text>Unitario</Text>
@@ -48,16 +66,16 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
          <View style={tw("w-full flex flex-row")}>
             <View style={tw("flex flex-col w-1/2")}>
                <Text style={tw(styles.pdf.textKey)}>
-                  {formatCurrency(precioUnitario, true, false) || 0}
+                  {formatCurrency(precioSinIva, true, false) || 0}
                </Text>
-               <Text style={tw(styles.pdf.textKey)}>I.V.A.</Text>
-               <Text style={tw(styles.pdf.textKey)}>Total C/IVA</Text>
-               <Text style={tw(styles.pdf.textKey)}>Retenciones</Text>
+               <Text style={tw(styles.pdf.textKey)}>I.V.A. ({ivaPct}%)</Text>
+               <Text style={tw(styles.pdf.textKey)}>Total c/ IVA</Text>
+               <Text style={tw(styles.pdf.textKey)}>Ret. ({retPct}%)</Text>
                <Text style={tw(styles.pdf.textKey)}>Total Neto</Text>
             </View>
             <View style={tw("flex flex-col w-1/2 text-start ml-2")}>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
-                  {formatCurrency(importe, true, false) || 0}
+                  {formatCurrency(subtotal, true, false) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
                   {formatCurrency(ivaCalculado, true, false) || 0}
@@ -77,7 +95,14 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({ producto, index }) => {
    );
 };
 
-export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
+export const PdfRight: React.FC<DataPdf> = ({
+   pdfData,
+   products,
+   totalPorProveedor,
+   isLastChunk = false,
+}) => {
+   // console.log("🚀 ~ ProvedorInfo ~ isLastChunk:", isLastChunk);
+   // console.log("🚀 ~ ProvedorInfo ~ totalPorProveedor:", totalPorProveedor);
    const observaciones = pdfData?.ObservacionesCot || "";
 
    return (
@@ -102,13 +127,42 @@ export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
                   {[1, 2, 3].map((index) => (
                      <ProvedorInfo
                         key={index}
+                        idxProducto={idx}
                         producto={producto}
                         index={index}
                      />
                   ))}
                </View>
             ))}
-            <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
+
+            {/* TOTAL POR PROVEEDOR */}
+            {isLastChunk && (
+               <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
+                  {totalPorProveedor.map((total) => (
+                     <>
+                        <View style={tw(`w-1/2`)}>
+                           <Text
+                              style={tw(
+                                 `${styles.pdf.textKey} text-wrap max-w-full`,
+                              )}>
+                              T. Prov{total.opcion}:
+                           </Text>
+                        </View>
+                        <View style={tw(`w-1/2`)}>
+                           <Text
+                              style={tw(
+                                 `${styles.pdf.textVal} text-wrap max-w-full`,
+                              )}>
+                              {formatCurrency(total.totalNeto, true, false) ||
+                                 ""}
+                           </Text>
+                        </View>
+                     </>
+                  ))}
+               </View>
+            )}
+
+            {/* <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
                {[1, 2, 3].map((i) => (
                   <>
                      <View style={tw(`w-1/2`)}>
@@ -125,22 +179,29 @@ export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
                               `${styles.pdf.textVal} text-wrap max-w-full`,
                            )}>
                            {formatCurrency(
-                              products.reduce((total, producto) => {
-                                 const precioConIva = Number(
-                                    producto?.[`PrecioUnitarioConIva${i}`] || 0,
-                                 );
+                              products.reduce((acum, producto) => {
                                  const cantidad = Number(
-                                    producto?.[`Cantidad`] || 0,
+                                    producto?.Cantidad || 0,
+                                 );
+                                 const precioSinIva = Number(
+                                    producto?.[`PrecioUnitarioSinIva${i}`] || 0,
+                                 );
+                                 const ivaPct = Number(
+                                    producto?.[`PorcentajeIVA${i}`] || 0,
                                  );
                                  const retPct = Number(
                                     producto?.[`Retenciones${i}`] || 0,
                                  );
 
-                                 const totalConIva = precioConIva * cantidad;
-                                 const retencion = totalConIva * (retPct / 100);
-                                 const totalNeto = totalConIva - retencion;
+                                 const subtotal = precioSinIva * cantidad;
+                                 const ivaCalculado = subtotal * (ivaPct / 100);
+                                 const totalConIva = subtotal + ivaCalculado;
+                                 const retencionCalculada =
+                                    totalConIva * (retPct / 100);
+                                 const totalNeto =
+                                    totalConIva - retencionCalculada;
 
-                                 return total + totalNeto;
+                                 return acum + totalNeto;
                               }, 0),
                               true,
                               false,
@@ -149,7 +210,21 @@ export const PdfRight: React.FC<DataPdf> = ({ pdfData, products }) => {
                      </View>
                   </>
                ))}
-            </View>
+            </View> */}
+
+            {/* TOTAL DE PRODUCTOS SELECCIONADOS */}
+            {/* <View style={tw(`${styles.pdf.box} w-full flex flex-row gap-1`)}>
+               <>
+                  <Text
+                     style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
+                     TOTAL DE PROVEEDORES SELECCIONADOS:
+                  </Text>
+                  <Text
+                     style={tw(`${styles.pdf.textVal} text-wrap max-w-full`)}>
+                     {products.map((p) => p.Proveedor)}
+                  </Text>
+               </>
+            </View> */}
          </View>
 
          <View

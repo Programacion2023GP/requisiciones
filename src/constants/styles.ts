@@ -3,6 +3,7 @@ const pdf = {
    subtitle: "text-[12px] font-bold",
    box: "flex items-center justify-center border border-black rounded-md p-1",
    textKey: "text-[8px]",
+   textKeySm: "text-[6px]",
    textVal: "text-[8px] font-bold",
    text: "text-[10px]",
    firmContainer:
