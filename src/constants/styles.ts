@@ -7,7 +7,7 @@ const pdf = {
    text: "text-[10px]",
    firmContainer:
       "h-20 text-center absolute bottom-0 w-full px-auto flex items-center justify-center",
-   firma: "object-cover max-h-50",
+   firma: "max-h-[200px] object-contain",
    // firmContainer: {
    //    fontFamily: "Roboto-Bold",
    //    textAlign: "center",
