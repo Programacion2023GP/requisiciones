@@ -165,10 +165,12 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
 
          {/* FIRMA */}
          <View style={tw(styles.pdf.firmContainer)}>
-            <Image
-               style={tw(styles.pdf.firma)}
-               src={`${pdfData?.Firma_Director}`}
-            />
+            {pdfData?.UsuarioAU && (
+               <Image
+                  style={tw(styles.pdf.firma)}
+                  src={`${pdfData?.Firma_Director}`}
+               />
+            )}
          </View>
       </View>
    );
