@@ -69,13 +69,14 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                producto?.[`PrecioUnitarioSinIva${i}`] || 0,
             );
             const ivaPct = Number(producto?.[`PorcentajeIVA${i}`] || 0);
-            const retPct = Number(producto?.[`Retenciones${i}`] || 0);
+            const retenciones = Number(producto?.[`Retenciones${i}`] || 0);
+            // const retPct = Number(producto?.[`Retenciones${i}`] || 0);
 
             const subtotal = precioSinIva * cantidad;
             const ivaCalculado = subtotal * (ivaPct / 100);
             const totalConIva = subtotal + ivaCalculado;
-            const retencionCalculada = totalConIva * (retPct / 100);
-            const totalNeto = totalConIva - retencionCalculada;
+            // const retencionCalculada = totalConIva * (retPct / 100);
+            const totalNeto = totalConIva - retenciones;
 
             totals.push({ opcion: i, proveedor, totalNeto });
          });
@@ -123,7 +124,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
          <PDFViewer width="100%" height="100%">
             <Document>
                {myData.map((item: any, indexData) => (
-                  <Page size="A4" orientation="landscape">
+                  <Page size="LETTER" orientation="landscape">
                      <View style={tw("p-4")}>
                         <PdfHeader />
 
