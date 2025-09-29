@@ -20,9 +20,6 @@ import { MdCheck } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import Tooltip from "../../components/toltip/Toltip";
 import { FormikProps } from "formik";
-import { AgGridReact } from "ag-grid-react";
-import { ColDef } from "ag-grid-community";
-import { Agtable } from "../../components/table/Agtable";
 
 type CotizacionType = {
   open: boolean;
@@ -38,11 +35,7 @@ type Requisition = {
   IdRequisicion: number;
   status: "OC" | "CO";
 };
-type RowData = {
-  producto: string;
-  cantidad: number;
-  estado: string;
-};
+
 const CotizacionComponent: React.FC<CotizacionType> = ({
   open,
   setOpen,
@@ -56,26 +49,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
   const [spiner, setSpiner] = useState<boolean>(true);
   const [data, setData] = useState<Array<Record<string, any>>>([]);
   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
-   const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
-   const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
 
-const rowData: RowData[] = [
-  { producto: "Manzana", cantidad: 10, estado: "Activo" },
-  { producto: "Pera", cantidad: 5, estado: "Inactivo" },
-];
-
-const columnDefs: ColDef<RowData>[] = [
-  { field: "producto", editable: true },
-  { field: "cantidad", editable: true },
-  {
-    field: "estado",
-    editable: true,
-    cellEditor: "agSelectCellEditor",
-    cellEditorParams: {
-      values: ["Activo", "Inactivo"],
-    },
-  },
-];
   const mutationSearch = useMutation({
     mutationFn: ({
       url,
@@ -307,10 +281,6 @@ const columnDefs: ColDef<RowData>[] = [
     >
       {(suppliers.status == "pending" || spiner) && <Spinner />}
 
-      <Agtable colapseFilters={false}  data={rowData} columnDefs={columnDefs} buttonElement={<></>} permissionsUserTable={{
-        buttonElement: "",
-        table: "Listado"
-      }} />
       {/* tabla resumen */}
       <div className="overflow-x-auto w-full mx-auto mb-8 p-4 bg-gray-50 rounded-lg shadow">
         <table className="w-full border-collapse bg-white rounded-lg overflow-hidden text-sm">
@@ -371,7 +341,7 @@ const columnDefs: ColDef<RowData>[] = [
       </div>
 
       {/* formulario tipo Excel */}
-      {/* {initialValues?.IDDetalle && (
+      {initialValues?.IDDetalle && (
         <FormikForm
           buttonMessage={
             IdRequisicion?.data?.status == "CO"
@@ -501,7 +471,7 @@ const columnDefs: ColDef<RowData>[] = [
             </div>
           )}
         </FormikForm>
-      )} */}
+      )}
     </ModalComponent>
   );
 };
