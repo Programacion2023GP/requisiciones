@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 
 type SwitchType = {
  enabled: boolean,
-  enabledColor: string;
-  disabledColor: string;
+  enabledColor?: string;
+  disabledColor?: string;
   onclick: () => void;
   label: string; // Prop para el mensaje del label
 };

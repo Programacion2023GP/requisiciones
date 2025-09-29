@@ -45,8 +45,8 @@ const Actions: React.FC<{
    const [changeStatus, setChangeStatus] = useState<boolean>(false)
    const [spiner, setSpiner] = useState<boolean>(false);
    const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
-   const [openSu, setOpenSu] = useState<boolean>(false);
    const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
+   const [openSu, setOpenSu] = useState<boolean>(false);
    const [autorized, SetAutorized] = useState(false);
    const [canceled, setCanceled] = useState(false);
    const { ObservablePost } = Observable();
@@ -499,7 +499,7 @@ const Actions: React.FC<{
                         )}
                      {localStorage.getItem("role") === "CAPTURA" ||
                         localStorage.getItem("role") === "DIRECTOR" ? (
-                        (data.Status === "CP" || data.Status === "AU") && (
+                        (data.Status === "CP" || data.Status === "AU") || (buttonVobo(data.IDTipo) && localStorage.getItem("role") === "DIRECTOR" ) &&  (
                            <div className="w-fit">
                               <Tooltip content="Pdf">
                                  <Button

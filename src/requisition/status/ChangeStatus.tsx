@@ -9,7 +9,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { showToast } from "../../sweetalert/Sweetalert";
 import Spinner from "../../loading/Loading";
 type DataTracing = {
-    data: DataT;
+    data: DataT; 
 };
 type DataT = {
     data: Requisition;
@@ -56,7 +56,6 @@ const ChangeStatusRequisition = ({ open, setOpen, setReloadTable }: {
         },
     });
     const item = Observable().ObservableGet("changeStatusRequisition") as DataTracing;
-    console.log("datos aqui", item.data)
     return (
 
         <>
@@ -66,7 +65,7 @@ const ChangeStatusRequisition = ({ open, setOpen, setReloadTable }: {
                 <FormikForm initialValues={{ status: item.data?.data.Status, id: item.data?.data.IDRequisicion }} onSubmit={(values) => {
                     mutation.mutate({
                         method: "POST",
-                        url: "/requisiciones/show",
+                        url: "/requisiciones/changeStatus",
                         data: values,
                     });
                 }}

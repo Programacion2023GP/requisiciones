@@ -608,7 +608,7 @@ export const FormikPasswordInput: React.FC<InputWithLabelProps> = ({
 type AutocompleteProps<T extends Record<string, any>> = {
   label: string;
   name: string;
-  loading: boolean;
+  loading?: boolean;
   options: Array<T>;
   id?: string,
   idKey: keyof T;
