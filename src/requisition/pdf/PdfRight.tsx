@@ -71,7 +71,7 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
                </Text>
                <Text style={tw(styles.pdf.textKey)}>I.V.A. ({ivaPct}%)</Text>
                <Text style={tw(styles.pdf.textKey)}>Total c/ IVA</Text>
-               <Text style={tw(styles.pdf.textKey)}>Ret. ({retenciones}%)</Text>
+               <Text style={tw(styles.pdf.textKey)}>Retenciones</Text>
                <Text style={tw(styles.pdf.textKey)}>Total Neto</Text>
             </View>
             <View style={tw("flex flex-col w-1/2 text-start ml-2")}>
