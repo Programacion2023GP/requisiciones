@@ -856,7 +856,7 @@ const Actions: React.FC<{
                                  method: "PUT",
                                  url: "/requisiciones/update",
                                  data: {
-                                    Status: newStatus(data.Status),
+                                    Status: "CA",
                                     id: data.Id,
                                     Motivo_Cancelacion:
                                        values.Motivo_Cancelacion,
