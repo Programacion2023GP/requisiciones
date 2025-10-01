@@ -410,7 +410,7 @@ const mutationOC = useMutation({
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
-          buttonMessage= {IdRequisicion.data.status == 'OC' ? "" :"Guardar las cotizaciones"}
+          buttonMessage= {IdRequisicion?.data?.status == 'OC' ? "" :"Guardar las cotizaciones"}
           ref={formik}
         >
           {(values, setFieldValue) => (
@@ -427,7 +427,7 @@ const mutationOC = useMutation({
                     </h3>
 
                       <p className="text-sm text-blue-600">
-                        {IdRequisicion.data.status == 'CO'?` Complete la información de cotización para los ${data.length}{" "}
+                        {IdRequisicion?.data?.status == 'CO'?` Complete la información de cotización para los ${data.length}{" "}
                       productos` :"Seleciona al provedor"}
                 
                     </p>
@@ -444,7 +444,7 @@ const mutationOC = useMutation({
               </div>
 
               {/* Selección de Proveedores */}
-                { IdRequisicion.data.status == 'CO' && (
+                { IdRequisicion?.data?.status == 'CO' && (
               <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Seleccione los 3 Proveedores
@@ -513,7 +513,7 @@ const mutationOC = useMutation({
                           colSpan={5}
                         >
                           {
-                            IdRequisicion.data.status == 'OC' ?
+                            IdRequisicion?.data?.status == 'OC' ?
                               <Button color="blue" variant={data?.[0]['Proveedor'] ==values[`IDproveedor${offset}`]?"solid":"outline"} onClick={() => { 
                                 console.log("aca",IdRequisicion?.data)
                                 mutationOC.mutate({

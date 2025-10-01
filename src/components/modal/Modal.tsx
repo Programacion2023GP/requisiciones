@@ -22,11 +22,11 @@ export const ModalComponent: React.FC<ModalProps> = memo(
         className={`fixed inset-0 flex items-center justify-center z-[300] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out`}
       >
         <div
-          className={`relative bg-white rounded-2xl shadow-xl transform transition-all duration-300 ease-out ${
-            fullScreenDialog
+          className={`relative bg-white rounded-2xl shadow-xl transform transition-all duration-300 ease-out ${fullScreenDialog
               ? "w-full h-full m-0 rounded-none"
-              : "w-full sm:w-4/5 md:w-3/4 lg:w-3/4 xl:w-full max-w-5xl mx-auto my-10"
-          }`}
+              : "w-full sm:w-4/5 md:w-3/4 lg:w-2/3 max-w-5xl mx-auto my-10 min-h-[300px]"
+
+            }`}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-5 text-white bg-gradient-to-r bg-presidencia rounded-t-2xl">
@@ -59,11 +59,15 @@ export const ModalComponent: React.FC<ModalProps> = memo(
 
           {/* Content */}
           <div
-            className={`overflow-y-auto p-6 ${
-              fullScreenDialog ? "h-full" : "max-h-[80vh]"
-            } custom-scrollbar`}
+            className={`overflow-y-auto p-6 ${fullScreenDialog ? "h-[calc(100vh-100px)]" : "max-h-[60vh]"
+              } custom-scrollbar`}
           >
             {children}
+          </div>
+ <div
+            className={`overflow-y-auto p-6 ${fullScreenDialog ? "h-[calc(100vh-100px)]" : "max-h-[60vh]"
+              } custom-scrollbar`}
+          >
           </div>
         </div>
       </div>,
