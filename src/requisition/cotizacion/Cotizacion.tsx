@@ -425,9 +425,11 @@ const mutationOC = useMutation({
                         ? "Cotización"
                         : "Orden de Compra"}
                     </h3>
-                    <p className="text-sm text-blue-600">
-                      Complete la información de cotización para los {data.length}{" "}
-                      productos
+
+                      <p className="text-sm text-blue-600">
+                        {IdRequisicion.data.status == 'CO'?` Complete la información de cotización para los ${data.length}{" "}
+                      productos` :"Seleciona al provedor"}
+                
                     </p>
                   </div>
                   <div className="text-right">
@@ -442,10 +444,14 @@ const mutationOC = useMutation({
               </div>
 
               {/* Selección de Proveedores */}
+                { IdRequisicion.data.status == 'CO' && (
               <div className="bg-white rounded-lg shadow border border-gray-200 p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Seleccione los 3 Proveedores
                 </h3>
+             
+
+            
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <FormikAutocomplete
                     label="Proveedor 1"
@@ -490,7 +496,8 @@ const mutationOC = useMutation({
                     idKey="IDProveedor"
                   />
                 </div>
-              </div>
+            </div>
+                )}
 
               {/* Tabla estilo Excel */}
               <div className="overflow-x-auto">
@@ -507,7 +514,7 @@ const mutationOC = useMutation({
                         >
                           {
                             IdRequisicion.data.status == 'OC' ?
-                              <Button color="blue" variant="outline" onClick={() => { 
+                              <Button color="blue" variant={data?.[0]['Proveedor'] ==values[`IDproveedor${offset}`]?"solid":"outline"} onClick={() => { 
                                 console.log("aca",IdRequisicion?.data)
                                 mutationOC.mutate({
                                   method:"POST",
