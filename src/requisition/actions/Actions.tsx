@@ -42,7 +42,7 @@ const Actions: React.FC<{
       view: false,
       tracing: false,
    });
-   const [changeStatus, setChangeStatus] = useState<boolean>(false)
+   const [changeStatus, setChangeStatus] = useState<boolean>(false);
    const [spiner, setSpiner] = useState<boolean>(false);
    const permisosString = localStorage.getItem("permisos") ?? "{}"; // Valor predeterminado: objeto vacío
    const permisos = JSON.parse(permisosString); // Convertir el string a un objeto
@@ -362,12 +362,15 @@ const Actions: React.FC<{
                      }}
                   />
                )}
-            {changeStatus && 
-                     
-            <ChangeStatusRequisition setReloadTable={setReloadTable}  open={changeStatus} setOpen={()=>{
-               setChangeStatus(false)
-            }} />
-            }
+               {changeStatus && (
+                  <ChangeStatusRequisition
+                     setReloadTable={setReloadTable}
+                     open={changeStatus}
+                     setOpen={() => {
+                        setChangeStatus(false);
+                     }}
+                  />
+               )}
                {open.cotizacion && (
                   <CotizacionComponent
                      setReloadTable={setReloadTable}
@@ -422,29 +425,29 @@ const Actions: React.FC<{
               </div> */}
                      {((data.Status == "CP" &&
                         data.IDDepartamento ==
-                        Number(localStorage.getItem("group"))) ||
+                           Number(localStorage.getItem("group"))) ||
                         localStorage.getItem("role") == "DIRECTORCOMPRAS" ||
                         localStorage.getItem("role") == "REQUISITOR") && (
-                           <div className="w-fit">
-                              <Tooltip content="Editar">
-                                 <Button
-                                    color="yellow"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={() => {
-                                       mutationEdit.mutate({
-                                          method: "POST",
-                                          url: "/requisiciones/showRequisicion",
-                                          data: {
-                                             Id: data.Id,
-                                          },
-                                       });
-                                    }}>
-                                    <MdEdit />
-                                 </Button>
-                              </Tooltip>
-                           </div>
-                        )}
+                        <div className="w-fit">
+                           <Tooltip content="Editar">
+                              <Button
+                                 color="yellow"
+                                 variant="solid"
+                                 size="small"
+                                 onClick={() => {
+                                    mutationEdit.mutate({
+                                       method: "POST",
+                                       url: "/requisiciones/showRequisicion",
+                                       data: {
+                                          Id: data.Id,
+                                       },
+                                    });
+                                 }}>
+                                 <MdEdit />
+                              </Button>
+                           </Tooltip>
+                        </div>
+                     )}
                      {data.Status != "CP" && (
                         <div className="w-fit">
                            <Tooltip content="Cancelar">
@@ -498,10 +501,11 @@ const Actions: React.FC<{
                            </PermissionMenu>
                         )}
                      {localStorage.getItem("role") === "CAPTURA" ||
-                        localStorage.getItem("role") === "DIRECTOR" ? (
-                        (data.Status === "CP" || data.Status === "AU") || (buttonVobo(data.IDTipo) && localStorage.getItem("role") === "DIRECTOR" ) &&  (
+                     localStorage.getItem("role") === "DIRECTOR" ? (
+                        buttonVobo(data.IDTipo) &&
+                        localStorage.getItem("role") === "DIRECTOR" && (
                            <div className="w-fit">
-                              <Tooltip content="Pdf">
+                              <Tooltip content="Ver requisición">
                                  <Button
                                     color="presidencia"
                                     variant="solid"
@@ -644,41 +648,33 @@ const Actions: React.FC<{
                               </Tooltip>
                            </div>
                         )}
-                     {!["CP", "AU", "SU", 'CA'].includes(data.Status) && (
+                     {!["CP", "AU", "SU", "CA"].includes(data.Status) && (
                         <>
                            <div className="w-fit ">
-                              {
-
-                                 permisos &&
-                                 permisos[
-
-                                 "Permiso_Orden_Compra"
-                                 ] == 1 && (
-                                    <Tooltip
-                                       content={
-                                          "seleccionar provedor"
-                                       }>
+                              {permisos &&
+                                 permisos["Permiso_Orden_Compra"] == 1 && (
+                                    <Tooltip content={"seleccionar provedor"}>
                                        <Button
-                                          color={
-                                             "pink"
-                                          }
+                                          color={"pink"}
                                           variant="solid"
                                           size="small"
                                           onClick={async () => {
                                              try {
                                                 // customLog(`${JSON.stringify(data)}`, "green");
-                                                const result = await ObservablePost(
-                                                   "IdRequisicion",
-                                                   {
-                                                      data: {
-                                                         IDRequisicion:
-                                                            data.IDRequisicion,
-                                                         Ejercicio: data.Ejercicio,
+                                                const result =
+                                                   await ObservablePost(
+                                                      "IdRequisicion",
+                                                      {
+                                                         data: {
+                                                            IDRequisicion:
+                                                               data.IDRequisicion,
+                                                            Ejercicio:
+                                                               data.Ejercicio,
 
-                                                         status: "OC",
+                                                            status: "OC",
+                                                         },
                                                       },
-                                                   },
-                                                );
+                                                   );
                                              } catch (e) {
                                              } finally {
                                                 setOpen((prev) => ({
@@ -696,58 +692,44 @@ const Actions: React.FC<{
                                  )}
                            </div>
                            <div className="w-fit ">
-                              {
-                                 permisos &&
-                                 permisos[
-                                 "Permiso_Cotizar"
-                                 ] == 1 && (
-                                    <Tooltip
-                                       content={
-
-                                          "cotizar"
-
-                                       }>
-                                       <Button
-                                          color={
-                                             "orange"
-
-                                          }
-                                          variant="solid"
-                                          size="small"
-                                          onClick={async () => {
-                                             try {
-                                                // customLog(`${JSON.stringify(data)}`, "green");
-                                                const result = await ObservablePost(
+                              {permisos && permisos["Permiso_Cotizar"] == 1 && (
+                                 <Tooltip content={"cotizar"}>
+                                    <Button
+                                       color={"orange"}
+                                       variant="solid"
+                                       size="small"
+                                       onClick={async () => {
+                                          try {
+                                             // customLog(`${JSON.stringify(data)}`, "green");
+                                             const result =
+                                                await ObservablePost(
                                                    "IdRequisicion",
                                                    {
                                                       data: {
                                                          IDRequisicion:
                                                             data.IDRequisicion,
-                                                         Ejercicio: data.Ejercicio,
+                                                         Ejercicio:
+                                                            data.Ejercicio,
 
-                                                         status:
-                                                            "CO"
-                                                         ,
+                                                         status: "CO",
                                                       },
                                                    },
                                                 );
-                                             } catch (e) {
-                                             } finally {
-                                                setOpen((prev) => ({
-                                                   autorized: false,
-                                                   cotizacion: true,
-                                                   pdf: false,
-                                                   view: false,
-                                                   tracing: false,
-                                                }));
-                                             }
-                                          }}>
-
-                                          cotizar
-
-                                       </Button>
-                                    </Tooltip>
-                                 )}
+                                          } catch (e) {
+                                          } finally {
+                                             setOpen((prev) => ({
+                                                autorized: false,
+                                                cotizacion: true,
+                                                pdf: false,
+                                                view: false,
+                                                tracing: false,
+                                             }));
+                                          }
+                                       }}>
+                                       cotizar
+                                    </Button>
+                                 </Tooltip>
+                              )}
                            </div>
                         </>
                      )}
@@ -766,27 +748,27 @@ const Actions: React.FC<{
                                  onClick={async () => {
                                     newStatus(data.Status) != "SU"
                                        ? showConfirmationAlert(
-                                          `El estatus se cambiara a ${newStatus(data.Status)} `,
-                                          "Esta acción no se puede deshacer.",
-                                       ).then((isConfirmed) => {
-                                          if (isConfirmed) {
-                                             mutation.mutate({
-                                                method: "PUT",
-                                                url: "/requisiciones/update",
-                                                data: {
-                                                   Status: newStatus(
-                                                      data.Status,
-                                                   ),
-                                                   id: data.Id,
-                                                },
-                                             });
-                                          } else {
-                                             showToast(
-                                                "La acción fue cancelada.",
-                                                "error",
-                                             );
-                                          }
-                                       })
+                                            `El estatus se cambiara a ${newStatus(data.Status)} `,
+                                            "Esta acción no se puede deshacer.",
+                                         ).then((isConfirmed) => {
+                                            if (isConfirmed) {
+                                               mutation.mutate({
+                                                  method: "PUT",
+                                                  url: "/requisiciones/update",
+                                                  data: {
+                                                     Status: newStatus(
+                                                        data.Status,
+                                                     ),
+                                                     id: data.Id,
+                                                  },
+                                               });
+                                            } else {
+                                               showToast(
+                                                  "La acción fue cancelada.",
+                                                  "error",
+                                               );
+                                            }
+                                         })
                                        : setOpenSu(true);
                                  }}
                                  className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}>
