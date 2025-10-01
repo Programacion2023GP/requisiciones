@@ -62,7 +62,7 @@ const ChangeStatusRequisition = ({ open, setOpen, setReloadTable }: {
             {spiner && <Spinner />}
 
             <ModalComponent title={`Cambio de estatus del folio`} open={open} setOpen={setOpen}>
-                <FormikForm initialValues={{ status: item.data?.data.Status, id: item.data?.data.IDRequisicion }} onSubmit={(values) => {
+                <FormikForm initialValues={{ status: item.data?.data?.Status, id: item.data?.data?.IDRequisicion }} onSubmit={(values) => {
                     mutation.mutate({
                         method: "POST",
                         url: "/requisiciones/changeStatus",
@@ -70,12 +70,12 @@ const ChangeStatusRequisition = ({ open, setOpen, setReloadTable }: {
                     });
                 }}
                     buttonMessage="Cambiar" children={() => (
-                        <div className="mt-8 w-full">
+                        <div className="w-full mt-8">
 
                             <FormikAutocomplete loading={false} label="cambia el status" name="status" idKey="value" labelKey="text" options={[
                                 { "text": "Captura", value: "CP" },
                                 { "text": "Autorizada", value: "AU" },
-                                { "text": "Visto Bueno", value: "VoBo" },
+                                // { "text": "Visto Bueno", value: "VoBo" },
                                 { "text": "Cotización", value: "CO" },
                                 { "text": "Orden de compra", value: "OC" },
                                 { "text": "Rechazada", value: "CA" },

@@ -36,6 +36,7 @@ import Spinner from "../loading/Loading";
 import YearSelect from "./select/Dropdown";
 import StatusColumn from "./columns/status/Status";
 import RequisitionForm from "./form/Requisition";
+import { icons } from "../constants";
 
 type ChipsProps = {
    captura: boolean;
@@ -267,7 +268,7 @@ const RequisicionesAdd = () => {
                   size="medium"
                   color="blue"
                   variant="solid">
-                  <LuPlus />
+                  <icons.Tb.TbFileTextSpark size={20} />
                </Button>
             </div>
          </Tooltip>

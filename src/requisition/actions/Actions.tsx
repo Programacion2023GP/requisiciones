@@ -480,7 +480,8 @@ const Actions: React.FC<{
                      {data.Status == "AU" &&
                         data.AutEspecial == 1 &&
                         !data.UsuarioVoBo &&
-                        buttonVobo(data.IDTipo) && (
+                        buttonVobo(data.IDTipo)  ||(localStorage.getItem("role")=="SISTEMAS" &&   data.AutEspecial == 1 &&
+                        !data.UsuarioVoBo  ) && (
                            <PermissionMenu IdMenu={"VoBo"}>
                               <Tooltip content="Visto bueno">
                                  <Button
@@ -495,7 +496,7 @@ const Actions: React.FC<{
                                        });
                                     }}>
                                     <MdOutlineCheckBox />
-                                    {data.UsuarioVoBo}
+                                    
                                  </Button>
                               </Tooltip>
                            </PermissionMenu>
@@ -507,7 +508,6 @@ const Actions: React.FC<{
                               variant="solid"
                               size="small"
                               onClick={async () => {
-                                 console.log("info", data);
                                  mutationPdf.mutate({
                                     method: "POST",
                                     url: "/requisiciones/detailsRequisicion",
@@ -586,9 +586,7 @@ const Actions: React.FC<{
                      {!data.UsuarioAS &&
                         newStatus(data.Status) == "AS" &&
                         permisos?.Permiso_Asignar == 1 &&
-                        (buttonVobo(data.IDTipo) === false ||
-                           (buttonVobo(data.IDTipo) &&
-                              data.UsuarioVoBo != null)) && (
+                        ( data.AutEspecial == 1 && data.UsuarioVoBo != null ) && (
                            <div className="w-fit">
                               <Tooltip content="Asignar requisitor">
                                  <Button
