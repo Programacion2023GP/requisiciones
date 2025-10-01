@@ -1,27 +1,28 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import React, {
+   Dispatch,
+   SetStateAction,
+   useEffect,
+   useRef,
+   useState,
+} from "react";
 import ModalComponent from "../../components/modal/Modal";
-import Typography from "../../components/typografy/Typografy";
 import FormikForm from "../../components/formik/Formik";
 import * as Yup from "yup";
-import CollapseComponent from "../../components/colapse/Colapse";
 import {
    FormikAutocomplete,
    FormikInput,
-   FormikNumberInput,
+   FormikSwitch,
    FormikTextArea,
 } from "../../components/formik/FormikInputs/FormikInput";
-import SwitchComponent from "../../components/switch/Swichcomponent";
 import Observable from "../../extras/observable";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showConfirmationAlert, showToast } from "../../sweetalert/Sweetalert";
-import Button from "../../components/form/Button";
 import { IoMdSend } from "react-icons/io";
 import Spinner from "../../loading/Loading";
-import { MdCheck } from "react-icons/md";
-import { IoClose } from "react-icons/io5";
-import Tooltip from "../../components/toltip/Toltip";
 import { FormikProps } from "formik";
+import { ColComponent, RowComponent } from "../../responsive/Responsive";
+import Button from "../../components/form/Button";
 
 type CotizacionType = {
    open: boolean;
@@ -29,35 +30,15 @@ type CotizacionType = {
    setReloadTable: Dispatch<SetStateAction<boolean>>;
 };
 
-type TitlesTitle = {
-   "Precio Uni. S/IVA": string;
-   "Importe IVA": string;
-   PorcentajeIVA: string;
-   "Precio Uni. C/IVA": string;
-   Retenciones: string;
-   "Selecciona el provedor": string;
-};
-
-const titlesForm: TitlesTitle = {
-   "Selecciona el provedor": "IDproveedor",
-   "Precio Uni. S/IVA": "PrecioUnitarioSinIva",
-   "Importe IVA": "ImporteIva",
-   PorcentajeIVA: "PorcentajeIVA",
-   "Precio Uni. C/IVA": "PrecioUnitarioConIva",
-   Retenciones: "Retenciones",
-};
-
-type SuppliersType = {
-   suppliers: Array<Record<string, any>>;
-};
 type RequisitionType = {
    data: Requisition;
 };
 type Requisition = {
    Ejercicio: number;
-   IdRequisicion: number;
+   IDRequisicion: number;
    status: "OC" | "CO";
 };
+
 const CotizacionComponent: React.FC<CotizacionType> = ({
    open,
    setOpen,
@@ -66,65 +47,15 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
    const IdRequisicion = Observable().ObservableGet(
       "IdRequisicion",
    ) as RequisitionType;
+
    const [initialValues, setInitialValues] = useState<Record<string, any>>({});
    const [spiner, setSpiner] = useState<boolean>(true);
    const [data, setData] = useState<Array<Record<string, any>>>([]);
    const formik = useRef<FormikProps<Record<string, any>> | null>(null);
-   const mutationSearch = useMutation({
-      mutationFn: ({
-         url,
-         method,
-         data,
-      }: {
-         url: string;
-         method: "POST" | "PUT" | "DELETE";
-         data?: any;
-      }) => AxiosRequest(url, method, data),
-      onMutate(variables) {
-         setInitialValues({});
-         setSpiner(true);
-      },
-      onSuccess: (resp) => {
-         console.log("response", resp?.data);
-         setSpiner(false);
+   const [validationSchema, setValidationSchema] = useState<
+      Yup.ObjectSchema<any>
+   >(Yup.object());
 
-         const raw = resp?.data || {};
-         const parsed: Record<string, any> = { ...raw };
-
-         // Normalizar campos que son numéricos
-         Object.keys(raw).forEach((key) => {
-            if (
-               key.match(
-                  /(PrecioUnitarioSinIva|PorcentajeIVA|ImporteIva|PrecioUnitarioConIva|Retenciones)\d?$/,
-               ) &&
-               raw[key] !== null
-            ) {
-               parsed[key] = Number(raw[key]); // convertir a número
-            }
-         });
-         console.log("parsed", parsed);
-         setInitialValues(parsed);
-         // const item = data.find(
-         //   (it) =>
-         //     it.IDproveedor1 > 0 && it.IDproveedor2 > 0 && it.IDproveedor3 > 0
-         // );
-         // setInitialValues({
-         //   ...resp?.data,
-
-         // });
-
-         // showToast(data.message, data.status);
-         if (mutationSearch.status === "success") {
-            mutationSearch.reset();
-         }
-      },
-      onError: (error: any) => {
-         showToast(
-            error.response?.data?.message || "Error al realizar la acción",
-            "error",
-         );
-      },
-   });
    const mutationCotized = useMutation({
       mutationFn: ({
          url,
@@ -135,14 +66,153 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          method: "POST" | "PUT" | "DELETE";
          data?: any;
       }) => AxiosRequest(url, method, IdRequisicion?.data),
-      onMutate(variables) {
+      onMutate() {
          setData([]);
          setSpiner(true);
       },
-      onSuccess: async (data, variables) => {
+      onSuccess: async (data) => {
          setSpiner(false);
+         console.log("aqui IdRequisicion", IdRequisicion.data);
+
+         let dynamicShape: Record<string, any> = {};
+         let dynamicInitialValues: Record<string, any> = {};
+         let counter = 1;
+
+         // primero tus reglas fijas
+         const baseShape: Record<string, any> = {
+            IDproveedor1: Yup.number().required("Proveedor 1 requerido"),
+            IDproveedor2: Yup.number().nullable(),
+            IDproveedor3: Yup.number().nullable(),
+            // aquí pones todas las demás fijas que ya tenías
+         };
+
+         data.data.forEach((it: any, index) => {
+            dynamicInitialValues[`IDRequisicion`] = it.IDRequisicion;
+            dynamicInitialValues[`Ejercicio`] = it.Ejercicio;
+            dynamicInitialValues[`IDproveedor1`] = Number(it.IDproveedor1);
+            dynamicInitialValues[`IDproveedor2`] = Number(it.IDproveedor2);
+            dynamicInitialValues[`IDproveedor3`] = Number(it.IDproveedor3);
+            dynamicInitialValues[`ObservacionesCot`] = it.ObservacionesCot;
+
+            dynamicInitialValues[`IDDetalle${index + 1}`] = it.IDDetalle;
+            [1, 2, 3].forEach((providerNum) => {
+               const fieldNumber = index * 3 + providerNum;
+
+               console.log(
+                  `Producto ${index + 1}, Proveedor ${providerNum} → Campo ${fieldNumber}`,
+               ); // Para debug
+
+               // Cargar valores iniciales desde la base de datos - CORREGIDO
+               // Usamos providerNum para leer de la BD y fieldNumber para el nombre del campo
+               dynamicInitialValues[`PrecioUnitarioSinIva${fieldNumber}`] =
+                  it[`PrecioUnitarioSinIva${providerNum}`] || 0;
+               dynamicInitialValues[`PorcentajeIVA${fieldNumber}`] =
+                  it[`PorcentajeIVA${providerNum}`] || 0;
+               dynamicInitialValues[`ImporteIva${fieldNumber}`] =
+                  it[`ImporteIva${providerNum}`] || 0;
+               dynamicInitialValues[`PrecioUnitarioConIva${fieldNumber}`] =
+                  it[`PrecioUnitarioConIva${providerNum}`] || 0;
+               dynamicInitialValues[`Retenciones${fieldNumber}`] =
+                  it[`Retenciones${providerNum}`] || 0;
+               dynamicShape[`PrecioUnitarioSinIva${counter}`] = Yup.number()
+                  .nullable()
+                  .transform((value, originalValue) => {
+                     // Si está vacío o no es un número válido, retorna null
+                     if (
+                        originalValue === "" ||
+                        originalValue === null ||
+                        originalValue === undefined
+                     ) {
+                        return null;
+                     }
+                     const number = Number(originalValue);
+                     return isNaN(number) ? originalValue : number; // Mantiene el valor original si no es número
+                  })
+                  .typeError("Debe ser un número válido")
+                  .min(0, "No puede ser negativo");
+
+               dynamicShape[`PorcentajeIVA${counter}`] = Yup.number()
+                  .nullable()
+                  .transform((value, originalValue) => {
+                     if (
+                        originalValue === "" ||
+                        originalValue === null ||
+                        originalValue === undefined
+                     ) {
+                        return null;
+                     }
+                     const number = Number(originalValue);
+                     return isNaN(number) ? originalValue : number;
+                  })
+                  .typeError("Debe ser un número válido")
+                  .min(0, "No puede ser negativo")
+                  .max(100, "No puede ser mayor a 100%");
+
+               dynamicShape[`ImporteIva${counter}`] = Yup.number()
+                  .nullable()
+                  .transform((value, originalValue) => {
+                     if (
+                        originalValue === "" ||
+                        originalValue === null ||
+                        originalValue === undefined
+                     ) {
+                        return null;
+                     }
+                     const number = Number(originalValue);
+                     return isNaN(number) ? originalValue : number;
+                  })
+                  .typeError("Debe ser un número válido")
+                  .min(0, "No puede ser negativo");
+
+               dynamicShape[`PrecioUnitarioConIva${counter}`] = Yup.number()
+                  .nullable()
+                  .transform((value, originalValue) => {
+                     if (
+                        originalValue === "" ||
+                        originalValue === null ||
+                        originalValue === undefined
+                     ) {
+                        return null;
+                     }
+                     const number = Number(originalValue);
+                     return isNaN(number) ? originalValue : number;
+                  })
+                  .typeError("Debe ser un número válido")
+                  .min(0, "No puede ser negativo");
+
+               dynamicShape[`Retenciones${counter}`] = Yup.number()
+                  .nullable()
+                  .transform((value, originalValue) => {
+                     if (
+                        originalValue === "" ||
+                        originalValue === null ||
+                        originalValue === undefined
+                     ) {
+                        return null;
+                     }
+                     const number = Number(originalValue);
+                     return isNaN(number) ? originalValue : number;
+                  })
+                  .typeError("Debe ser un número válido")
+                  .min(0, "No puede ser negativo");
+
+               counter++;
+            });
+         });
+
+         console.log("provs", dynamicInitialValues);
+         // ahora combinas fijas + dinámicas en un solo schema
+         setValidationSchema(
+            Yup.object().shape({
+               ...baseShape,
+               ...dynamicShape,
+            }),
+         );
+
+         setInitialValues(dynamicInitialValues);
          setData(data.data);
       },
+
       onError: (error: any) => {
          showToast(
             error.response?.data?.message || "Error al realizar la acción",
@@ -150,6 +220,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          );
       },
    });
+
    const queries = useQueries({
       queries: [
          {
@@ -160,6 +231,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       ],
    });
    const [suppliers] = queries;
+
    const mutation = useMutation({
       mutationFn: ({
          url,
@@ -170,25 +242,21 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          method: "POST" | "PUT" | "DELETE";
          data?: any;
       }) => AxiosRequest(url, method, data),
-      onMutate(variables) {
+      onMutate() {
          setSpiner(true);
          setReloadTable(false);
       },
       onSuccess: (data) => {
-         mutationCotized.mutate({
-            method: "POST",
-            url: "/requisiciones/products",
-            data: {
-               ...IdRequisicion?.data,
-            },
-         });
-         // setReloadTable(true);
+         // mutationCotized.mutate({
+         //   method: "POST",
+         //   url: "/requisiciones/products",
+         //   data: {
+         //     ...IdRequisicion?.data,
+         //   },
+         // });
+         setOpen(false);
          setInitialValues({});
-         console.log("cotizacion search");
          showToast(data.message, data.status);
-         // if (mutation.status === "success") {
-         //   mutation.reset();
-         // }
       },
       onError: (error: any) => {
          showToast(
@@ -197,27 +265,40 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          );
       },
    });
-
+   const mutationOC = useMutation({
+      mutationFn: ({
+         url,
+         method,
+         data,
+      }: {
+         url: string;
+         method: "POST" | "PUT" | "DELETE";
+         data?: any;
+      }) => AxiosRequest(url, method, data),
+      onMutate() {
+         setSpiner(true);
+         setReloadTable(false);
+      },
+      onSuccess: (data) => {
+         setOpen(false);
+         setInitialValues({});
+         showToast(data.message, data.status);
+      },
+      onError: (error: any) => {
+         showToast(
+            error.response?.data?.message || "Error al realizar la acción",
+            "error",
+         );
+      },
+   });
    const handleSubmit = (values: any) => {
-      console.log(values);
-      if (
-         values.IDproveedor1 !== null &&
-         values.IDproveedor1 !== undefined &&
-         values.IDproveedor1 !== "" &&
-         !isNaN(Number(values.IDproveedor1)) &&
-         values.IDproveedor2 !== null &&
-         values.IDproveedor2 !== undefined &&
-         values.IDproveedor2 !== "" &&
-         !isNaN(Number(values.IDproveedor2)) &&
-         values.IDproveedor3 !== null &&
-         values.IDproveedor3 !== undefined &&
-         values.IDproveedor3 !== "" &&
-         !isNaN(Number(values.IDproveedor3))
-      ) {
+      // Crear array de items para enviar
+
+      if (values.IDproveedor1 && values.IDproveedor2 && values.IDproveedor3) {
          mutation.mutate({
             url: "/requisicionesdetails/update",
             method: "PUT",
-            data: { ...values, newStatus: IdRequisicion?.data?.status },
+            data: values,
          });
       } else {
          showConfirmationAlert(
@@ -228,7 +309,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                mutation.mutate({
                   url: "/requisicionesdetails/update",
                   method: "PUT",
-                  data: { ...values, newStatus: IdRequisicion?.data?.status },
+                  data: values,
                });
             } else {
                showToast("La acción fue cancelada.", "error");
@@ -237,134 +318,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }
    };
 
-   const validationSchema =
-      IdRequisicion?.data?.status == "CO"
-         ? Yup.object({
-              // Proveedor: Yup.number()
-              //   .min(1, "Selecciona un provedor")
-              //   .required("Selecciona un provedor"), // Asegúrate que Proveedor pueda ser null
-              IDproveedor1: Yup.number()
-                 .test(
-                    "unique1",
-                    "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-                    function (value) {
-                       const { IDproveedor2, IDproveedor3 } = this.parent;
-                       return value !== IDproveedor2 && value !== IDproveedor3;
-                    },
-                 )
-                 .required("El proveedor 1 es obligatorio"),
-
-              // Proveedor 2
-              IDproveedor2: Yup.number()
-                 .nullable() // Permite valores nulos
-                 .optional() // Permite que el campo no esté presente
-                 .test(
-                    "unique2",
-                    "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-                    function (value) {
-                       const { IDproveedor1, IDproveedor3 } = this.parent;
-                       return (
-                          value !== IDproveedor1 &&
-                          (IDproveedor3 == null || value !== IDproveedor3)
-                       );
-                    },
-                 ),
-              // Proveedor 3
-              IDproveedor3: Yup.number()
-                 .nullable() // Permite valores nulos
-                 .optional()
-
-                 .test(
-                    "unique3",
-                    "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-                    function (value) {
-                       const { IDproveedor1, IDproveedor2 } = this.parent;
-                       return (
-                          value !== IDproveedor1 &&
-                          (IDproveedor2 == null || value !== IDproveedor2)
-                       );
-                    },
-                 ),
-              // IDproveedor1: Yup.number()
-              //   .test(
-              //     "unique1",
-              //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-              //     function (value) {
-              //       console.log("Valores del formulario:", this.parent); // 👀 Verificar qué llega aquí
-              //       const { IDProveedor1, IDProveedor3 } = this.parent || {}; // Evitar undefined
-              //       return value !== IDProveedor1 && value !== IDProveedor3;
-              //     }
-              //   )
-              //   .required("El proveedor 1 es obligatorio"),
-
-              //   IDproveedor2: Yup.number()
-              //   .min(1, "Selecciona un provedor")
-              //   .test(
-              //     "unique",
-              //     "El provedor ya esta seleccionado en los demas provedores seleccione otro",
-              //     (value) =>
-              //       value ==
-              //       (formik?.current?.values["IDproveedor3"] ||
-              //         formik?.current?.values["IDproveedor1"])
-
-              //     // {
-              //     // const { IDproveedor1, IDproveedor3 } = formik?.current?.values;
-              //     // console.log( Number(value) == Number(IDproveedor1),Number(value) == Number(IDproveedor3),value );
-              //     //  (Number(value) == Number(IDproveedor1) || Number(value) == Number(IDproveedor3));
-
-              //     // }
-              //   )
-              //   .required("Selecciona un provedor"),
-
-              //   IDproveedor3: Yup.number()
-              //   .min(1, "Selecciona un proveedor")
-              //   .test(
-              //     "unique3",
-              //     "El proveedor ya está seleccionado en los demás proveedores, seleccione otro",
-              //     function (value) {
-              //       const { IDproveedor1, IDproveedor2 } = this.parent; // Accede a los valores del formulario
-              //       return value !== IDproveedor1 && value !== IDproveedor2;
-              //     }
-              //   )
-
-              //   .required("Selecciona un provedor"),
-
-              PrecioUnitarioSinIva1: Yup.number().required(
-                 "Precio unitario sin IVA es obligatorio",
-              ),
-              // PorcentajeIVA1: Yup.number().required("porcentaje del iva es obligatorio"),
-              ImporteIva1: Yup.number().required("Importe iva es obligatorio"),
-              PrecioUnitarioConIva1: Yup.number().required(
-                 "Precio unitario con iva es obligatorio",
-              ),
-              // Retenciones1: Yup.number().required("Retenciones es obligatorio"),
-
-              // PrecioUnitarioSinIva2: Yup.number().required(
-              //   "Precio unitario sin iva es obligatorio"
-              // ),
-              // // PorcentajeIVA2: Yup.number().required("porcentaje del iva es obligatorio"),
-              // ImporteIva2: Yup.number().required("Importe iva es obligatorio"),
-              // PrecioUnitarioConIva2: Yup.number().required(
-              //   "Precio unitario con iva es obligatorio"
-              // ),
-              // Retenciones2: Yup.number().required("Retenciones es obligatorio"),
-
-              // PrecioUnitarioSinIva3: Yup.number().required(
-              //   "Precio unitario sin iva es obligatorio"
-              // ),
-              // // PorcentajeIVA3: Yup.number().required("porcentaje del iva es obligatorio"),
-              // ImporteIva3: Yup.number().required("Importe iva es obligatorio"),
-              // PrecioUnitarioConIva3: Yup.number().required(
-              //   "Precio unitario con iva es obligatorio"
-              // ),
-
-              // Retenciones3: Yup.number().required("Retenciones es obligatorio"),
-           })
-         : Yup.object({
-              Proveedor: Yup.number()
-                 .min(1, "Selecciona un provedor")
-                 .required("Selecciona un provedor"),
-           });
+   // Validación simplificada - solo para los proveedores principales
 
    const handleModified = (
       values: Record<string, any>,
@@ -375,298 +329,484 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       ) => void,
    ) => {
       const calculateIVA = (precioSinIva: number, porcentajeIVA: number) => {
-         // Solo realizar el cálculo si el porcentaje de IVA es mayor que 0
          if (porcentajeIVA > 0) {
             const importeIva = +(precioSinIva * (porcentajeIVA / 100)).toFixed(
                2,
-            ); // Convierte a número
-            const precioConIva = +(importeIva + precioSinIva).toFixed(2); // Convierte a número
+            );
+            const precioConIva = +(importeIva + precioSinIva).toFixed(2);
             return { importeIva, precioConIva };
          }
-         // Si el IVA no se aplica, devolver 0 para ambos campos
-         return { importeIva: 0, precioConIva: precioSinIva }; // Mantener como número
+         return { importeIva: 0, precioConIva: precioSinIva };
       };
 
-      const { importeIva: importeIva1, precioConIva: precioConIva1 } =
-         calculateIVA(
-            Number(values.PrecioUnitarioSinIva1),
-            Number(values.PorcentajeIVA1),
-         );
-      setFieldValue("ImporteIva1", importeIva1);
-      setFieldValue("PrecioUnitarioConIva1", precioConIva1);
+      data.forEach((_, index) => {
+         [1, 2, 3].forEach((offset) => {
+            const providerNumber = index * 3 + offset;
 
-      const { importeIva: importeIva2, precioConIva: precioConIva2 } =
-         calculateIVA(
-            Number(values.PrecioUnitarioSinIva2),
-            Number(values.PorcentajeIVA2),
-         );
-      setFieldValue("ImporteIva2", importeIva2);
-      setFieldValue("PrecioUnitarioConIva2", precioConIva2);
+            const precioSinIva =
+               Number(values[`PrecioUnitarioSinIva${providerNumber}`]) || 0;
+            const porcentajeIVA =
+               Number(values[`PorcentajeIVA${providerNumber}`]) || 0;
 
-      const { importeIva: importeIva3, precioConIva: precioConIva3 } =
-         calculateIVA(
-            Number(values.PrecioUnitarioSinIva3),
-            Number(values.PorcentajeIVA3),
-         );
-      setFieldValue("ImporteIva3", importeIva3);
-      setFieldValue("PrecioUnitarioConIva3", precioConIva3);
+            const { importeIva, precioConIva } = calculateIVA(
+               precioSinIva,
+               porcentajeIVA,
+            );
+
+            setFieldValue(`ImporteIva${providerNumber}`, importeIva);
+            setFieldValue(
+               `PrecioUnitarioConIva${providerNumber}`,
+               precioConIva,
+            );
+         });
+      });
    };
+
    useEffect(() => {
       mutationCotized.mutate({
          method: "POST",
          url: "/requisiciones/products",
          data: {
-            IDRequisicion: IdRequisicion?.data?.IdRequisicion,
+            IDRequisicion: IdRequisicion?.data?.IDRequisicion,
             Ejercicio: IdRequisicion?.data?.Ejercicio,
          },
       });
    }, []);
+
+   const ProveedorSection = ({
+      provedor,
+      providerNumber,
+      values,
+      isOC,
+      index,
+   }: any) => (
+      <div
+         className={`p-4 rounded-lg border ${
+            index === 1
+               ? "bg-blue-50 border-blue-200"
+               : index === 2
+                 ? "bg-green-50 border-green-200"
+                 : "bg-purple-50 border-purple-200"
+         }`}>
+         <h4
+            className={`font-semibold mb-3 ${
+               index === 1
+                  ? "text-blue-800"
+                  : index === 2
+                    ? "text-green-800"
+                    : "text-purple-800"
+            }`}>
+            {provedor}
+         </h4>
+         <div className="space-y-3">
+            <FormikInput
+               responsive={{ "2xl": 4, lg: 6 }}
+               label="Precio sin IVA"
+               name={`PrecioUnitarioSinIva${providerNumber}`}
+               handleModified={handleModified}
+               disabled={isOC}
+            />
+            <FormikInput
+               responsive={{ "2xl": 4, lg: 6 }}
+               label="% IVA"
+               name={`PorcentajeIVA${providerNumber}`}
+               handleModified={handleModified}
+               disabled={isOC}
+            />
+            <FormikInput
+               responsive={{ "2xl": 4, lg: 6 }}
+               label="Retenciones"
+               name={`Retenciones${providerNumber}`}
+               disabled={isOC}
+            />
+            <FormikInput
+               responsive={{ "2xl": 6, lg: 6 }}
+               label="Importe IVA"
+               name={`ImporteIva${providerNumber}`}
+               disabled
+            />
+            <FormikInput
+               responsive={{ "2xl": 6, lg: 6 }}
+               label="Precio con IVA"
+               name={`PrecioUnitarioConIva${providerNumber}`}
+               disabled
+            />
+         </div>
+      </div>
+   );
+
    return (
       <ModalComponent
          title="Detalle de Cotizaciones"
          open={open}
          setOpen={() => setOpen(false)}>
-         {(suppliers.status == "pending" || spiner) && <Spinner />}
-         <div className="w-full p-4 mx-auto mb-8 overflow-x-auto rounded-lg shadow bg-gray-50">
-            <table className="w-full overflow-hidden text-sm bg-white border-collapse rounded-lg">
-               <thead className="bg-gray-100 text-slate-900">
-                  <tr>
-                     <th className="px-4 py-3 font-medium text-center">
-                        Descripción
-                     </th>
-                     <th className="px-4 py-3 font-medium text-center">
-                        Cantidad
-                     </th>
-                     <th className="px-4 py-3 font-medium text-center">
-                        Cotizado
-                     </th>
-                     <th className="px-4 py-3 font-medium text-center">
-                        Provedor seleccionado
-                     </th>
+         {(suppliers.status === "pending" || spiner) && <Spinner />}
 
-                     <th className="px-4 py-3 font-medium text-center">
-                        Accion
-                     </th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {Array.isArray(data) &&
-                     data.map((item: any) => (
-                        <tr
-                           className={` transition duration-150 ${initialValues?.IDDetalle == item.IDDetalle && "bg-sky-100"}`}>
-                           <td className="px-4 py-3 text-center text-gray-700 border-b border-gray-200">
-                              {/* {item.IDDetalle}   */}
-                              {item.Descripcion}
-                           </td>
-                           <td className="px-4 py-3 text-center text-gray-700 border-b border-gray-200">
-                              {item.Cantidad}
-                           </td>
-                           <td className="px-4 py-3 text-center text-gray-700 border-b border-gray-200">
-                              <div className="flex justify-center w-full">
-                                 {item.IDproveedor1 > 0 ? (
-                                    <MdCheck />
-                                 ) : (
-                                    <IoClose />
-                                 )}
-                              </div>
-                           </td>
-                           <td className="px-4 py-3 text-center text-gray-700 border-b border-gray-200">
-                              <div className="flex justify-center w-full">
-                                 {item.Proveedor ? <MdCheck /> : <IoClose />}
-                              </div>
-                           </td>
-                           <td className="flex justify-center px-4 py-3 text-gray-700 border-b border-gray-200">
-                              <div className="w-fit">
-                                 <Tooltip content="seleccionar">
-                                    <Button
-                                       color="blue"
-                                       variant="solid"
-                                       size="small"
-                                       onClick={() => {
-                                          mutationSearch.mutate({
-                                             method: "POST",
-                                             url: "/requisicionesdetails/search",
-                                             data: {
-                                                IDDetalle: item.IDDetalle,
-                                             },
-                                          });
-                                       }}>
-                                       <IoMdSend />
-                                    </Button>
-                                 </Tooltip>
-                              </div>
-                           </td>
-                        </tr>
-                     ))}
-               </tbody>
-            </table>
-         </div>
-
-         {initialValues?.IDDetalle && (
+         {Array.isArray(data) && data.length > 0 && (
             <FormikForm
-               buttonMessage={
-                  IdRequisicion?.data?.status == "CO"
-                     ? "Cotizar"
-                     : "Seleccionar provedor"
-               }
                initialValues={initialValues}
                validationSchema={validationSchema}
                onSubmit={handleSubmit}
+               buttonMessage={
+                  IdRequisicion.data.status == "OC"
+                     ? ""
+                     : "Guardar las cotizaciones"
+               }
                ref={formik}>
-               {(values, setFieldValue, setTouched, errors) => {
-                  return (
-                     <div className="w-full px-2 space-y-8 overflow-auto">
-                        {[1, 2, 3].map((contProvedor) => {
-                           // Clase dinámica de fondo
-                           const bgClass =
-                              values.Proveedor ===
-                                 values[`IDproveedor${contProvedor}`] &&
-                              values[`IDproveedor${contProvedor}`] > 0
-                                 ? "bg-sky-100"
-                                 : "bg-gray-50";
+               {(values, setFieldValue) => (
+                  <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+                     {/* Header informativo */}
+                     <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                           <div>
+                              <h3 className="text-lg font-semibold text-blue-800">
+                                 Estado:{" "}
+                                 {IdRequisicion?.data?.status === "CO"
+                                    ? "Cotización"
+                                    : "Orden de Compra"}
+                              </h3>
 
-                           return (
-                              <div
-                                 key={contProvedor}
-                                 className={`w-full ${bgClass} p-6 rounded-lg shadow-lg`}>
-                                 <Typography className="mb-4 text-lg font-semibold text-slate-800">
-                                    Proveedor {contProvedor}
-                                 </Typography>
-
-                                 {IdRequisicion?.data?.status === "OC" &&
-                                    Number(
-                                       values[`IDproveedor${contProvedor}`],
-                                    ) > 0 && (
-                                       <SwitchComponent
-                                          enabled={
-                                             values.Proveedor ===
-                                             values[
-                                                `IDproveedor${contProvedor}`
-                                             ]
-                                          }
-                                          label={`Seleccionar al proveedor ${contProvedor}`}
-                                          enabledColor="bg-sky-200"
-                                          disabledColor="bg-gray-200"
-                                          onclick={() => {
-                                             // Alterna el proveedor seleccionado
-                                             values.Proveedor ===
-                                             values[
-                                                `IDproveedor${contProvedor}`
-                                             ]
-                                                ? setFieldValue(
-                                                     "Proveedor",
-                                                     null,
-                                                  )
-                                                : setFieldValue(
-                                                     "Proveedor",
-                                                     values[
-                                                        `IDproveedor${contProvedor}`
-                                                     ],
-                                                  );
-                                          }}
-                                       />
-                                    )}
-                                 {/* {JSON.stringify(errors)} */}
-                                 {errors?.Proveedor && (
-                                    <Typography className="mb-4 font-semibold text-red-500 text-md">
-                                       {errors.Proveedor}
-                                    </Typography>
-                                 )}
-                                 <div className="w-full">
-                                    {(
-                                       Object.keys(
-                                          titlesForm,
-                                       ) as (keyof TitlesTitle)[]
-                                    ).map((title) => {
-                                       const fieldName =
-                                          titlesForm[title] + contProvedor;
-
-                                       {
-                                          if (
-                                             title === "Selecciona el provedor"
-                                          ) {
-                                             return (
-                                                <FormikAutocomplete
-                                                   disabled={
-                                                      IdRequisicion?.data
-                                                         ?.status == "OC"
-                                                         ? true
-                                                         : false
-                                                   }
-                                                   label={title}
-                                                   key={title + contProvedor}
-                                                   name={fieldName}
-                                                   options={
-                                                      suppliers?.data?.data.filter(
-                                                         (
-                                                            prov: Record<
-                                                               string,
-                                                               any
-                                                            >,
-                                                         ) =>
-                                                            ![
-                                                               values.IDProveedor1,
-                                                               values.IDProveedor2,
-                                                               values.IDProveedor3,
-                                                            ]
-                                                               .filter(Boolean)
-                                                               .includes(
-                                                                  prov.IDProveedor,
-                                                               ),
-                                                      ) || []
-                                                   }
-                                                   labelKey={"NombreCompleto"}
-                                                   idKey={"IDProveedor"}
-                                                   loading={false}
-                                                />
-                                             );
-                                          }
-
-                                          return (
-                                             <FormikInput
-                                                handleModified={
-                                                   title ==
-                                                      "Precio Uni. S/IVA" ||
-                                                   title == "PorcentajeIVA"
-                                                      ? handleModified
-                                                      : undefined
-                                                }
-                                                disabled={
-                                                   title == "Importe IVA" ||
-                                                   title ==
-                                                      "Precio Uni. C/IVA" ||
-                                                   IdRequisicion?.data
-                                                      ?.status == "OC"
-                                                      ? true
-                                                      : false
-                                                }
-                                                key={title + contProvedor}
-                                                type={"number"}
-                                                responsive={{ "2xl": 6, xl: 6 }}
-                                                name={fieldName}
-                                                label={title}
-                                             />
-                                          );
-                                       }
-                                    })}
-                                 </div>
-                              </div>
-                           );
-                        })}
-                        <div className="w-full p-4 mx-auto mb-8 overflow-x-auto rounded-lg shadow bg-gray-50">
-                           <FormikTextArea
-                              label="Observaciones de la Cotización"
-                              name="ObservacionesCot"
-                              disabled={
-                                 IdRequisicion?.data?.status == "OC"
-                                    ? true
-                                    : false
-                              }
-                           />
+                              <p className="text-sm text-blue-600">
+                                 {IdRequisicion.data.status == "CO"
+                                    ? ` Complete la información de cotización para los ${data.length}{" "}
+                      productos`
+                                    : "Seleciona al provedor"}
+                              </p>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-sm font-medium text-blue-700">
+                                 Requisición:{" "}
+                                 {IdRequisicion?.data?.IDRequisicion}
+                              </p>
+                              <p className="text-sm text-blue-600">
+                                 Ejercicio: {IdRequisicion?.data?.Ejercicio}
+                              </p>
+                           </div>
                         </div>
                      </div>
-                  );
-               }}
+
+                     {/* Selección de Proveedores */}
+                     {IdRequisicion.data.status == "CO" && (
+                        <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
+                           <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                              Seleccione los 3 Proveedores
+                           </h3>
+
+                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                              <FormikAutocomplete
+                                 label="Proveedor 1"
+                                 name="IDproveedor1"
+                                 options={
+                                    suppliers?.data?.data.filter(
+                                       (prov: any) =>
+                                          ![
+                                             values?.IDproveedor2,
+                                             values?.IDproveedor3,
+                                          ]
+                                             .filter(Boolean)
+                                             .includes(prov.IDProveedor),
+                                    ) || []
+                                 }
+                                 labelKey="NombreCompleto"
+                                 idKey="IDProveedor"
+                              />
+                              <FormikAutocomplete
+                                 label="Proveedor 2"
+                                 name="IDproveedor2"
+                                 options={
+                                    suppliers?.data?.data.filter(
+                                       (prov: any) =>
+                                          ![
+                                             values?.IDproveedor1,
+                                             values?.IDproveedor3,
+                                          ]
+                                             .filter(Boolean)
+                                             .includes(prov.IDProveedor),
+                                    ) || []
+                                 }
+                                 labelKey="NombreCompleto"
+                                 idKey="IDProveedor"
+                              />
+                              <FormikAutocomplete
+                                 label="Proveedor 3"
+                                 name="IDproveedor3"
+                                 options={
+                                    suppliers?.data?.data.filter(
+                                       (prov: any) =>
+                                          ![
+                                             values?.IDproveedor1,
+                                             values?.IDproveedor2,
+                                          ]
+                                             .filter(Boolean)
+                                             .includes(prov.IDProveedor),
+                                    ) || []
+                                 }
+                                 labelKey="NombreCompleto"
+                                 idKey="IDProveedor"
+                              />
+                           </div>
+                        </div>
+                     )}
+
+                     {/* Tabla estilo Excel */}
+                     <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm border border-gray-300">
+                           <thead className="bg-gray-100">
+                              <tr>
+                                 <th className="px-3 py-2 text-left border">
+                                    Producto
+                                 </th>
+                                 {[1, 2, 3].map((offset) => (
+                                    <th
+                                       key={offset}
+                                       className="px-3 py-2 text-center border"
+                                       colSpan={5}>
+                                       {IdRequisicion.data.status == "OC" ? (
+                                          <Button
+                                             color="blue"
+                                             variant={
+                                                data?.[0]["Proveedor"] ==
+                                                values[`IDproveedor${offset}`]
+                                                   ? "solid"
+                                                   : "outline"
+                                             }
+                                             onClick={() => {
+                                                console.log(
+                                                   "aca",
+                                                   IdRequisicion?.data,
+                                                );
+                                                mutationOC.mutate({
+                                                   method: "POST",
+                                                   url: "requisicionesdetails/ordencompra",
+                                                   data: {
+                                                      Ejercicio:
+                                                         IdRequisicion?.data
+                                                            ?.Ejercicio,
+                                                      IDRequisicion:
+                                                         IdRequisicion?.data
+                                                            ?.IDRequisicion,
+                                                      Proveedor:
+                                                         values[
+                                                            `IDproveedor${offset}`
+                                                         ],
+                                                   },
+                                                });
+                                             }}>
+                                             {suppliers?.data?.data.find(
+                                                (prov) =>
+                                                   prov.IDProveedor ==
+                                                   values[
+                                                      `IDproveedor${offset}`
+                                                   ],
+                                             )?.NombreCompleto ||
+                                                `Proveedor ${offset}`}
+                                          </Button>
+                                       ) : (
+                                          suppliers?.data?.data.find(
+                                             (prov) =>
+                                                prov.IDProveedor ==
+                                                values[`IDproveedor${offset}`],
+                                          )?.NombreCompleto ||
+                                          `Proveedor ${offset}`
+                                       )}
+                                    </th>
+                                 ))}
+                              </tr>
+                              <tr>
+                                 <th className="px-3 py-2 border"></th>
+                                 {[1, 2, 3].map((offset) => (
+                                    <React.Fragment key={offset}>
+                                       <th className="px-3 py-2 text-center border">
+                                          Precio sin IVA
+                                       </th>
+                                       <th className="px-3 py-2 text-center border">
+                                          % IVA
+                                       </th>
+                                       <th className="px-3 py-2 text-center border">
+                                          Retenciones
+                                       </th>
+                                       <th className="px-3 py-2 text-center border">
+                                          Importe IVA
+                                       </th>
+                                       <th className="px-3 py-2 text-center border">
+                                          Precio con IVA
+                                       </th>
+                                    </React.Fragment>
+                                 ))}
+                              </tr>
+                           </thead>
+                           <tbody>
+                              {data.map((item: any, index) => (
+                                 <tr
+                                    key={index}
+                                    className="odd:bg-white even:bg-gray-50">
+                                    <td className="px-3 py-2 align-top border">
+                                       <div className="font-semibold">
+                                          {item.Descripcion}
+                                       </div>
+                                       {item.Codigo && (
+                                          <div className="text-xs text-gray-600">
+                                             Código: {item.Codigo}
+                                          </div>
+                                       )}
+                                       {item.Cantidad && (
+                                          <div className="text-xs text-blue-700">
+                                             Cantidad: {item.Cantidad}
+                                          </div>
+                                       )}
+                                    </td>
+
+                                    {[1, 2, 3].map((offset) => {
+                                       const providerNumber =
+                                          index * 3 + offset;
+                                       return (
+                                          <React.Fragment key={offset}>
+                                             <td className="px-2 py-1 border">
+                                                <FormikInput
+                                                   label=""
+                                                   name={`PrecioUnitarioSinIva${providerNumber}`}
+                                                   handleModified={
+                                                      handleModified
+                                                   }
+                                                   disabled={
+                                                      IdRequisicion?.data
+                                                         ?.status === "OC"
+                                                   }
+                                                />
+                                             </td>
+                                             <td className="px-2 py-1 border">
+                                                <FormikInput
+                                                   label=""
+                                                   name={`PorcentajeIVA${providerNumber}`}
+                                                   handleModified={
+                                                      handleModified
+                                                   }
+                                                   disabled={
+                                                      IdRequisicion?.data
+                                                         ?.status === "OC"
+                                                   }
+                                                />
+                                             </td>
+                                             <td className="px-2 py-1 border">
+                                                <FormikInput
+                                                   label=""
+                                                   name={`Retenciones${providerNumber}`}
+                                                   disabled={
+                                                      IdRequisicion?.data
+                                                         ?.status === "OC"
+                                                   }
+                                                />
+                                             </td>
+                                             <td className="px-2 py-1 border">
+                                                <FormikInput
+                                                   label=""
+                                                   name={`ImporteIva${providerNumber}`}
+                                                   disabled
+                                                />
+                                             </td>
+                                             <td className="px-2 py-1 border">
+                                                <FormikInput
+                                                   label=""
+                                                   name={`PrecioUnitarioConIva${providerNumber}`}
+                                                   disabled
+                                                />
+                                             </td>
+                                          </React.Fragment>
+                                       );
+                                    })}
+                                 </tr>
+                              ))}
+
+                              {/* Totales con leyendas */}
+                              {[
+                                 { key: "subtotal", label: "Subtotal" },
+                                 { key: "iva", label: "IVA Calculado" },
+                                 { key: "totalConIva", label: "Total con IVA" },
+                                 { key: "retencion", label: "Retenciones" },
+                                 { key: "totalNeto", label: "Total Neto" },
+                              ].map((row, i) => (
+                                 <tr
+                                    key={i}
+                                    className="font-medium bg-gray-100">
+                                    <td className="px-3 py-2 text-right border">
+                                       {row.label}
+                                    </td>
+                                    {[1, 2, 3].map((providerIdx) => {
+                                       let subtotal = 0;
+                                       let ivaCalculado = 0;
+                                       let totalConIva = 0;
+                                       let retencionCalculada = 0;
+                                       let totalNeto = 0;
+
+                                       data.forEach((item, index) => {
+                                          const providerNumber =
+                                             index * 3 + providerIdx;
+                                          const cantidad =
+                                             Number(item.Cantidad) || 0;
+                                          const precioSinIva =
+                                             Number(
+                                                values[
+                                                   `PrecioUnitarioSinIva${providerNumber}`
+                                                ],
+                                             ) || 0;
+                                          const ivaPct =
+                                             Number(
+                                                values[
+                                                   `PorcentajeIVA${providerNumber}`
+                                                ],
+                                             ) || 0;
+                                          const retPct =
+                                             Number(
+                                                values[
+                                                   `Retenciones${providerNumber}`
+                                                ],
+                                             ) || 0;
+
+                                          const st = precioSinIva * cantidad;
+                                          const iva = st * (ivaPct / 100);
+                                          const tcIva = st + iva;
+                                          const ret = tcIva * (retPct / 100);
+                                          const neto = tcIva - ret;
+
+                                          subtotal += st;
+                                          ivaCalculado += iva;
+                                          totalConIva += tcIva;
+                                          retencionCalculada += ret;
+                                          totalNeto += neto;
+                                       });
+
+                                       const mapTotals: any = {
+                                          subtotal,
+                                          iva: ivaCalculado,
+                                          totalConIva,
+                                          retencion: retencionCalculada,
+                                          totalNeto,
+                                       };
+
+                                       return (
+                                          <td
+                                             key={providerIdx}
+                                             colSpan={5}
+                                             className="px-2 py-1 text-right border">
+                                             {mapTotals[row.key].toFixed(2)}
+                                          </td>
+                                       );
+                                    })}
+                                 </tr>
+                              ))}
+                           </tbody>
+                        </table>
+                     </div>
+
+                     {/* Observaciones */}
+                     <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
+                        <FormikTextArea
+                           label="Observaciones de la Cotización"
+                           name="ObservacionesCot"
+                        />
+                     </div>
+                  </div>
+               )}
             </FormikForm>
          )}
       </ModalComponent>
