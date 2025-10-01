@@ -1,18 +1,18 @@
 import Button from "../components/form/Button";
 import { ColDef } from "ag-grid-community";
 import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+   Dispatch,
+   SetStateAction,
+   useEffect,
+   useMemo,
+   useRef,
+   useState,
 } from "react";
 import {
-  useMutation,
-  useQueries,
-  useQuery,
-  useQueryClient,
+   useMutation,
+   useQueries,
+   useQuery,
+   useQueryClient,
 } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../axios/Axios";
 import { TypeUsers } from "./types/TypeUsers";
@@ -23,10 +23,10 @@ import { Agtable } from "../components/table/Agtable";
 import FormikForm from "../components/formik/Formik";
 import * as Yup from "yup";
 import {
-  FormikAutocomplete,
-  FormikCheckbox,
-  FormikInput,
-  FormikSwitch,
+   FormikAutocomplete,
+   FormikCheckbox,
+   FormikInput,
+   FormikSwitch,
 } from "../components/formik/FormikInputs/FormikInput";
 import Typography from "../components/typografy/Typografy";
 import { showToast } from "../sweetalert/Sweetalert";
@@ -37,555 +37,571 @@ import Spinner from "../loading/Loading";
 import { MdMenu } from "react-icons/md"; // Importar el ícono de menú (hamburger)
 import MenuComponent from "../menus/Menus";
 import { PermissionMenu } from "../extras/menupermisos";
+import TransferList from "../components/transferlist/TransferList";
 
 const ActionButtons = ({
-  data,
-  mutation,
-  setOpen,
-  handleEdit,
-  handleEditPermission,
+   data,
+   mutation,
+   setOpen,
+   handleEdit,
+   handleEditPermission,
 }: {
-  data: Record<string, any>;
-  mutation: any;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  handleEdit: (data: Record<string, any>) => void;
-  handleEditPermission: (data: Record<string, any>) => void;
+   data: Record<string, any>;
+   mutation: any;
+   setOpen: Dispatch<SetStateAction<boolean>>;
+   handleEdit: (data: Record<string, any>) => void;
+   handleEditPermission: (data: Record<string, any>) => void;
 }) => {
-  const handleDelete = () => {
-    mutation.mutate({
-      url: `/users/delete/${data.IDUsuario}`,
-      method: "DELETE",
-    });
-  };
+   const handleDelete = () => {
+      mutation.mutate({
+         url: `/users/delete/${data.IDUsuario}`,
+         method: "DELETE",
+      });
+   };
 
-  return (
-    <>
-      <div className="flex gap-2">
-        <Tooltip content="editar al usuario">
-          <Button
-            color="yellow"
-            size="small"
-            variant="solid"
-            onClick={() => {
-              handleEdit(data);
-            }}
-          >
-            <BiEdit />
-          </Button>
-        </Tooltip>
-        <PermissionMenu IdMenu={"Permisos"}>
-          <Tooltip content="asignar permisos al usuario">
-            <Button
-              color="indigo"
-              size="small"
-              variant="solid"
-              onClick={() => {
-                handleEditPermission(data);
-              }}
-            >
-              <MdMenu />
-            </Button>
-          </Tooltip>
-        </PermissionMenu>
-        <Tooltip content="eliminar al usuario">
-          <Button
-            color="red"
-            size="small"
-            variant="solid"
-            onClick={handleDelete}
-          >
-            <MdDelete />
-          </Button>
-        </Tooltip>
-      </div>
-    </>
-  );
+   return (
+      <>
+         <div className="flex gap-2">
+            <Tooltip content="editar al usuario">
+               <Button
+                  color="yellow"
+                  size="small"
+                  variant="solid"
+                  onClick={() => {
+                     handleEdit(data);
+                  }}>
+                  <BiEdit />
+               </Button>
+            </Tooltip>
+            <PermissionMenu IdMenu={"Permisos"}>
+               <Tooltip content="asignar permisos al usuario">
+                  <Button
+                     color="indigo"
+                     size="small"
+                     variant="solid"
+                     onClick={() => {
+                        handleEditPermission(data);
+                     }}>
+                     <MdMenu />
+                  </Button>
+               </Tooltip>
+            </PermissionMenu>
+            <Tooltip content="eliminar al usuario">
+               <Button
+                  color="red"
+                  size="small"
+                  variant="solid"
+                  onClick={handleDelete}>
+                  <MdDelete />
+               </Button>
+            </Tooltip>
+         </div>
+      </>
+   );
 };
 
 const TypeRolUser = (data: Record<string, any>) => {
-  const { Rol } = data.data;
-  let classNames = "";
+   const { Rol } = data.data;
+   let classNames = "";
 
-  // Asignar clases de borde según el rol
-  switch (Rol) {
-    case "REQUISITOR":
-      classNames = "border-blue-500 text-blue-500 border-2 p-2 rounded-md"; // Borde y texto azul para 'REQUISITOR'
-      break;
-    case "DIRECTORCOMPRAS":
-      classNames =
-        "border-black bg-black text-white font-bold border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
-      break;
-    case "AUTORIZADOR":
-      classNames = "border-green-500 text-green-500 border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
-      break;
-    case "CAPTURA":
-      classNames = "border-yellow-500 text-yellow-500 border-2 p-2 rounded-md"; // Borde y texto amarillo para 'CAPTURA'
-      break;
-    case "DIRECTOR":
-      classNames = "border-gray-500 text-gray-500 border-2 p-2 rounded-md"; // Borde y texto gris para 'DIRECTOR'
-      break;
-    case "COMPRAS":
-      classNames = "border-purple-500 text-purple-500 border-2 p-2 rounded-md"; // Borde y texto morado para 'COMPRAS'
-      break;
-    default:
-      // Sin clases si no coincide con ningún rol
-      break;
-  }
+   // Asignar clases de borde según el rol
+   switch (Rol) {
+      case "REQUISITOR":
+         classNames = "border-blue-500 text-blue-500 border-2 p-2 rounded-md"; // Borde y texto azul para 'REQUISITOR'
+         break;
+      case "DIRECTORCOMPRAS":
+         classNames =
+            "border-black bg-black text-white font-bold border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
+         break;
+      case "AUTORIZADOR":
+         classNames = "border-green-500 text-green-500 border-2 p-2 rounded-md"; // Borde y texto verde para 'PRESUPUESTOS'
+         break;
+      case "CAPTURA":
+         classNames =
+            "border-yellow-500 text-yellow-500 border-2 p-2 rounded-md"; // Borde y texto amarillo para 'CAPTURA'
+         break;
+      case "DIRECTOR":
+         classNames = "border-gray-500 text-gray-500 border-2 p-2 rounded-md"; // Borde y texto gris para 'DIRECTOR'
+         break;
+      case "COMPRAS":
+         classNames =
+            "border-purple-500 text-purple-500 border-2 p-2 rounded-md"; // Borde y texto morado para 'COMPRAS'
+         break;
+      default:
+         // Sin clases si no coincide con ningún rol
+         break;
+   }
 
-  // Retornar el JSX con el rol y las clases correspondientes
-  return (
-    <div
-      className={`${classNames} `} // Borde de 2px
-    >
-      {Rol}
-    </div>
-  );
+   // Retornar el JSX con el rol y las clases correspondientes
+   return (
+      <div
+         className={`${classNames} `} // Borde de 2px
+      >
+         {Rol}
+      </div>
+   );
 };
 
 const Users = () => {
-  const formik = useRef<FormikProps<Record<string, any>> | null>(null);
-  const [open, setOpen] = useState<boolean>(false);
-  const toggleOpen = () => {
-    setOpen(true);
-  };
-  const [permissionEditUser, setPermissionEditUser] = useState({
-    fullName: "",
-    Usuario: "",
-    newKey: "", // Inicializado en 1
-  });
+   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
+   const [open, setOpen] = useState<boolean>(false);
+   const toggleOpen = () => {
+      setOpen(true);
+   };
+   const [permissionEditUser, setPermissionEditUser] = useState({
+      fullName: "",
+      Usuario: "",
+      newKey: "", // Inicializado en 1
+   });
 
-  const queryClient = useQueryClient(); // Inicializa el query client
-  const [usersFormik, setUsersFormik] = useState<Record<string, any>>({
-    IDUsuario: null,
-    Nombre: null,
-    Paterno: null,
-    Materno: null,
-    IDDepartamento: 0,
-    Rol: 0,
-    Usuario: "",
-    Password: "123456",
-    Permiso_Autorizar: false,
-    Permiso_Asignar: false,
-    Permiso_Cotizar: false,
-    Permiso_Surtir: false,
-    Permiso_Orden_Compra: false,
-  });
-  // Realizas las consultas
-  const queries = useQueries({
-    queries: [
-      {
-        queryKey: ["departamentos/index"],
-        queryFn: () => GetAxios("departamentos/index"),
-        refetchOnWindowFocus: true,
-      },
-      {
-        queryKey: ["users/index"],
-        queryFn: () => GetAxios("users/index"),
-        refetchOnWindowFocus: true,
-      },
+   const queryClient = useQueryClient(); // Inicializa el query client
+   const [usersFormik, setUsersFormik] = useState<Record<string, any>>({
+      IDUsuario: null,
+      Nombre: null,
+      Paterno: null,
+      Materno: null,
+      IDDepartamento: 0,
+      Rol: 0,
+      Usuario: "",
+      Password: "123456",
+      Permiso_Autorizar: false,
+      Permiso_Asignar: false,
+      Permiso_Cotizar: false,
+      Permiso_Surtir: false,
+      Permiso_Orden_Compra: false,
+   });
+   // Realizas las consultas
+   const queries = useQueries({
+      queries: [
+         {
+            queryKey: ["departamentos/index"],
+            queryFn: () => GetAxios("departamentos/index"),
+            refetchOnWindowFocus: true,
+         },
+         {
+            queryKey: ["users/index"],
+            queryFn: () => GetAxios("users/index"),
+            refetchOnWindowFocus: true,
+         },
 
-      // Puedes agregar más peticiones aquí
-    ],
-  });
-  const handleEdit = (data: Record<string, any>) => {
-    toggleOpen(); // Optionally open the modal if you're editing
-    setUsersFormik(data);
-  };
-  const handleEditPermission = (data: Record<string, any>) => {
-    const generateRandomNumber = () => {
-      return Math.floor(Math.random() * 10); // Genera un número entre 0 y 9
-    };
+         // Puedes agregar más peticiones aquí
+      ],
+   });
+   const handleEdit = (data: Record<string, any>) => {
+      toggleOpen(); // Optionally open the modal if you're editing
+      setUsersFormik(data);
+   };
+   const handleEditPermission = (data: Record<string, any>) => {
+      const generateRandomNumber = () => {
+         return Math.floor(Math.random() * 10); // Genera un número entre 0 y 9
+      };
 
-    const generateRandomKey = (length: number) => {
-      let key = "";
-      for (let i = 0; i < length; i++) {
-        key += generateRandomNumber(); // Concatenar números aleatorios
-      }
-      return key;
-    };
+      const generateRandomKey = (length: number) => {
+         let key = "";
+         for (let i = 0; i < length; i++) {
+            key += generateRandomNumber(); // Concatenar números aleatorios
+         }
+         return key;
+      };
 
-    setPermissionEditUser({
-      fullName: data.NombreCompleto,
-      Usuario: data.Usuario,
-      newKey: generateRandomKey(50), // Genera una clave con 30 números aleatorios
-    });
-  };
-
-  // useEffect(()=>{
-  //   console.log("my info",usersFormik)
-  // },[usersFormik])
-
-  // Realizas la mutación
-  const mutation = useMutation({
-    mutationFn: ({
-      url,
-      method,
-      data,
-    }: {
-      url: string;
-      method: "POST" | "PUT" | "DELETE";
-      data?: any;
-    }) => AxiosRequest(url, method, data),
-    onSuccess: (data) => {
-      setOpen(false);
-      showToast(data.message, data.status);
-      queryClient.refetchQueries({
-        queryKey: ["users/index"],
+      setPermissionEditUser({
+         fullName: data.NombreCompleto,
+         Usuario: data.Usuario,
+         newKey: generateRandomKey(50), // Genera una clave con 30 números aleatorios
       });
-    },
-    onError: (error: any) => {
-      showToast(
-        error.response?.data?.message || "Error al realizar la acción",
-        "error"
-      );
-    },
-  });
-  const [groups,users] = queries;
+   };
 
-  const roles = [
-    {
-      id: "REQUISITOR",
-      value: "REQUISITOR",
-    },
-    {
-      id: "DIRECTOR",
-      value: "DIRECTOR",
-    },
-    {
-      id: "DIRECTORCOMPRAS",
-      value: "DIRECTOR COMPRAS",
-    },
-    {
-      id: "CAPTURA",
-      value: "CAPTURA",
-    },
-    {
-      id: "AUTORIZADOR",
-      value: "AUTORIZADOR",
-    },
-  ];
+   // useEffect(()=>{
+   //   console.log("my info",usersFormik)
+   // },[usersFormik])
 
-  const [columnDefs] = useState<ColDef<TypeUsers>[]>([
+   // Realizas la mutación
+   const mutation = useMutation({
+      mutationFn: ({
+         url,
+         method,
+         data,
+      }: {
+         url: string;
+         method: "POST" | "PUT" | "DELETE";
+         data?: any;
+      }) => AxiosRequest(url, method, data),
+      onSuccess: (data) => {
+         setOpen(false);
+         showToast(data.message, data.status);
+         queryClient.refetchQueries({
+            queryKey: ["users/index"],
+         });
+      },
+      onError: (error: any) => {
+         showToast(
+            error.response?.data?.message || "Error al realizar la acción",
+            "error",
+         );
+      },
+   });
+   const [groups, users] = queries;
 
-    {
-      headerName: "Nombre Completo",
-      field: "NombreCompleto",
-      sortable: true,
-      filter: true,
-    },
-  {
-  headerName: "Departamento",
-  field: "Nombre_Departamento",
-  sortable: true,
-  filter: true,
-  
-}
-,
+   const roles = [
+      {
+         id: "REQUISITOR",
+         value: "REQUISITOR",
+      },
+      {
+         id: "DIRECTOR",
+         value: "DIRECTOR",
+      },
+      {
+         id: "DIRECTORCOMPRAS",
+         value: "DIRECTOR COMPRAS",
+      },
+      {
+         id: "CAPTURA",
+         value: "CAPTURA",
+      },
+      {
+         id: "AUTORIZADOR",
+         value: "AUTORIZADOR",
+      },
+   ];
 
-    { headerName: "Usuario", field: "Usuario", sortable: true, filter: true },
-    {
-      headerName: "Rol",
-      field: "Rol", // Usamos colId para identificar la columna sin usar field
-      sortable: true,
-      filter: true,
+   const [columnDefs] = useState<ColDef<TypeUsers>[]>([
+      {
+         headerName: "Nombre Completo",
+         field: "NombreCompleto",
+         sortable: true,
+         filter: true,
+      },
+      {
+         headerName: "Departamento",
+         field: "Nombre_Departamento",
+         sortable: true,
+         filter: true,
+      },
 
-      cellRenderer: (params: any) => <TypeRolUser data={params.data} />, // Usamos cellRendererFramework
-    },
-    {
-      headerName: "Acciones",
-      colId: "buttons",
-   
-      cellRenderer: (params: any) => (
-        <ActionButtons
-          data={params.data}
-          mutation={mutation}
-          setOpen={setOpen}
-          handleEdit={handleEdit}
-          handleEditPermission={handleEditPermission}
-        />
+      { headerName: "Usuario", field: "Usuario", sortable: true, filter: true },
+      {
+         headerName: "Rol",
+         field: "Rol", // Usamos colId para identificar la columna sin usar field
+         sortable: true,
+         filter: true,
+
+         cellRenderer: (params: any) => <TypeRolUser data={params.data} />, // Usamos cellRendererFramework
+      },
+      {
+         headerName: "Acciones",
+         colId: "buttons",
+
+         cellRenderer: (params: any) => (
+            <ActionButtons
+               data={params.data}
+               mutation={mutation}
+               setOpen={setOpen}
+               handleEdit={handleEdit}
+               handleEditPermission={handleEditPermission}
+            />
+         ),
+      },
+   ]);
+
+   const buttonElement = useMemo(
+      () => (
+         <Tooltip content="Agregar Usuario">
+            <div className="mb-4">
+               <Button
+                  onClick={() => {
+                     setUsersFormik({
+                        IDUsuario: null,
+                        Nombre: null,
+                        Paterno: null,
+                        Materno: null,
+                        IDDepartamento: 0,
+                        Rol: 0,
+                        Usuario: "",
+                        Password: "123456",
+                        Permiso_Autorizar: false,
+                        Permiso_Asignar: false,
+                        Permiso_Cotizar: false,
+                        Permiso_Surtir: false,
+                        Permiso_Orden_Compra: false,
+                     });
+                     // formik.current?.resetForm();
+                     toggleOpen();
+                  }}
+                  size="medium"
+                  color="blue"
+                  variant="solid">
+                  <LuPlus />
+               </Button>
+            </div>
+         </Tooltip>
       ),
-    },
-  ]);
+      [],
+   );
+   const validationSchema = Yup.object({
+      Nombre: Yup.string().required("El nombre es obligatorio"),
+      Paterno: Yup.string().required("El apellido paterno es obligatorio"),
+      Materno: Yup.string().required("El apellido materno es obligatorio"),
+      Usuario: Yup.string().required("El usuario es requerido"),
+      IDDepartamento: Yup.number()
+         .min(1, "El departamento es obligatorio")
+         .required("El departamento es obligatorio"),
+      Rol: Yup.string()
+         .oneOf(
+            [
+               "REQUISITOR",
+               "DIRECTOR",
+               "AUTORIZADOR",
+               "CAPTURA",
+               "DIRECTORCOMPRAS",
+            ],
+            "Selecciona un rol válido",
+         ) // Aquí validamos que el valor esté entre los roles permitidos
+         .required("El rol es obligatorio"),
+   });
+   const responsive = {
+      "2xl": 6,
+      xl: 6,
+      lg: 6,
+      md: 12,
+      sm: 12,
+   };
 
-  const buttonElement = useMemo(
-    () => (
-      <Tooltip content="Agregar Usuario">
-        <div className="mb-4">
-          <Button
-            onClick={() => {
-              setUsersFormik({
-                IDUsuario: null,
-                Nombre: null,
-                Paterno: null,
-                Materno: null,
-                IDDepartamento: 0,
-                Rol: 0,
-                Usuario: "",
-                Password: "123456",
-                Permiso_Autorizar: false,
-                Permiso_Asignar: false,
-                Permiso_Cotizar: false,
-                Permiso_Surtir: false,
-                Permiso_Orden_Compra: false,
-              });
-              // formik.current?.resetForm();
-              toggleOpen();
-            }}
-            size="medium"
-            color="blue"
-            variant="solid"
-          >
-            <LuPlus />
-          </Button>
-        </div>
-      </Tooltip>
-    ),
-    []
-  );
-  const validationSchema = Yup.object({
-    Nombre: Yup.string().required("El nombre es obligatorio"),
-    Paterno: Yup.string().required("El apellido paterno es obligatorio"),
-    Materno: Yup.string().required("El apellido materno es obligatorio"),
-    Usuario: Yup.string().required("El usuario es requerido"),
-    IDDepartamento: Yup.number()
-      .min(1, "El departamento es obligatorio")
-      .required("El departamento es obligatorio"),
-    Rol: Yup.string()
-      .oneOf(
-        ["REQUISITOR", "DIRECTOR", "AUTORIZADOR", "CAPTURA", "DIRECTORCOMPRAS"],
-        "Selecciona un rol válido"
-      ) // Aquí validamos que el valor esté entre los roles permitidos
-      .required("El rol es obligatorio"),
-  });
-  const responsive = {
-    "2xl": 6,
-    xl: 6,
-    lg: 6,
-    md: 12,
-    sm: 12,
-  };
+   const onSumbit = (values: Record<string, any>) => {
+      values.Password = `${values.Usuario}*`;
+      if (values.Rol == "DIRECTORCOMPRAS") {
+         values.Permiso_Asignar = true;
+         values.Permiso_Autorizar = true;
+         values.Permiso_Cotizar = true;
+         values.Permiso_Orden_Compra = true;
+         values.Permiso_Surtir = true;
+      }
+      if (values.Rol == "DIRECTOR") {
+         values.Permiso_Autorizar = true;
+      }
+      if (values.Rol == "REQUISITOR") {
+         values.Permiso_Cotizar = true;
+      }
+      // Llamar a la función mutate para ejecutar la solicitud POST
+      mutation.mutate({
+         url: "/users/createOrUpdate",
+         method: "POST",
+         data: values,
+      });
+   };
+   const handleModified = (
+      values: Record<string, any>,
+      setFieldValue: (
+         name: string,
+         value: any,
+         shouldValidate?: boolean,
+      ) => void,
+   ) => {
+      const year = new Date().getFullYear().toString().slice(-2); // últimos 2 dígitos del año
 
-  const onSumbit = (values: Record<string, any>) => {
-    values.Password =`${values.Usuario}*`
-    if (values.Rol == "DIRECTORCOMPRAS") {
-      values.Permiso_Asignar = true;
-      values.Permiso_Autorizar = true;
-      values.Permiso_Cotizar = true;
-      values.Permiso_Orden_Compra = true;
-      values.Permiso_Surtir = true;
-    }
-    if (values.Rol == "DIRECTOR") {
-      values.Permiso_Autorizar = true;
+      const capitalizeFirst = (str: string) =>
+         str ? str.charAt(0).toUpperCase() : "";
 
-    }
-    if (values.Rol == "REQUISITOR") {
-      values.Permiso_Cotizar = true;
+      const capitalizeFull = (str: string) =>
+         str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
-    }
-    // Llamar a la función mutate para ejecutar la solicitud POST
-    mutation.mutate({
-      url: "/users/createOrUpdate",
-      method: "POST",
-      data: values,
-    });
-  };
-  const handleModified = (
-    values: Record<string, any>,
-    setFieldValue: (name: string, value: any, shouldValidate?: boolean) => void
-  ) => {
+      // Solo el primer nombre (split por espacio)
+      const firstName = values["Nombre"]?.split(" ")[0] || "";
 
-    const year = new Date().getFullYear().toString().slice(-2); // últimos 2 dígitos del año
+      setFieldValue(
+         "Usuario",
+         capitalizeFull(firstName) +
+            capitalizeFirst(values["Paterno"]) +
+            capitalizeFirst(values["Materno"]) +
+            "-" +
+            year,
+      );
+   };
+   const departamentosMock = [
+      { id: 1, nombre: "Recursos Humanos" },
+      { id: 2, nombre: "Sistemas" },
+      { id: 3, nombre: "Finanzas" },
+      { id: 4, nombre: "Compras" },
+      { id: 5, nombre: "Jurídico" },
+   ];
+   const handleChange = (ids: number[]) => {
+      console.log("Departamentos seleccionados:", ids);
+   };
 
-    const capitalizeFirst = (str: string) =>
-      str ? str.charAt(0).toUpperCase() : "";
+   const handlePermissions = () => {};
+   return (
+      <div className="container p-6 mx-auto mt-12 border shadow-lg">
+         {mutation.status == "pending" && <Spinner />}
+         {permissionEditUser.Usuario != "" && (
+            <MenuComponent
+               newKey={permissionEditUser?.newKey}
+               fullName={permissionEditUser?.fullName}
+               Usuario={permissionEditUser?.Usuario}
+            />
+         )}
 
-    const capitalizeFull = (str: string) =>
-      str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+         <ModalComponent
+            title="Usuarios"
+            open={open}
+            setOpen={() => {
+               setOpen(false);
+            }}>
+            <div className="mt-4"></div>
+            <FormikForm
+               // ref={formik}
+               onSubmit={onSumbit}
+               buttonMessage={
+                  usersFormik.IDUsuario > 0 ? "Actualizar" : "Registrar"
+               }
+               validationSchema={validationSchema}
+               initialValues={usersFormik}
+               children={(values) => (
+                  <>
+                     <FormikInput
+                        name="Nombre"
+                        label="Nombre"
+                        responsive={responsive}
+                        handleModified={handleModified}
+                     />
+                     <FormikInput
+                        name="Paterno"
+                        label="Apellido paterno"
+                        responsive={responsive}
+                        handleModified={handleModified}
+                     />
+                     <FormikInput
+                        name="Materno"
+                        label="Apellido Materno"
+                        handleModified={handleModified}
+                        responsive={responsive}
+                     />
+                     <FormikInput
+                        disabled
+                        name="Usuario"
+                        label="Usuario con el que va a iniciar sesión"
+                        responsive={responsive}
+                     />
+                     <FormikAutocomplete
+                        responsive={responsive}
+                        loading={groups.isLoading}
+                        name="IDDepartamento"
+                        label={"selecciona el departamento"}
+                        options={groups.data?.data}
+                        idKey={"IDDepartamento"}
+                        labelKey={"Nombre_Departamento"}
+                     />
 
-    // Solo el primer nombre (split por espacio)
-    const firstName = values["Nombre"]?.split(" ")[0] || "";
+                     <FormikAutocomplete
+                        responsive={responsive}
+                        loading={false}
+                        name="Rol"
+                        label={"selecciona un rol"}
+                        options={roles}
+                        idKey={"id"}
+                        labelKey={"value"}
+                     />
+                     {(values.Rol == "AUTORIZADOR" ||
+                        values.Rol == "CAPTURA") && (
+                        <>
+                           <div className="w-full mb-2 ml-3 text-start">
+                              <Typography
+                                 variant="h2"
+                                 size="base"
+                                 weight="normal"
+                                 color="gray">
+                                 Selecciona los permisos que se le otorgaran :
+                              </Typography>
+                           </div>
+                           <FormikSwitch
+                              name="Permiso_Autorizar"
+                              label="Autorizar"
+                              responsive={{
+                                 "2xl": 4,
+                                 xl: 12,
+                                 lg: 12,
+                                 md: 12,
+                                 sm: 12,
+                              }}
+                           />
+                           <FormikSwitch
+                              name="Permiso_Asignar"
+                              label="Asignar"
+                              responsive={{
+                                 "2xl": 4,
+                                 xl: 12,
+                                 lg: 12,
+                                 md: 12,
+                                 sm: 12,
+                              }}
+                           />
+                           <FormikSwitch
+                              name="Permiso_Cotizar"
+                              label="Cotizar"
+                              responsive={{
+                                 "2xl": 4,
+                                 xl: 12,
+                                 lg: 12,
+                                 md: 12,
+                                 sm: 12,
+                              }}
+                           />
 
-    setFieldValue(
-      "Usuario",
-      capitalizeFull(firstName) +
-      capitalizeFirst(values["Paterno"]) +
-      capitalizeFirst(values["Materno"]) +
-      "-" +
-      year
-    );
-  };
+                           <FormikSwitch
+                              name="Permiso_Orden_Compra"
+                              label="Orden de compra"
+                              responsive={{
+                                 "2xl": 4,
+                                 xl: 12,
+                                 lg: 12,
+                                 md: 12,
+                                 sm: 12,
+                              }}
+                           />
+                           <FormikSwitch
+                              name="Permiso_Surtir"
+                              label="Surtir"
+                              responsive={{
+                                 "2xl": 4,
+                                 xl: 12,
+                                 lg: 12,
+                                 md: 12,
+                                 sm: 12,
+                              }}
+                           />
+                        </>
+                     )}
 
-  const handlePermissions = () => { };
-  return (
-    <div className="container mx-auto shadow-lg p-6 border mt-12">
-      {mutation.status == "pending" && <Spinner />}
-      {permissionEditUser.Usuario != "" && (    
-        <MenuComponent
-          newKey={permissionEditUser?.newKey}
-          fullName={permissionEditUser?.fullName}
-          Usuario={permissionEditUser?.Usuario}
-        />
-      )}
+                     <TransferList
+                        departamentos={departamentosMock}
+                        seleccionados={[2]}
+                        onChange={handleChange}
+                     />
+                  </>
+               )}
+            />
+         </ModalComponent>
 
-      <ModalComponent
-        title="Usuarios"
-        open={open}
-        setOpen={() => {
-          setOpen(false);
-        }}
-      >
-        <div className="mt-4"></div>
-        <FormikForm
-          // ref={formik}
-          onSubmit={onSumbit}
-          buttonMessage={usersFormik.IDUsuario > 0 ? "Actualizar" : "Registrar"}
-          validationSchema={validationSchema}
-          initialValues={usersFormik}
-          children={(values) => (
-            <>
-              <FormikInput
-                name="Nombre"
-                label="Nombre"
-                responsive={responsive}
-                handleModified={handleModified}
-
-              />
-              <FormikInput
-                name="Paterno"
-                label="Apellido paterno"
-                responsive={responsive}
-
-                handleModified={handleModified}
-              />
-              <FormikInput
-                name="Materno"
-                label="Apellido Materno"
-                handleModified={handleModified}
-                responsive={responsive}
-              />
-              <FormikInput
-                disabled
-                name="Usuario"
-                label="Usuario con el que va a iniciar sesión"
-                responsive={responsive}
-              />
-              <FormikAutocomplete
-                responsive={responsive}
-                loading={groups.isLoading}
-                name="IDDepartamento"
-                label={"selecciona el departamento"}
-                options={groups.data?.data}
-                idKey={"IDDepartamento"}
-                labelKey={"Nombre_Departamento"}
-              />
-            
-                
-              <FormikAutocomplete
-                responsive={responsive}
-                loading={false}
-                name="Rol"
-                label={"selecciona un rol"}
-                options={roles}
-                idKey={"id"}
-                labelKey={"value"}
-              />
-              {(values.Rol == "AUTORIZADOR" || values.Rol == "CAPTURA") && (
-                <>
-                  <div className="w-full text-start mb-2 ml-3">
-                    <Typography
-                      variant="h2"
-                      size="base"
-                      weight="normal"
-                      color="gray"
-                    >
-                      Selecciona los permisos que se le otorgaran :
-                    </Typography>
-                  </div>
-                  <FormikSwitch
-                    name="Permiso_Autorizar"
-                    label="Autorizar"
-                    responsive={{
-                      "2xl": 4,
-                      xl: 12,
-                      lg: 12,
-                      md: 12,
-                      sm: 12,
-                    }}
-                  />
-                  <FormikSwitch
-                    name="Permiso_Asignar"
-                    label="Asignar"
-                    responsive={{
-                      "2xl": 4,
-                      xl: 12,
-                      lg: 12,
-                      md: 12,
-                      sm: 12,
-                    }}
-                  />
-                  <FormikSwitch
-                    name="Permiso_Cotizar"
-                    label="Cotizar"
-                    responsive={{
-                      "2xl": 4,
-                      xl: 12,
-                      lg: 12,
-                      md: 12,
-                      sm: 12,
-                    }}
-                  />
-
-                  <FormikSwitch
-                    name="Permiso_Orden_Compra"
-                    label="Orden de compra"
-                    responsive={{
-                      "2xl": 4,
-                      xl: 12,
-                      lg: 12,
-                      md: 12,
-                      sm: 12,
-                    }}
-                  />
-                  <FormikSwitch
-                    name="Permiso_Surtir"
-                    label="Surtir"
-                    responsive={{
-                      "2xl": 4,
-                      xl: 12,
-                      lg: 12,
-                      md: 12,
-                      sm: 12,
-                    }}
-                  />
-                </>
-              )}
-              
-            </>
-          )}
-        />
-      </ModalComponent>
-
-      <div className="ag-theme-alpine w-full mx-auto container p-6">
-        <PermissionMenu IdMenu={"Usuarios"}>
-          <p className="text-center font-semibold text-2xl md:text-3xl text-gray-700 mb-4">
-            Usuarios del Sistema
-          </p>
-        </PermissionMenu>
-        <Agtable
-          permissionsUserTable={{
-            buttonElement: "Usuarios",
-            table: "Usuarios",
-          }}
-          loading={users.status == "pending" ? true : false}
-          data={users?.data?.data}
-          isLoading={users.isLoading}
-          columnDefs={columnDefs}
-          buttonElement={buttonElement}
-        // data={users.data?.data}
-        />
+         <div className="container w-full p-6 mx-auto ag-theme-alpine">
+            <PermissionMenu IdMenu={"Usuarios"}>
+               <p className="mb-4 text-2xl font-semibold text-center text-gray-700 md:text-3xl">
+                  Usuarios del Sistema
+               </p>
+            </PermissionMenu>
+            <Agtable
+               permissionsUserTable={{
+                  buttonElement: "Usuarios",
+                  table: "Usuarios",
+               }}
+               loading={users.status == "pending" ? true : false}
+               data={users?.data?.data}
+               isLoading={users.isLoading}
+               columnDefs={columnDefs}
+               buttonElement={buttonElement}
+               // data={users.data?.data}
+            />
+         </div>
       </div>
-    </div>
-  );
+   );
 };
 
 export default Users;

@@ -28,18 +28,18 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
    producto,
    index,
 }) => {
-   console.log("🚀 ~ ProvedorInfo ~ idxProducto:", idxProducto);
    const cantidad = Number(producto?.Cantidad || 0);
    const precioSinIva = Number(producto?.[`PrecioUnitarioSinIva${index}`] || 0);
    const ivaPct = Number(producto?.[`PorcentajeIVA${index}`] || 0); // nuevo campo
-   const retPct = Number(producto?.[`Retenciones${index}`] || 0);
+   // const retPct = Number(producto?.[`Retenciones${index}`] || 0); // ya no es porcentaje lo que se guarda
+   const retenciones = Number(producto?.[`Retenciones${index}`] || 0); // ya no es porcentaje lo que se guarda
 
    // Cálculos paso a paso
    const subtotal = precioSinIva * cantidad;
    const ivaCalculado = subtotal * (ivaPct / 100);
    const totalConIva = subtotal + ivaCalculado;
-   const retencionCalculada = totalConIva * (retPct / 100);
-   const totalNeto = totalConIva - retencionCalculada;
+   // const retencionCalculada = totalConIva * (retPct / 100); // ya no es porcentaje
+   const totalNeto = totalConIva - retenciones;
 
    return (
       <View
@@ -70,7 +70,7 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
                </Text>
                <Text style={tw(styles.pdf.textKey)}>I.V.A. ({ivaPct}%)</Text>
                <Text style={tw(styles.pdf.textKey)}>Total c/ IVA</Text>
-               <Text style={tw(styles.pdf.textKey)}>Ret. ({retPct}%)</Text>
+               <Text style={tw(styles.pdf.textKey)}>Retenciones</Text>
                <Text style={tw(styles.pdf.textKey)}>Total Neto</Text>
             </View>
             <View style={tw("flex flex-col w-1/2 text-start ml-2")}>
@@ -84,7 +84,7 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
                   {formatCurrency(totalConIva, true, false) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
-                  {formatCurrency(retencionCalculada, true, false) || 0}
+                  {formatCurrency(retenciones, true, false) || 0}
                </Text>
                <Text style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
                   {formatCurrency(totalNeto, true, false) || 0}

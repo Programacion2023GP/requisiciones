@@ -30,8 +30,17 @@ const StatusColumn: React.FC<{
         color = 'class_ca'
      break;
      case 'AU':
-        value = 'AUTORIZADA'
-        color = 'class_au'
+         if (data.AutEspecial == 1 &&
+                        !data.UsuarioVoBo) {
+        value = 'falta/Vobo'
+            color = 'class_vobo'
+            
+         }
+         else{
+            value = 'AUTORIZADA'
+            color = 'class_au'
+
+         }
      break;
     }
     return [value,color];
