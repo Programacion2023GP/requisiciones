@@ -402,30 +402,30 @@ const Actions: React.FC<{
                )}
                <DropdownComponent>
                   <div className="flex flex-col gap-2">
-                     {/* <div className="w-fit">
-                <Tooltip content="Ver requisición">
-                  <Button
-                    color="presidencia"
-                    variant="solid"
-                    size="small"
-                    onClick={() => {
-                      mutationView.mutate({
-                        method: "POST",
-                        url: "/requisiciones/show",
-                        data: {
-                          IDRequisicion: data.IDRequisicion,
-                          Ejercicio: data.Ejercicio,
-                        },
-                      });
-                    }}
-                  >
-                    <FaEye />
-                  </Button>
-                </Tooltip>
-              </div> */}
+                     <div className="w-fit">
+                        <Tooltip content="Ver requisición">
+                           <Button
+                              color="presidencia"
+                              variant="solid"
+                              size="small"
+                              onClick={() => {
+                                 mutationView.mutate({
+                                    method: "POST",
+                                    url: "/requisiciones/show",
+                                    data: {
+                                       IDRequisicion: data.IDRequisicion,
+                                       Ejercicio: data.Ejercicio,
+                                    },
+                                 });
+                              }}>
+                              <FaEye />
+                           </Button>
+                        </Tooltip>
+                     </div>
                      {((data.Status == "CP" &&
                         data.IDDepartamento ==
                            Number(localStorage.getItem("group"))) ||
+                        localStorage.getItem("role") == "SISTEMAS" ||
                         localStorage.getItem("role") == "DIRECTORCOMPRAS" ||
                         localStorage.getItem("role") == "REQUISITOR") && (
                         <div className="w-fit">
