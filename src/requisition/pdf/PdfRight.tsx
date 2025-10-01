@@ -28,7 +28,6 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
    producto,
    index,
 }) => {
-   console.log("🚀 ~ ProvedorInfo ~ idxProducto:", idxProducto);
    const cantidad = Number(producto?.Cantidad || 0);
    const precioSinIva = Number(producto?.[`PrecioUnitarioSinIva${index}`] || 0);
    const ivaPct = Number(producto?.[`PorcentajeIVA${index}`] || 0); // nuevo campo

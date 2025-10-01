@@ -500,58 +500,29 @@ const Actions: React.FC<{
                               </Tooltip>
                            </PermissionMenu>
                         )}
-                     {localStorage.getItem("role") === "CAPTURA" ||
-                     localStorage.getItem("role") === "DIRECTOR" ? (
-                        buttonVobo(data.IDTipo) &&
-                        localStorage.getItem("role") === "DIRECTOR" && (
-                           <div className="w-fit">
-                              <Tooltip content="Ver requisición">
-                                 <Button
-                                    color="presidencia"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={async () => {
-                                       console.log("info", data);
-                                       mutationPdf.mutate({
-                                          method: "POST",
-                                          url: "/requisiciones/detailsRequisicion",
-                                          pdfData: data,
-                                          status: data.Status,
-                                          data: {
-                                             IDRequisicion: data.IDRequisicion,
-                                             Ejercicio: data.Ejercicio,
-                                          },
-                                       });
-                                    }}>
-                                    <BsFiletypePdf />
-                                 </Button>
-                              </Tooltip>
-                           </div>
-                        )
-                     ) : (
-                        <div className="w-fit">
-                           <Tooltip content="Pdf">
-                              <Button
-                                 color="presidencia"
-                                 variant="solid"
-                                 size="small"
-                                 onClick={async () => {
-                                    mutationPdf.mutate({
-                                       method: "POST",
-                                       url: "/requisiciones/detailsRequisicion",
-                                       pdfData: data,
-                                       status: data.Status,
-                                       data: {
-                                          IDRequisicion: data.IDRequisicion,
-                                          Ejercicio: data.Ejercicio,
-                                       },
-                                    });
-                                 }}>
-                                 <BsFiletypePdf />
-                              </Button>
-                           </Tooltip>
-                        </div>
-                     )}
+                     <div className="w-fit">
+                        <Tooltip content="Ver requisición">
+                           <Button
+                              color="presidencia"
+                              variant="solid"
+                              size="small"
+                              onClick={async () => {
+                                 console.log("info", data);
+                                 mutationPdf.mutate({
+                                    method: "POST",
+                                    url: "/requisiciones/detailsRequisicion",
+                                    pdfData: data,
+                                    status: data.Status,
+                                    data: {
+                                       IDRequisicion: data.IDRequisicion,
+                                       Ejercicio: data.Ejercicio,
+                                    },
+                                 });
+                              }}>
+                              <BsFiletypePdf />
+                           </Button>
+                        </Tooltip>
+                     </div>
                      <div className="w-fit">
                         <PermissionMenu IdMenu="SeguimientoRequis">
                            <Tooltip content="Seguimiento de la requisición">
