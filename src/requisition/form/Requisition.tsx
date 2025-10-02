@@ -271,7 +271,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    //     console.log(open,director.data.data)
    //     const nombre = director.data?.data?.[0]?.Nombre_Director || "";
    //     formik.current?.setFieldValue("Solicitante", nombre);
-const userGroups = localStorage.getItem("group")?.split(",") ?? [];
+   const userGroups = localStorage.getItem("group")?.split(",") ?? [];
 
    // }, [director.data,open]);
    const handleModified = (name: string, value: number | string) => {
@@ -428,46 +428,50 @@ const userGroups = localStorage.getItem("group")?.split(",") ?? [];
                      validationSchema={validationSchema}
                      initialValues={values}
                      children={(v, setValue) => {
-                        console.log("group",groups.data?.data)
+                        console.log("group", groups.data?.data);
                         return (
                            <>
-                           {localStorage.getItem("role")=="SISTEMAS" ? (
-                            
-                              <FormikAutocomplete
-                         
-                                 responsive={responsive}
-                                 loading={groups.isLoading}
-                                 name="IDDepartamento"
-                                 label={"selecciona el departamento"}
-                                 options={groups.data?.data}
-                                 idKey={"IDDepartamento"}
-                                 labelKey={"Nombre_Departamento"}
-                                 handleModified={handleModified}
-                                 handleModifiedOptions={{
-                                    name: "IDDepartamento",
-                                 }}
-                              />
-                           ): 
-                           
-                           (
-                              <FormikAutocomplete
-                           disabled={(localStorage.getItem("group")?.split(",") ?? []).length === 1 }
-                                responsive={responsive}
-                                loading={groups.isLoading}
-                                name="IDDepartamento"
-                                label={"selecciona el departamento"}
-                               options={groups.data?.data?.filter(it => userGroups.includes(it.IDDepartamento.toString()))}
+                              {localStorage.getItem("role") == "SISTEMAS" ? (
+                                 <FormikAutocomplete
+                                    responsive={responsive}
+                                    loading={groups.isLoading}
+                                    name="IDDepartamento"
+                                    label={"selecciona el departamento"}
+                                    options={groups.data?.data}
+                                    idKey={"IDDepartamento"}
+                                    labelKey={"Nombre_Departamento"}
+                                    handleModified={handleModified}
+                                    handleModifiedOptions={{
+                                       name: "IDDepartamento",
+                                    }}
+                                 />
+                              ) : (
+                                 <FormikAutocomplete
+                                    disabled={
+                                       (
+                                          localStorage
+                                             .getItem("group")
+                                             ?.split(",") ?? []
+                                       ).length === 1
+                                    }
+                                    responsive={responsive}
+                                    loading={groups.isLoading}
+                                    name="IDDepartamento"
+                                    label={"selecciona el departamento"}
+                                    options={groups.data?.data?.filter((it) =>
+                                       userGroups.includes(
+                                          it.IDDepartamento.toString(),
+                                       ),
+                                    )}
+                                    idKey={"IDDepartamento"}
+                                    labelKey={"Nombre_Departamento"}
+                                    handleModified={handleModified}
+                                    handleModifiedOptions={{
+                                       name: "IDDepartamento",
+                                    }}
+                                 />
+                              )}
 
-                                idKey={"IDDepartamento"}
-                                labelKey={"Nombre_Departamento"}
-                                handleModified={handleModified}
-                                handleModifiedOptions={{
-                                   name: "IDDepartamento",
-                                }}
-                             />
-                           )
-                           }
-                           
                               <FormikAutocomplete
                                  disabled={
                                     localStorage.getItem("role") != "SISTEMAS"
@@ -509,27 +513,29 @@ const userGroups = localStorage.getItem("group")?.split(",") ?? [];
                                  label="Observaciones"
                                  name="Observaciones"
                               />
-                              <CollapseComponent
-                                 title="Detalles de la requisición"
-                                 id="requisition-products"
-                                 buttonId="btn-requisition-products">
-                                 <div className="mt-2"></div>
-                                 <div className="mb-4 w-fit">
-                                    <Button
-                                       id="form-requisition-addproduct"
-                                       type="button"
-                                       color="teal"
-                                       variant="solid"
-                                       size="small"
-                                       onClick={handleMoreProducts}>
-                                       Agregar Producto
-                                    </Button>
-                                 </div>
-                                 <HandleAddProduct
-                                    cont={cont}
-                                    dropInitialValue={dropInitialValue}
-                                 />
-                              </CollapseComponent>
+                              {!v?.IDRequisicion && (
+                                 <CollapseComponent
+                                    title="Detalles de la requisición"
+                                    id="requisition-products"
+                                    buttonId="btn-requisition-products">
+                                    <div className="mt-2"></div>
+                                    <div className="mb-4 w-fit">
+                                       <Button
+                                          id="form-requisition-addproduct"
+                                          type="button"
+                                          color="teal"
+                                          variant="solid"
+                                          size="small"
+                                          onClick={handleMoreProducts}>
+                                          Agregar Producto
+                                       </Button>
+                                    </div>
+                                    <HandleAddProduct
+                                       cont={cont}
+                                       dropInitialValue={dropInitialValue}
+                                    />
+                                 </CollapseComponent>
+                              )}
                            </>
                         );
                      }}

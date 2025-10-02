@@ -426,31 +426,37 @@ const Actions: React.FC<{
                   </Button>
                 </Tooltip>
               </div> */}
-                     {((data.Status == "CP" &&
+
+              {/* ((data.Status == "CP" &&
                         data.IDDepartamento ==
-                        Number(localStorage.getItem("group"))) ||
-                        localStorage.getItem("role") == "DIRECTORCOMPRAS" ||
-                        localStorage.getItem("role") == "REQUISITOR") && (
-                           <div className="w-fit">
-                              <Tooltip content="Editar">
-                                 <Button
-                                    color="yellow"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={() => {
-                                       mutationEdit.mutate({
-                                          method: "POST",
-                                          url: "/requisiciones/showRequisicion",
-                                          data: {
-                                             Id: data.Id,
-                                          },
-                                       });
-                                    }}>
-                                    <MdEdit />
-                                 </Button>
-                              </Tooltip>
-                           </div>
-                        )}
+                           Number(localStorage.getItem("group"))) ||
+                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                           localStorage.getItem("role") ?? "",
+                        )) */}
+                     {
+                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                           localStorage.getItem("role") ?? "",
+                        ) && (
+                        <div className="w-fit">
+                           <Tooltip content="Editar">
+                              <Button
+                                 color="yellow"
+                                 variant="solid"
+                                 size="small"
+                                 onClick={() => {
+                                    mutationEdit.mutate({
+                                       method: "POST",
+                                       url: "/requisiciones/showRequisicion",
+                                       data: {
+                                          Id: data.Id,
+                                       },
+                                    });
+                                 }}>
+                                 <MdEdit />
+                              </Button>
+                           </Tooltip>
+                        </div>
+                     )}
                      {data.Status != "CP" && (
                         <div className="w-fit">
                            <Tooltip content="Cancelar">
@@ -480,30 +486,31 @@ const Actions: React.FC<{
                            </Tooltip>
                         </div>
                      )}
-                     {(data.Status == "AU" &&
+                     {((data.Status == "AU" &&
                         data.AutEspecial == 1 &&
                         !data.UsuarioVoBo &&
-                        buttonVobo(data.IDTipo) || (localStorage.getItem("role") == "SISTEMAS" && data.AutEspecial == 1 &&
+                        buttonVobo(data.IDTipo)) ||
+                        (localStorage.getItem("role") == "SISTEMAS" &&
+                           data.AutEspecial == 1 &&
                            !data.UsuarioVoBo)) && (
-                           <PermissionMenu IdMenu={"VoBo"}>
-                              <Tooltip content="Visto bueno">
-                                 <Button
-                                    color="teal"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={() => {
-                                       mutation.mutate({
-                                          method: "PUT",
-                                          url: "/requisiciones/vobo",
-                                          data: { id: data.Id },
-                                       });
-                                    }}>
-                                    <MdOutlineCheckBox />
-
-                                 </Button>
-                              </Tooltip>
-                           </PermissionMenu>
-                        )}
+                        <PermissionMenu IdMenu={"VoBo"}>
+                           <Tooltip content="Visto bueno">
+                              <Button
+                                 color="teal"
+                                 variant="solid"
+                                 size="small"
+                                 onClick={() => {
+                                    mutation.mutate({
+                                       method: "PUT",
+                                       url: "/requisiciones/vobo",
+                                       data: { id: data.Id },
+                                    });
+                                 }}>
+                                 <MdOutlineCheckBox />
+                              </Button>
+                           </Tooltip>
+                        </PermissionMenu>
+                     )}
                      <div className="w-fit">
                         <Tooltip content="Ver requisición">
                            <Button
@@ -586,10 +593,10 @@ const Actions: React.FC<{
                         </PermissionMenu>
                      </div>
 
-                     {!data.UsuarioAS &&
-                        newStatus(data.Status) == "AS" &&
+                     {["AU", "AS", "CO"].includes(data.Status) &&
                         permisos?.Permiso_Asignar == 1 &&
-                        (data.AutEspecial == 1 && data.UsuarioVoBo != null || data.AutEspecial == 0) && (
+                        ((data.AutEspecial == 1 && data.UsuarioVoBo != null) ||
+                           data.AutEspecial == 0) && (
                            <div className="w-fit">
                               <Tooltip content="Asignar requisitor">
                                  <Button
@@ -705,62 +712,57 @@ const Actions: React.FC<{
                            </div>
                         </>
                      )}
-                     {(
-                        (
-                           (userGroups.includes(String(data?.IDDepartamento)) && newStatus(data.Status) == "AU")
-                           ||["AUTORIZADOR","SISTEMAS","REQUISITOR"].includes(localStorage.getItem("role")??"")
-                        )
-                        ||
-                        (
-                           newStatus(data.Status) != "CP"
-                           && newStatus(data.Status) != "AU"
+                     {((userGroups.includes(String(data?.IDDepartamento)) &&
+                        newStatus(data.Status) == "AU") ||
+                        ["AUTORIZADOR", "SISTEMAS", "REQUISITOR"].includes(
+                           localStorage.getItem("role") ?? "",
+                        ) ||
+                        (newStatus(data.Status) != "CP" &&
+                           newStatus(data.Status) != "AU" &&
                            // && newStatus(data.Status) !== "SU"
-                           && newStatus(data.Status) != "AS"
-                           && AutorizedEspecial(
+                           newStatus(data.Status) != "AS" &&
+                           AutorizedEspecial(
                               data.RequiereAut,
                               data.AutEspecial,
                               newStatus(data.Status),
-                           )
-                        )
-                     )
-                        && autorized &&
-                           (
-                              <Tooltip
-                                 content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}>
-                                 <div
-                                    onClick={async () => {
-                                       newStatus(data.Status) != "SU"
-                                          ? showConfirmationAlert(
-                                             `El estatus se cambiara a ${newStatus(data.Status)} `,
-                                             "Esta acción no se puede deshacer.",
-                                          ).then((isConfirmed) => {
-                                             if (isConfirmed) {
-                                                mutation.mutate({
-                                                   method: "PUT",
-                                                   url: "/requisiciones/update",
-                                                   data: {
-                                                      Status: newStatus(
-                                                         data.Status,
-                                                      ),
-                                                      id: data.Id,
-                                                   },
-                                                });
-                                             } else {
-                                                showToast(
-                                                   "La acción fue cancelada.",
-                                                   "error",
-                                                );
-                                             }
-                                          })
-                                          : setOpenSu(true);
-                                    }}
-                                    className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}>
-                                    <span>{data.Status}</span>
-                                    <LiaExchangeAltSolid className="text-whitecursor-pointer" />
-                                    <span>{newStatus(data.Status)} </span>
-                                 </div>
-                              </Tooltip>
-                           )}
+                           ))) &&
+                        autorized && (
+                           <Tooltip
+                              content={`Cambiar status de ${data.Status} a ${newStatus(data.Status)}`}>
+                              <div
+                                 onClick={async () => {
+                                    newStatus(data.Status) != "SU"
+                                       ? showConfirmationAlert(
+                                            `El estatus se cambiara a ${newStatus(data.Status)} `,
+                                            "Esta acción no se puede deshacer.",
+                                         ).then((isConfirmed) => {
+                                            if (isConfirmed) {
+                                               mutation.mutate({
+                                                  method: "PUT",
+                                                  url: "/requisiciones/update",
+                                                  data: {
+                                                     Status: newStatus(
+                                                        data.Status,
+                                                     ),
+                                                     id: data.Id,
+                                                  },
+                                               });
+                                            } else {
+                                               showToast(
+                                                  "La acción fue cancelada.",
+                                                  "error",
+                                               );
+                                            }
+                                         })
+                                       : setOpenSu(true);
+                                 }}
+                                 className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}>
+                                 <span>{data.Status}</span>
+                                 <LiaExchangeAltSolid className="text-whitecursor-pointer" />
+                                 <span>{newStatus(data.Status)} </span>
+                              </div>
+                           </Tooltip>
+                        )}
                   </div>
                </DropdownComponent>
                <ModalComponent
