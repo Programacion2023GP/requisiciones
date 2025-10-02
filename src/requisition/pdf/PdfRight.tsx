@@ -153,8 +153,12 @@ export const PdfRight: React.FC<DataPdf> = ({
                               style={tw(
                                  `${styles.pdf.textVal} text-wrap max-w-full`,
                               )}>
-                              {formatCurrency(total.totalNeto, true, false) ||
-                                 ""}
+                              {formatCurrency(
+                                 total.totalNeto,
+                                 true,
+                                 false,
+                                 2,
+                              ) || ""}
                            </Text>
                         </View>
                      </>

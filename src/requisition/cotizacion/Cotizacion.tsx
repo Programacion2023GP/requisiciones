@@ -544,7 +544,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        Ret.
                                     </th>
                                     <th className="px-3 py-2 text-center border">
-                                       Subtotal
+                                       IVA cal.
                                     </th>
                                     <th className="px-3 py-2 text-center border">
                                        P. c/IVA
@@ -692,6 +692,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                              mapTotals[row.key],
                                              true,
                                              false,
+                                             2,
                                           )}
                                        </td>
                                     );
