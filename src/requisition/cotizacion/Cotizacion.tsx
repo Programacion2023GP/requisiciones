@@ -1,9 +1,4 @@
-import React, {
-   Dispatch,
-   SetStateAction,
-   useEffect,
-   useState,
-} from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import ModalComponent from "../../components/modal/Modal";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
@@ -134,12 +129,13 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }) => AxiosRequest(url, method, data),
       onMutate() {
          setSpiner(true);
-         setReloadTable(false);
+         setReloadTable(true);
       },
       onSuccess: (data) => {
          setOpen(false);
          setFormValues({});
          showToast(data.message, data.status);
+         setReloadTable(false);
       },
       onError: (error: any) => {
          showToast(
@@ -186,26 +182,40 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       data.forEach((_, index) => {
          [1, 2, 3].forEach((offset) => {
             const providerNumber = index * 3 + offset;
-            const precioSinIva = formValues[`PrecioUnitarioSinIva${providerNumber}`];
+            const precioSinIva =
+               formValues[`PrecioUnitarioSinIva${providerNumber}`];
             const porcentajeIVA = formValues[`PorcentajeIVA${providerNumber}`];
 
-            if (precioSinIva !== null && precioSinIva !== undefined && precioSinIva !== "") {
+            if (
+               precioSinIva !== null &&
+               precioSinIva !== undefined &&
+               precioSinIva !== ""
+            ) {
                const num = Number(precioSinIva);
                if (isNaN(num)) {
-                  newErrors[`PrecioUnitarioSinIva${providerNumber}`] = "Debe ser un número válido";
+                  newErrors[`PrecioUnitarioSinIva${providerNumber}`] =
+                     "Debe ser un número válido";
                } else if (num < 0) {
-                  newErrors[`PrecioUnitarioSinIva${providerNumber}`] = "No puede ser negativo";
+                  newErrors[`PrecioUnitarioSinIva${providerNumber}`] =
+                     "No puede ser negativo";
                }
             }
 
-            if (porcentajeIVA !== null && porcentajeIVA !== undefined && porcentajeIVA !== "") {
+            if (
+               porcentajeIVA !== null &&
+               porcentajeIVA !== undefined &&
+               porcentajeIVA !== ""
+            ) {
                const num = Number(porcentajeIVA);
                if (isNaN(num)) {
-                  newErrors[`PorcentajeIVA${providerNumber}`] = "Debe ser un número válido";
+                  newErrors[`PorcentajeIVA${providerNumber}`] =
+                     "Debe ser un número válido";
                } else if (num < 0) {
-                  newErrors[`PorcentajeIVA${providerNumber}`] = "No puede ser negativo";
+                  newErrors[`PorcentajeIVA${providerNumber}`] =
+                     "No puede ser negativo";
                } else if (num > 100) {
-                  newErrors[`PorcentajeIVA${providerNumber}`] = "No puede ser mayor a 100%";
+                  newErrors[`PorcentajeIVA${providerNumber}`] =
+                     "No puede ser mayor a 100%";
                }
             }
          });
@@ -223,7 +233,11 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          return;
       }
 
-      if (formValues.IDproveedor1 && formValues.IDproveedor2 && formValues.IDproveedor3) {
+      if (
+         formValues.IDproveedor1 &&
+         formValues.IDproveedor2 &&
+         formValues.IDproveedor3
+      ) {
          mutation.mutate({
             url: "/requisicionesdetails/update",
             method: "PUT",
@@ -267,9 +281,14 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
    };
 
    const calculateIVA = (fieldName: string, fieldValue: any) => {
-      const calculateIVAHelper = (precioSinIva: number, porcentajeIVA: number) => {
+      const calculateIVAHelper = (
+         precioSinIva: number,
+         porcentajeIVA: number,
+      ) => {
          if (porcentajeIVA > 0) {
-            const importeIva = +(precioSinIva * (porcentajeIVA / 100)).toFixed(2);
+            const importeIva = +(precioSinIva * (porcentajeIVA / 100)).toFixed(
+               2,
+            );
             const precioConIva = +(importeIva + precioSinIva).toFixed(2);
             return { importeIva, precioConIva };
          }
@@ -280,14 +299,18 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          [1, 2, 3].forEach((offset) => {
             const providerNumber = index * 3 + offset;
 
-            const isPrecioField = fieldName === `PrecioUnitarioSinIva${providerNumber}`;
-            const isPorcentajeField = fieldName === `PorcentajeIVA${providerNumber}`;
+            const isPrecioField =
+               fieldName === `PrecioUnitarioSinIva${providerNumber}`;
+            const isPorcentajeField =
+               fieldName === `PorcentajeIVA${providerNumber}`;
 
             if (isPrecioField || isPorcentajeField) {
-               const precioSinIva = isPrecioField 
+               const precioSinIva = isPrecioField
                   ? Number(fieldValue) || 0
-                  : Number(formValues[`PrecioUnitarioSinIva${providerNumber}`]) || 0;
-               
+                  : Number(
+                       formValues[`PrecioUnitarioSinIva${providerNumber}`],
+                    ) || 0;
+
                const porcentajeIVA = isPorcentajeField
                   ? Number(fieldValue) || 0
                   : Number(formValues[`PorcentajeIVA${providerNumber}`]) || 0;
@@ -336,7 +359,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       </div>
    );
 
-   const renderSelect = (name: string, options: any[], labelKey: string, idKey: string) => {
+   const renderSelect = (
+      name: string,
+      options: any[],
+      labelKey: string,
+      idKey: string,
+   ) => {
       const selectedValue = formValues[name] || "";
       const otherProviders = [
          formValues.IDproveedor1,
@@ -345,7 +373,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       ].filter((id) => id && id !== selectedValue);
 
       const filteredOptions = options.filter(
-         (opt) => !otherProviders.includes(opt[idKey])
+         (opt) => !otherProviders.includes(opt[idKey]),
       );
 
       return (
@@ -424,19 +452,19 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                               "IDproveedor1",
                               suppliers?.data?.data || [],
                               "NombreCompleto",
-                              "IDProveedor"
+                              "IDProveedor",
                            )}
                            {renderSelect(
                               "IDproveedor2",
                               suppliers?.data?.data || [],
                               "NombreCompleto",
-                              "IDProveedor"
+                              "IDProveedor",
                            )}
                            {renderSelect(
                               "IDproveedor3",
                               suppliers?.data?.data || [],
                               "NombreCompleto",
-                              "IDProveedor"
+                              "IDProveedor",
                            )}
                         </div>
                      </div>
@@ -447,7 +475,9 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                      <table className="min-w-full text-sm border border-gray-300">
                         <thead className="bg-gray-100">
                            <tr>
-                              <th className="px-3 py-2 text-left border">Producto</th>
+                              <th className="px-3 py-2 text-left border">
+                                 Producto
+                              </th>
                               {[1, 2, 3].map((offset) => (
                                  <th
                                     key={offset}
@@ -467,26 +497,35 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                 method: "POST",
                                                 url: "requisicionesdetails/ordencompra",
                                                 data: {
-                                                   Ejercicio: IdRequisicion?.data?.Ejercicio,
+                                                   Ejercicio:
+                                                      IdRequisicion?.data
+                                                         ?.Ejercicio,
                                                    IDRequisicion:
-                                                      IdRequisicion?.data?.IDRequisicion,
+                                                      IdRequisicion?.data
+                                                         ?.IDRequisicion,
                                                    Proveedor:
-                                                      formValues[`IDproveedor${offset}`],
+                                                      formValues[
+                                                         `IDproveedor${offset}`
+                                                      ],
                                                 },
                                              });
                                           }}>
                                           {suppliers?.data?.data.find(
                                              (prov) =>
                                                 prov.IDProveedor ==
-                                                formValues[`IDproveedor${offset}`],
-                                          )?.NombreCompleto || `Proveedor ${offset}`}
+                                                formValues[
+                                                   `IDproveedor${offset}`
+                                                ],
+                                          )?.NombreCompleto ||
+                                             `Proveedor ${offset}`}
                                        </Button>
                                     ) : (
                                        suppliers?.data?.data.find(
                                           (prov) =>
                                              prov.IDProveedor ==
                                              formValues[`IDproveedor${offset}`],
-                                       )?.NombreCompleto || `Proveedor ${offset}`
+                                       )?.NombreCompleto ||
+                                       `Proveedor ${offset}`
                                     )}
                                  </th>
                               ))}
@@ -495,9 +534,15 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                               <th className="px-3 py-2 border"></th>
                               {[1, 2, 3].map((offset) => (
                                  <React.Fragment key={offset}>
-                                    <th className="px-3 py-2 text-center border">P.U.</th>
-                                    <th className="px-3 py-2 text-center border">% IVA</th>
-                                    <th className="px-3 py-2 text-center border">Ret.</th>
+                                    <th className="px-3 py-2 text-center border">
+                                       P.U.
+                                    </th>
+                                    <th className="px-3 py-2 text-center border">
+                                       % IVA
+                                    </th>
+                                    <th className="px-3 py-2 text-center border">
+                                       Ret.
+                                    </th>
                                     <th className="px-3 py-2 text-center border">
                                        Subtotal
                                     </th>
@@ -508,7 +553,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                               ))}
                            </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="">
                            {data?.length > 0 &&
                               data.map((item: any, index) => (
                                  <tr
@@ -531,37 +576,41 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     </td>
 
                                     {[1, 2, 3].map((offset) => {
-                                       const providerNumber = index * 3 + offset;
+                                       const providerNumber =
+                                          index * 3 + offset;
                                        return (
                                           <React.Fragment key={offset}>
                                              <td className="px-2 py-1 border">
                                                 {renderInput(
                                                    `PrecioUnitarioSinIva${providerNumber}`,
-                                                   IdRequisicion?.data?.status === "OC"
+                                                   IdRequisicion?.data
+                                                      ?.status === "OC",
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
                                                 {renderInput(
                                                    `PorcentajeIVA${providerNumber}`,
-                                                   IdRequisicion?.data?.status === "OC"
+                                                   IdRequisicion?.data
+                                                      ?.status === "OC",
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
                                                 {renderInput(
                                                    `Retenciones${providerNumber}`,
-                                                   IdRequisicion?.data?.status === "OC"
+                                                   IdRequisicion?.data
+                                                      ?.status === "OC",
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
                                                 {renderInput(
                                                    `ImporteIva${providerNumber}`,
-                                                   true
+                                                   true,
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
                                                 {renderInput(
                                                    `PrecioUnitarioConIva${providerNumber}`,
-                                                   true
+                                                   true,
                                                 )}
                                              </td>
                                           </React.Fragment>
@@ -569,7 +618,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     })}
                                  </tr>
                               ))}
-
+                        </tbody>
+                        <tfoot>
                            {/* Totales con leyendas */}
                            {[
                               { key: "subtotal", label: "Subtotal" },
@@ -590,8 +640,10 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     let totalNeto = 0;
 
                                     data.forEach((item, index) => {
-                                       const providerNumber = index * 3 + providerIdx;
-                                       const cantidad = Number(item.Cantidad) || 0;
+                                       const providerNumber =
+                                          index * 3 + providerIdx;
+                                       const cantidad =
+                                          Number(item.Cantidad) || 0;
                                        const precioSinIva =
                                           Number(
                                              formValues[
@@ -600,11 +652,15 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                           ) || 0;
                                        const ivaPct =
                                           Number(
-                                             formValues[`PorcentajeIVA${providerNumber}`],
+                                             formValues[
+                                                `PorcentajeIVA${providerNumber}`
+                                             ],
                                           ) || 0;
                                        const ret =
                                           Number(
-                                             formValues[`Retenciones${providerNumber}`],
+                                             formValues[
+                                                `Retenciones${providerNumber}`
+                                             ],
                                           ) || 0;
 
                                        const st = precioSinIva * cantidad;
@@ -642,7 +698,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                  })}
                               </tr>
                            ))}
-                        </tbody>
+                        </tfoot>
                      </table>
                   </div>
 
