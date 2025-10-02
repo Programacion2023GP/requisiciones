@@ -116,7 +116,7 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
             touched?.[name] && typeof errors?.[name] === "string"
               ? (errors?.[name] as string)
               : null;
-          if (handleModified) {
+            if (handleModified) {
             handleModified(values, setFieldValue);
           }
           return (
@@ -156,6 +156,7 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
                         : ""
                     }
                     id={name}
+                  
                     placeholder=" "
                     autoComplete="off"
                     className={`peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200 `}
@@ -265,7 +266,7 @@ export const FormikCheckbox: React.FC<CheckboxWithLabelProps> = ({
 
               {(meta.error && (meta.touched || formik.status)) && (
                 <span
-                  className="absolute left-0 top-6 text-sm font-semibold text-red-600"
+                  className="absolute left-0 text-sm font-semibold text-red-600 top-6"
                   id={`${name}-meta.error`}
                 >
                   {meta.error}
@@ -330,7 +331,7 @@ export const FormikImageInput: React.FC<FormikImageInputProps> = ({
     <div className="relative z-0 w-full mb-5">
       <label
         htmlFor={name}
-        className="block text-gray-500 text-sm font-medium mb-2"
+        className="block mb-2 text-sm font-medium text-gray-500"
       >
         {label}
       </label>
@@ -342,7 +343,7 @@ export const FormikImageInput: React.FC<FormikImageInputProps> = ({
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-full object-cover border-4 border-cyan-500 shadow-lg transition-transform duration-300 hover:scale-105 cursor-pointer"
+              className="object-cover w-full h-full transition-transform duration-300 border-4 shadow-lg cursor-pointer border-cyan-500 hover:scale-105"
               onClick={handleImageClick} // Hacer clic en la imagen para cambiarla
             />
           )}
@@ -360,14 +361,14 @@ export const FormikImageInput: React.FC<FormikImageInputProps> = ({
               disabled={disabled}
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
-            <AiOutlineCamera className="text-gray-600 text-3xl" />
+            <AiOutlineCamera className="text-3xl text-gray-600" />
           </div>
 
         </div>
 
         {/* Mostrar nombre del archivo seleccionado */}
         {fileName && (
-          <span className="text-sm text-gray-500 mt-2">{fileName}</span>
+          <span className="mt-2 text-sm text-gray-500">{fileName}</span>
         )}
 
         {/* Texto de ayuda o mensaje de validación */}
@@ -377,7 +378,7 @@ export const FormikImageInput: React.FC<FormikImageInputProps> = ({
 
         {/* Mensaje de error de Formik */}
         {touched[name] && errors[name] && (
-          <div className="text-sm font-semibold text-red-600 mt-2">{errors[name]}</div>
+          <div className="mt-2 text-sm font-semibold text-red-600">{errors[name]}</div>
         )}
       </div>
     </div>
@@ -505,7 +506,7 @@ export const FormikNumberInput: React.FC<FormikNumberInputProps> = ({
                   min={min}
                   max={max}
                   inputMode="numeric" // Para teclado numérico en dispositivos móviles
-                  className="peer pt-4 pb-2 block w-full px-0 text-center bg-transparent border-0 appearance-none focus:outline-none focus:ring-0"
+                  className="block w-full px-0 pt-4 pb-2 text-center bg-transparent border-0 appearance-none peer focus:outline-none focus:ring-0"
                 />
                 {/* Botón de incremento */}
                 <button
@@ -570,7 +571,7 @@ export const FormikPasswordInput: React.FC<InputWithLabelProps> = ({
                 id={name}
                 autoComplete="off"
                 placeholder=" "
-                className="peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
+                className="block w-full px-0 pt-4 pb-2 mt-0 bg-transparent border-0 border-b-2 border-gray-200 appearance-none peer focus:outline-none focus:ring-0 focus:border-black"
               />
               <label
                 htmlFor={name}
@@ -581,12 +582,12 @@ export const FormikPasswordInput: React.FC<InputWithLabelProps> = ({
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)} // Cambia el estado
-                className="absolute right-0 top-4 text-gray-500 focus:outline-none"
+                className="absolute right-0 text-gray-500 top-4 focus:outline-none"
               >
                 {showPassword ? (
-                  <IoMdEye className="h-5 w-5" />
+                  <IoMdEye className="w-5 h-5" />
                 ) : (
-                  <IoIosEyeOff className="h-5 w-5" />
+                  <IoIosEyeOff className="w-5 h-5" />
                 )}
               </button>
               {error && (
@@ -835,7 +836,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 onKeyDown={(e) => {
                   handleKeyDown(e, setFieldValue);
                 }}
-                className="peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200"
+                className="block w-full px-0 pt-4 pb-2 mt-0 bg-transparent border-0 border-b-2 border-gray-200 appearance-none peer focus:outline-none focus:ring-0 focus:border-black"
               />
 
               <label
@@ -845,7 +846,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
                 {label}
                 {loading && (
                   <span
-                    className="inline-block ml-2 animate-spin h-4 w-4 border-2 border-t-transparent border-gray-500 rounded-full"
+                    className="inline-block w-4 h-4 ml-2 border-2 border-gray-500 rounded-full animate-spin border-t-transparent"
                     role="status"
                     aria-live="polite" // Anuncia el estado de carga para lectores de pantalla
                   >
@@ -856,7 +857,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
               </label>
               <div
                 onClick={handleInputFocus}
-                className="absolute top-6 right-0 cursor-pointer"
+                className="absolute right-0 cursor-pointer top-6"
               >
 
                {!disabled && <IoMdArrowDropdown />}
@@ -865,7 +866,7 @@ export const FormikAutocomplete = <T extends Record<string, any>>({
               {showOptions && (
                 <ul
                   ref={menuRef} // Añadimos la referencia para la lista
-                  className="absolute bg-white border border-gray-300 rounded shadow-md max-h-40 overflow-auto w-full z-10 mt-1"
+                  className="absolute z-10 w-full mt-1 overflow-auto bg-white border border-gray-300 rounded shadow-md max-h-40"
                 >
                   {Array.isArray(filteredOptions) && filteredOptions.length > 0 && filteredOptions.map((option, index) => (
                     <li
@@ -926,11 +927,11 @@ export const FormikSwitch: React.FC<SwitchProps> = ({
               : null;
 
           return (
-            <div className="relative z-0 w-full mb-5 flex items-center">
+            <div className="relative z-0 flex items-center w-full mb-5">
               <div className="flex items-center">
                 <label
                   htmlFor={name}
-                  className="inline-flex relative items-center cursor-pointer"
+                  className="relative inline-flex items-center cursor-pointer"
                 >
                   <input
                     {...field}
@@ -951,7 +952,7 @@ export const FormikSwitch: React.FC<SwitchProps> = ({
                     />
                   </div>
                 </label>
-                <span className="ml-3 text-gray-500 text-sm">{label}</span>
+                <span className="ml-3 text-sm text-gray-500">{label}</span>
               </div>
 
               {error && (

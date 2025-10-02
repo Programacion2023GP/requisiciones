@@ -2,28 +2,16 @@ import React, {
    Dispatch,
    SetStateAction,
    useEffect,
-   useRef,
    useState,
 } from "react";
 import ModalComponent from "../../components/modal/Modal";
-import FormikForm from "../../components/formik/Formik";
-import * as Yup from "yup";
-import {
-   FormikAutocomplete,
-   FormikInput,
-   FormikSwitch,
-   FormikTextArea,
-} from "../../components/formik/FormikInputs/FormikInput";
-import Observable from "../../extras/observable";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { showConfirmationAlert, showToast } from "../../sweetalert/Sweetalert";
-import { IoMdSend } from "react-icons/io";
 import Spinner from "../../loading/Loading";
-import { FormikProps } from "formik";
-import { ColComponent, RowComponent } from "../../responsive/Responsive";
 import Button from "../../components/form/Button";
 import { formatCurrency } from "../../utils/functions";
+import Observable from "../../extras/observable";
 
 type CotizacionType = {
    open: boolean;
@@ -34,6 +22,7 @@ type CotizacionType = {
 type RequisitionType = {
    data: Requisition;
 };
+
 type Requisition = {
    Ejercicio: number;
    IDRequisicion: number;
@@ -49,13 +38,10 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       "IdRequisicion",
    ) as RequisitionType;
 
-   const [initialValues, setInitialValues] = useState<Record<string, any>>({});
+   const [formValues, setFormValues] = useState<Record<string, any>>({});
+   const [errors, setErrors] = useState<Record<string, string>>({});
    const [spiner, setSpiner] = useState<boolean>(true);
    const [data, setData] = useState<Array<Record<string, any>>>([]);
-   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
-   const [validationSchema, setValidationSchema] = useState<
-      Yup.ObjectSchema<any>
-   >(Yup.object());
 
    const mutationCotized = useMutation({
       mutationFn: ({
@@ -66,152 +52,55 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          url: string;
          method: "POST" | "PUT" | "DELETE";
          data?: any;
-      }) => AxiosRequest(url, method, IdRequisicion?.data),
+      }) => AxiosRequest(url, method, data),
       onMutate() {
          setData([]);
          setSpiner(true);
       },
       onSuccess: async (data) => {
          setSpiner(false);
-         console.log("aqui IdRequisicion", IdRequisicion.data);
 
-         let dynamicShape: Record<string, any> = {};
-         let dynamicInitialValues: Record<string, any> = {};
-         let counter = 1;
+         const productsData = data.data
+            .trim()
+            .split("\n")
+            .map((line) => {
+               const obj: Record<string, string> = {};
+               line.split("|").forEach((part) => {
+                  const [key, value] = part.split(":").map((p) => p.trim());
+                  obj[key] = value ?? "";
+               });
+               return obj;
+            });
 
-         // primero tus reglas fijas
-         const baseShape: Record<string, any> = {
-            IDproveedor1: Yup.number().required("Proveedor 1 requerido"),
-            IDproveedor2: Yup.number().nullable(),
-            IDproveedor3: Yup.number().nullable(),
-            // aquí pones todas las demás fijas que ya tenías
-         };
+         let initialFormValues: Record<string, any> = {};
 
-         data.data.forEach((it: any, index) => {
-            dynamicInitialValues[`IDRequisicion`] = it.IDRequisicion;
-            dynamicInitialValues[`Ejercicio`] = it.Ejercicio;
-            dynamicInitialValues[`IDproveedor1`] = Number(it.IDproveedor1);
-            dynamicInitialValues[`IDproveedor2`] = Number(it.IDproveedor2);
-            dynamicInitialValues[`IDproveedor3`] = Number(it.IDproveedor3);
-            dynamicInitialValues[`ObservacionesCot`] = it.ObservacionesCot;
+         productsData.forEach((it: any, index) => {
+            initialFormValues[`IDRequisicion`] = it.IDRequisicion;
+            initialFormValues[`Ejercicio`] = it.Ejercicio;
+            initialFormValues[`IDproveedor1`] = Number(it.IDproveedor1);
+            initialFormValues[`IDproveedor2`] = Number(it.IDproveedor2);
+            initialFormValues[`IDproveedor3`] = Number(it.IDproveedor3);
+            initialFormValues[`ObservacionesCot`] = it.ObservacionesCot;
 
-            dynamicInitialValues[`IDDetalle${index + 1}`] = it.IDDetalle;
+            initialFormValues[`IDDetalle${index + 1}`] = it.IDDetalle;
             [1, 2, 3].forEach((providerNum) => {
                const fieldNumber = index * 3 + providerNum;
 
-               console.log(
-                  `Producto ${index + 1}, Proveedor ${providerNum} → Campo ${fieldNumber}`,
-               ); // Para debug
-
-               // Cargar valores iniciales desde la base de datos - CORREGIDO
-               // Usamos providerNum para leer de la BD y fieldNumber para el nombre del campo
-               dynamicInitialValues[`PrecioUnitarioSinIva${fieldNumber}`] =
+               initialFormValues[`PrecioUnitarioSinIva${fieldNumber}`] =
                   it[`PrecioUnitarioSinIva${providerNum}`] || 0;
-               dynamicInitialValues[`PorcentajeIVA${fieldNumber}`] =
+               initialFormValues[`PorcentajeIVA${fieldNumber}`] =
                   it[`PorcentajeIVA${providerNum}`] || 0;
-               dynamicInitialValues[`ImporteIva${fieldNumber}`] =
+               initialFormValues[`ImporteIva${fieldNumber}`] =
                   it[`ImporteIva${providerNum}`] || 0;
-               dynamicInitialValues[`PrecioUnitarioConIva${fieldNumber}`] =
+               initialFormValues[`PrecioUnitarioConIva${fieldNumber}`] =
                   it[`PrecioUnitarioConIva${providerNum}`] || 0;
-               dynamicInitialValues[`Retenciones${fieldNumber}`] =
+               initialFormValues[`Retenciones${fieldNumber}`] =
                   it[`Retenciones${providerNum}`] || 0;
-               dynamicShape[`PrecioUnitarioSinIva${counter}`] = Yup.number()
-                  .nullable()
-                  .transform((value, originalValue) => {
-                     // Si está vacío o no es un número válido, retorna null
-                     if (
-                        originalValue === "" ||
-                        originalValue === null ||
-                        originalValue === undefined
-                     ) {
-                        return null;
-                     }
-                     const number = Number(originalValue);
-                     return isNaN(number) ? originalValue : number; // Mantiene el valor original si no es número
-                  })
-                  .typeError("Debe ser un número válido")
-                  .min(0, "No puede ser negativo");
-
-               dynamicShape[`PorcentajeIVA${counter}`] = Yup.number()
-                  .nullable()
-                  .transform((value, originalValue) => {
-                     if (
-                        originalValue === "" ||
-                        originalValue === null ||
-                        originalValue === undefined
-                     ) {
-                        return null;
-                     }
-                     const number = Number(originalValue);
-                     return isNaN(number) ? originalValue : number;
-                  })
-                  .typeError("Debe ser un número válido")
-                  .min(0, "No puede ser negativo")
-                  .max(100, "No puede ser mayor a 100%");
-
-               dynamicShape[`ImporteIva${counter}`] = Yup.number()
-                  .nullable()
-                  .transform((value, originalValue) => {
-                     if (
-                        originalValue === "" ||
-                        originalValue === null ||
-                        originalValue === undefined
-                     ) {
-                        return null;
-                     }
-                     const number = Number(originalValue);
-                     return isNaN(number) ? originalValue : number;
-                  })
-                  .typeError("Debe ser un número válido")
-                  .min(0, "No puede ser negativo");
-
-               dynamicShape[`PrecioUnitarioConIva${counter}`] = Yup.number()
-                  .nullable()
-                  .transform((value, originalValue) => {
-                     if (
-                        originalValue === "" ||
-                        originalValue === null ||
-                        originalValue === undefined
-                     ) {
-                        return null;
-                     }
-                     const number = Number(originalValue);
-                     return isNaN(number) ? originalValue : number;
-                  })
-                  .typeError("Debe ser un número válido")
-                  .min(0, "No puede ser negativo");
-
-               dynamicShape[`Retenciones${counter}`] = Yup.number()
-                  .nullable()
-                  .transform((value, originalValue) => {
-                     if (
-                        originalValue === "" ||
-                        originalValue === null ||
-                        originalValue === undefined
-                     ) {
-                        return null;
-                     }
-                     const number = Number(originalValue);
-                     return isNaN(number) ? originalValue : number;
-                  })
-                  .typeError("Debe ser un número válido")
-                  .min(0, "No puede ser negativo");
-
-               counter++;
             });
          });
 
-         console.log("provs", dynamicInitialValues);
-         // ahora combinas fijas + dinámicas en un solo schema
-         setValidationSchema(
-            Yup.object().shape({
-               ...baseShape,
-               ...dynamicShape,
-            }),
-         );
-
-         setInitialValues(dynamicInitialValues);
-         setData(data.data);
+         setFormValues(initialFormValues);
+         setData(productsData);
       },
 
       onError: (error: any) => {
@@ -248,15 +137,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          setReloadTable(false);
       },
       onSuccess: (data) => {
-         // mutationCotized.mutate({
-         //   method: "POST",
-         //   url: "/requisiciones/products",
-         //   data: {
-         //     ...IdRequisicion?.data,
-         //   },
-         // });
          setOpen(false);
-         setInitialValues({});
+         setFormValues({});
          showToast(data.message, data.status);
       },
       onError: (error: any) => {
@@ -266,6 +148,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          );
       },
    });
+
    const mutationOC = useMutation({
       mutationFn: ({
          url,
@@ -282,7 +165,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       },
       onSuccess: (data) => {
          setOpen(false);
-         setInitialValues({});
+         setFormValues({});
          showToast(data.message, data.status);
       },
       onError: (error: any) => {
@@ -292,14 +175,59 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          );
       },
    });
-   const handleSubmit = (values: any) => {
-      // Crear array de items para enviar
 
-      if (values.IDproveedor1 && values.IDproveedor2 && values.IDproveedor3) {
+   const validateForm = () => {
+      const newErrors: Record<string, string> = {};
+
+      if (!formValues.IDproveedor1) {
+         newErrors.IDproveedor1 = "Proveedor 1 es requerido";
+      }
+
+      data.forEach((_, index) => {
+         [1, 2, 3].forEach((offset) => {
+            const providerNumber = index * 3 + offset;
+            const precioSinIva = formValues[`PrecioUnitarioSinIva${providerNumber}`];
+            const porcentajeIVA = formValues[`PorcentajeIVA${providerNumber}`];
+
+            if (precioSinIva !== null && precioSinIva !== undefined && precioSinIva !== "") {
+               const num = Number(precioSinIva);
+               if (isNaN(num)) {
+                  newErrors[`PrecioUnitarioSinIva${providerNumber}`] = "Debe ser un número válido";
+               } else if (num < 0) {
+                  newErrors[`PrecioUnitarioSinIva${providerNumber}`] = "No puede ser negativo";
+               }
+            }
+
+            if (porcentajeIVA !== null && porcentajeIVA !== undefined && porcentajeIVA !== "") {
+               const num = Number(porcentajeIVA);
+               if (isNaN(num)) {
+                  newErrors[`PorcentajeIVA${providerNumber}`] = "Debe ser un número válido";
+               } else if (num < 0) {
+                  newErrors[`PorcentajeIVA${providerNumber}`] = "No puede ser negativo";
+               } else if (num > 100) {
+                  newErrors[`PorcentajeIVA${providerNumber}`] = "No puede ser mayor a 100%";
+               }
+            }
+         });
+      });
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+   };
+
+   const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!validateForm()) {
+         showToast("Por favor corrija los errores en el formulario", "error");
+         return;
+      }
+
+      if (formValues.IDproveedor1 && formValues.IDproveedor2 && formValues.IDproveedor3) {
          mutation.mutate({
             url: "/requisicionesdetails/update",
             method: "PUT",
-            data: values,
+            data: formValues,
          });
       } else {
          showConfirmationAlert(
@@ -310,7 +238,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                mutation.mutate({
                   url: "/requisicionesdetails/update",
                   method: "PUT",
-                  data: values,
+                  data: formValues,
                });
             } else {
                showToast("La acción fue cancelada.", "error");
@@ -319,21 +247,29 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }
    };
 
-   // Validación simplificada - solo para los proveedores principales
+   const handleInputChange = (name: string, value: any) => {
+      setFormValues((prev) => ({
+         ...prev,
+         [name]: value,
+      }));
 
-   const handleModified = (
-      values: Record<string, any>,
-      setFieldValue: (
-         name: string,
-         value: any,
-         shouldValidate?: boolean,
-      ) => void,
-   ) => {
-      const calculateIVA = (precioSinIva: number, porcentajeIVA: number) => {
+      // Limpiar error del campo
+      if (errors[name]) {
+         setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[name];
+            return newErrors;
+         });
+      }
+
+      // Recalcular IVA si es necesario
+      calculateIVA(name, value);
+   };
+
+   const calculateIVA = (fieldName: string, fieldValue: any) => {
+      const calculateIVAHelper = (precioSinIva: number, porcentajeIVA: number) => {
          if (porcentajeIVA > 0) {
-            const importeIva = +(precioSinIva * (porcentajeIVA / 100)).toFixed(
-               2,
-            );
+            const importeIva = +(precioSinIva * (porcentajeIVA / 100)).toFixed(2);
             const precioConIva = +(importeIva + precioSinIva).toFixed(2);
             return { importeIva, precioConIva };
          }
@@ -344,21 +280,29 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          [1, 2, 3].forEach((offset) => {
             const providerNumber = index * 3 + offset;
 
-            const precioSinIva =
-               Number(values[`PrecioUnitarioSinIva${providerNumber}`]) || 0;
-            const porcentajeIVA =
-               Number(values[`PorcentajeIVA${providerNumber}`]) || 0;
+            const isPrecioField = fieldName === `PrecioUnitarioSinIva${providerNumber}`;
+            const isPorcentajeField = fieldName === `PorcentajeIVA${providerNumber}`;
 
-            const { importeIva, precioConIva } = calculateIVA(
-               precioSinIva,
-               porcentajeIVA,
-            );
+            if (isPrecioField || isPorcentajeField) {
+               const precioSinIva = isPrecioField 
+                  ? Number(fieldValue) || 0
+                  : Number(formValues[`PrecioUnitarioSinIva${providerNumber}`]) || 0;
+               
+               const porcentajeIVA = isPorcentajeField
+                  ? Number(fieldValue) || 0
+                  : Number(formValues[`PorcentajeIVA${providerNumber}`]) || 0;
 
-            setFieldValue(`ImporteIva${providerNumber}`, importeIva);
-            setFieldValue(
-               `PrecioUnitarioConIva${providerNumber}`,
-               precioConIva,
-            );
+               const { importeIva, precioConIva } = calculateIVAHelper(
+                  precioSinIva,
+                  porcentajeIVA,
+               );
+
+               setFormValues((prev) => ({
+                  ...prev,
+                  [`ImporteIva${providerNumber}`]: importeIva,
+                  [`PrecioUnitarioConIva${providerNumber}`]: precioConIva,
+               }));
+            }
          });
       });
    };
@@ -366,7 +310,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
    useEffect(() => {
       mutationCotized.mutate({
          method: "POST",
-         url: "/requisiciones/products",
+         url: "/requisiciones/productsPlainText",
          data: {
             IDRequisicion: IdRequisicion?.data?.IDRequisicion,
             Ejercicio: IdRequisicion?.data?.Ejercicio,
@@ -374,67 +318,63 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       });
    }, []);
 
-   const ProveedorSection = ({
-      provedor,
-      providerNumber,
-      values,
-      isOC,
-      index,
-   }: any) => (
-      <div
-         className={`p-4 rounded-lg border ${
-            index === 1
-               ? "bg-blue-50 border-blue-200"
-               : index === 2
-                 ? "bg-green-50 border-green-200"
-                 : "bg-purple-50 border-purple-200"
-         }`}>
-         <h4
-            className={`font-semibold mb-3 ${
-               index === 1
-                  ? "text-blue-800"
-                  : index === 2
-                    ? "text-green-800"
-                    : "text-purple-800"
-            }`}>
-            {provedor}
-         </h4>
-         <div className="space-y-3">
-            <FormikInput
-               responsive={{ "2xl": 4, lg: 6 }}
-               label="Precio sin IVA"
-               name={`PrecioUnitarioSinIva${providerNumber}`}
-               handleModified={handleModified}
-               disabled={isOC}
-            />
-            <FormikInput
-               responsive={{ "2xl": 4, lg: 6 }}
-               label="% IVA"
-               name={`PorcentajeIVA${providerNumber}`}
-               handleModified={handleModified}
-               disabled={isOC}
-            />
-            <FormikInput
-               responsive={{ "2xl": 4, lg: 6 }}
-               label="Retenciones"
-               name={`Retenciones${providerNumber}`}
-               disabled={isOC}
-            />
-            <FormikInput
-               responsive={{ "2xl": 6, lg: 6 }}
-               label="Importe IVA"
-               name={`ImporteIva${providerNumber}`}
-               disabled
-            />
-            <FormikInput
-               responsive={{ "2xl": 6, lg: 6 }}
-               label="Precio con IVA"
-               name={`PrecioUnitarioConIva${providerNumber}`}
-               disabled
-            />
-         </div>
+   const renderInput = (name: string, disabled: boolean = false) => (
+      <div className="w-full">
+         <input
+            type="text"
+            name={name}
+            value={formValues[name] || ""}
+            onChange={(e) => handleInputChange(name, e.target.value)}
+            disabled={disabled}
+            className={`w-full px-2 py-1 text-sm border rounded ${
+               disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+            } ${errors[name] ? "border-red-500" : "border-gray-300"}`}
+         />
+         {errors[name] && (
+            <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
+         )}
       </div>
    );
+
+   const renderSelect = (name: string, options: any[], labelKey: string, idKey: string) => {
+      const selectedValue = formValues[name] || "";
+      const otherProviders = [
+         formValues.IDproveedor1,
+         formValues.IDproveedor2,
+         formValues.IDproveedor3,
+      ].filter((id) => id && id !== selectedValue);
+
+      const filteredOptions = options.filter(
+         (opt) => !otherProviders.includes(opt[idKey])
+      );
+
+      return (
+         <div className="w-full">
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+               {name === "IDproveedor1" && "Proveedor 1"}
+               {name === "IDproveedor2" && "Proveedor 2"}
+               {name === "IDproveedor3" && "Proveedor 3"}
+            </label>
+            <select
+               name={name}
+               value={selectedValue}
+               onChange={(e) => handleInputChange(name, Number(e.target.value))}
+               className={`w-full px-3 py-2 border rounded ${
+                  errors[name] ? "border-red-500" : "border-gray-300"
+               }`}>
+               <option value="">Seleccione...</option>
+               {filteredOptions.map((opt) => (
+                  <option key={opt[idKey]} value={opt[idKey]}>
+                     {opt[labelKey]}
+                  </option>
+               ))}
+            </select>
+            {errors[name] && (
+               <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
+            )}
+         </div>
+      );
+   };
 
    return (
       <ModalComponent
@@ -444,199 +384,133 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          {(suppliers.status === "pending" || spiner) && <Spinner />}
 
          {Array.isArray(data) && data.length > 0 && (
-            <FormikForm
-               initialValues={initialValues}
-               validationSchema={validationSchema}
-               onSubmit={handleSubmit}
-               buttonMessage={
-                  IdRequisicion?.data?.status == "OC"
-                     ? ""
-                     : "Guardar las cotizaciones"
-               }
-               ref={formik}>
-               {(values, setFieldValue) => (
-                  <div className="space-y-6 max-h-[80vh] overflow-y-auto">
-                     {/* Header informativo */}
-                     <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                           <div>
-                              <h3 className="text-lg font-semibold text-blue-800">
-                                 Estado:{" "}
-                                 {IdRequisicion?.data?.status === "CO"
-                                    ? "Cotización"
-                                    : "Orden de Compra"}
-                              </h3>
-
-                              <p className="text-sm text-blue-600">
-                                 {IdRequisicion?.data?.status == "CO"
-                                    ? ` Complete la información de cotización para los ${data.length} productos`
-                                    : "Seleciona al provedor"}
-                              </p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-sm font-medium text-blue-700">
-                                 Requisición:{" "}
-                                 {IdRequisicion?.data?.IDRequisicion}
-                              </p>
-                              <p className="text-sm text-blue-600">
-                                 Ejercicio: {IdRequisicion?.data?.Ejercicio}
-                              </p>
-                           </div>
+            <form onSubmit={handleSubmit}>
+               <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+                  {/* Header informativo */}
+                  <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                           <h3 className="text-lg font-semibold text-blue-800">
+                              Estado:{" "}
+                              {IdRequisicion?.data?.status === "CO"
+                                 ? "Cotización"
+                                 : "Orden de Compra"}
+                           </h3>
+                           <p className="text-sm text-blue-600">
+                              {IdRequisicion?.data?.status == "CO"
+                                 ? ` Complete la información de cotización para los ${data.length} productos`
+                                 : "Seleciona al provedor"}
+                           </p>
+                        </div>
+                        <div className="text-right">
+                           <p className="text-sm font-medium text-blue-700">
+                              Requisición: {IdRequisicion?.data?.IDRequisicion}
+                           </p>
+                           <p className="text-sm text-blue-600">
+                              Ejercicio: {IdRequisicion?.data?.Ejercicio}
+                           </p>
                         </div>
                      </div>
+                  </div>
 
-                     {/* Selección de Proveedores */}
-                     {IdRequisicion?.data?.status == "CO" && (
-                        <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
-                           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-                              Seleccione los 3 Proveedores
-                           </h3>
-
-                           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                              <FormikAutocomplete
-                                 label="Proveedor 1"
-                                 name="IDproveedor1"
-                                 options={
-                                    suppliers?.data?.data.filter(
-                                       (prov: any) =>
-                                          ![
-                                             values?.IDproveedor2,
-                                             values?.IDproveedor3,
-                                          ]
-                                             .filter(Boolean)
-                                             .includes(prov.IDProveedor),
-                                    ) || []
-                                 }
-                                 labelKey="NombreCompleto"
-                                 idKey="IDProveedor"
-                              />
-                              <FormikAutocomplete
-                                 label="Proveedor 2"
-                                 name="IDproveedor2"
-                                 options={
-                                    suppliers?.data?.data.filter(
-                                       (prov: any) =>
-                                          ![
-                                             values?.IDproveedor1,
-                                             values?.IDproveedor3,
-                                          ]
-                                             .filter(Boolean)
-                                             .includes(prov.IDProveedor),
-                                    ) || []
-                                 }
-                                 labelKey="NombreCompleto"
-                                 idKey="IDProveedor"
-                              />
-                              <FormikAutocomplete
-                                 label="Proveedor 3"
-                                 name="IDproveedor3"
-                                 options={
-                                    suppliers?.data?.data.filter(
-                                       (prov: any) =>
-                                          ![
-                                             values?.IDproveedor1,
-                                             values?.IDproveedor2,
-                                          ]
-                                             .filter(Boolean)
-                                             .includes(prov.IDProveedor),
-                                    ) || []
-                                 }
-                                 labelKey="NombreCompleto"
-                                 idKey="IDProveedor"
-                              />
-                           </div>
+                  {/* Selección de Proveedores */}
+                  {IdRequisicion?.data?.status == "CO" && (
+                     <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
+                        <h3 className="mb-4 text-lg font-semibold text-gray-900">
+                           Seleccione los 3 Proveedores
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                           {renderSelect(
+                              "IDproveedor1",
+                              suppliers?.data?.data || [],
+                              "NombreCompleto",
+                              "IDProveedor"
+                           )}
+                           {renderSelect(
+                              "IDproveedor2",
+                              suppliers?.data?.data || [],
+                              "NombreCompleto",
+                              "IDProveedor"
+                           )}
+                           {renderSelect(
+                              "IDproveedor3",
+                              suppliers?.data?.data || [],
+                              "NombreCompleto",
+                              "IDProveedor"
+                           )}
                         </div>
-                     )}
+                     </div>
+                  )}
 
-                     {/* Tabla estilo Excel */}
-                     <div className="overflow-x-auto">
-                        <table className="min-w-full text-sm border border-gray-300">
-                           <thead className="bg-gray-100">
-                              <tr>
-                                 <th className="px-3 py-2 text-left border">
-                                    Producto
-                                 </th>
-                                 {[1, 2, 3].map((offset) => (
-                                    <th
-                                       key={offset}
-                                       className="px-3 py-2 text-center border"
-                                       colSpan={5}>
-                                       {IdRequisicion?.data?.status == "OC" ? (
-                                          <Button
-                                             color="blue"
-                                             variant={
-                                                data?.[0]["Proveedor"] ==
-                                                values[`IDproveedor${offset}`]
-                                                   ? "solid"
-                                                   : "outline"
-                                             }
-                                             onClick={() => {
-                                                console.log(
-                                                   "aca",
-                                                   IdRequisicion?.data,
-                                                );
-                                                mutationOC.mutate({
-                                                   method: "POST",
-                                                   url: "requisicionesdetails/ordencompra",
-                                                   data: {
-                                                      Ejercicio:
-                                                         IdRequisicion?.data
-                                                            ?.Ejercicio,
-                                                      IDRequisicion:
-                                                         IdRequisicion?.data
-                                                            ?.IDRequisicion,
-                                                      Proveedor:
-                                                         values[
-                                                            `IDproveedor${offset}`
-                                                         ],
-                                                   },
-                                                });
-                                             }}>
-                                             {suppliers?.data?.data.find(
-                                                (prov) =>
-                                                   prov.IDProveedor ==
-                                                   values[
-                                                      `IDproveedor${offset}`
-                                                   ],
-                                             )?.NombreCompleto ||
-                                                `Proveedor ${offset}`}
-                                          </Button>
-                                       ) : (
-                                          suppliers?.data?.data.find(
+                  {/* Tabla estilo Excel */}
+                  <div className="overflow-x-auto">
+                     <table className="min-w-full text-sm border border-gray-300">
+                        <thead className="bg-gray-100">
+                           <tr>
+                              <th className="px-3 py-2 text-left border">Producto</th>
+                              {[1, 2, 3].map((offset) => (
+                                 <th
+                                    key={offset}
+                                    className="px-3 py-2 text-center border"
+                                    colSpan={5}>
+                                    {IdRequisicion?.data?.status == "OC" ? (
+                                       <Button
+                                          color="blue"
+                                          variant={
+                                             data?.[0]["Proveedor"] ==
+                                             formValues[`IDproveedor${offset}`]
+                                                ? "solid"
+                                                : "outline"
+                                          }
+                                          onClick={() => {
+                                             mutationOC.mutate({
+                                                method: "POST",
+                                                url: "requisicionesdetails/ordencompra",
+                                                data: {
+                                                   Ejercicio: IdRequisicion?.data?.Ejercicio,
+                                                   IDRequisicion:
+                                                      IdRequisicion?.data?.IDRequisicion,
+                                                   Proveedor:
+                                                      formValues[`IDproveedor${offset}`],
+                                                },
+                                             });
+                                          }}>
+                                          {suppliers?.data?.data.find(
                                              (prov) =>
                                                 prov.IDProveedor ==
-                                                values[`IDproveedor${offset}`],
-                                          )?.NombreCompleto ||
-                                          `Proveedor ${offset}`
-                                       )}
+                                                formValues[`IDproveedor${offset}`],
+                                          )?.NombreCompleto || `Proveedor ${offset}`}
+                                       </Button>
+                                    ) : (
+                                       suppliers?.data?.data.find(
+                                          (prov) =>
+                                             prov.IDProveedor ==
+                                             formValues[`IDproveedor${offset}`],
+                                       )?.NombreCompleto || `Proveedor ${offset}`
+                                    )}
+                                 </th>
+                              ))}
+                           </tr>
+                           <tr>
+                              <th className="px-3 py-2 border"></th>
+                              {[1, 2, 3].map((offset) => (
+                                 <React.Fragment key={offset}>
+                                    <th className="px-3 py-2 text-center border">P.U.</th>
+                                    <th className="px-3 py-2 text-center border">% IVA</th>
+                                    <th className="px-3 py-2 text-center border">Ret.</th>
+                                    <th className="px-3 py-2 text-center border">
+                                       Subtotal
                                     </th>
-                                 ))}
-                              </tr>
-                              <tr>
-                                 <th className="px-3 py-2 border"></th>
-                                 {[1, 2, 3].map((offset) => (
-                                    <React.Fragment key={offset}>
-                                       <th className="px-3 py-2 text-center border">
-                                          P.U.
-                                       </th>
-                                       <th className="px-3 py-2 text-center border">
-                                          % IVA
-                                       </th>
-                                       <th className="px-3 py-2 text-center border">
-                                          Ret.
-                                       </th>
-                                       <th className="px-3 py-2 text-center border">
-                                          Subtotal
-                                       </th>
-                                       <th className="px-3 py-2 text-center border">
-                                          P. c/IVA
-                                       </th>
-                                    </React.Fragment>
-                                 ))}
-                              </tr>
-                           </thead>
-                           <tbody>
-                              {data.map((item: any, index) => (
+                                    <th className="px-3 py-2 text-center border">
+                                       P. c/IVA
+                                    </th>
+                                 </React.Fragment>
+                              ))}
+                           </tr>
+                        </thead>
+                        <tbody>
+                           {data?.length > 0 &&
+                              data.map((item: any, index) => (
                                  <tr
                                     key={index}
                                     className="odd:bg-white even:bg-gray-50">
@@ -657,59 +531,38 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     </td>
 
                                     {[1, 2, 3].map((offset) => {
-                                       const providerNumber =
-                                          index * 3 + offset;
+                                       const providerNumber = index * 3 + offset;
                                        return (
                                           <React.Fragment key={offset}>
                                              <td className="px-2 py-1 border">
-                                                <FormikInput
-                                                   label=""
-                                                   name={`PrecioUnitarioSinIva${providerNumber}`}
-                                                   handleModified={
-                                                      handleModified
-                                                   }
-                                                   disabled={
-                                                      IdRequisicion?.data
-                                                         ?.status === "OC"
-                                                   }
-                                                />
+                                                {renderInput(
+                                                   `PrecioUnitarioSinIva${providerNumber}`,
+                                                   IdRequisicion?.data?.status === "OC"
+                                                )}
                                              </td>
                                              <td className="px-2 py-1 border">
-                                                <FormikInput
-                                                   label=""
-                                                   name={`PorcentajeIVA${providerNumber}`}
-                                                   handleModified={
-                                                      handleModified
-                                                   }
-                                                   disabled={
-                                                      IdRequisicion?.data
-                                                         ?.status === "OC"
-                                                   }
-                                                />
+                                                {renderInput(
+                                                   `PorcentajeIVA${providerNumber}`,
+                                                   IdRequisicion?.data?.status === "OC"
+                                                )}
                                              </td>
                                              <td className="px-2 py-1 border">
-                                                <FormikInput
-                                                   label=""
-                                                   name={`Retenciones${providerNumber}`}
-                                                   disabled={
-                                                      IdRequisicion?.data
-                                                         ?.status === "OC"
-                                                   }
-                                                />
+                                                {renderInput(
+                                                   `Retenciones${providerNumber}`,
+                                                   IdRequisicion?.data?.status === "OC"
+                                                )}
                                              </td>
                                              <td className="px-2 py-1 border">
-                                                <FormikInput
-                                                   label=""
-                                                   name={`ImporteIva${providerNumber}`}
-                                                   disabled
-                                                />
+                                                {renderInput(
+                                                   `ImporteIva${providerNumber}`,
+                                                   true
+                                                )}
                                              </td>
                                              <td className="px-2 py-1 border">
-                                                <FormikInput
-                                                   label=""
-                                                   name={`PrecioUnitarioConIva${providerNumber}`}
-                                                   disabled
-                                                />
+                                                {renderInput(
+                                                   `PrecioUnitarioConIva${providerNumber}`,
+                                                   true
+                                                )}
                                              </td>
                                           </React.Fragment>
                                        );
@@ -717,100 +570,110 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                  </tr>
                               ))}
 
-                              {/* Totales con leyendas */}
-                              {[
-                                 { key: "subtotal", label: "Subtotal" },
-                                 { key: "iva", label: "IVA Calculado" },
-                                 { key: "totalConIva", label: "Total con IVA" },
-                                 { key: "retencion", label: "Retenciones" },
-                                 { key: "totalNeto", label: "Total Neto" },
-                              ].map((row, i) => (
-                                 <tr
-                                    key={i}
-                                    className="font-medium bg-gray-100">
-                                    <td className="px-3 py-2 text-right border">
-                                       {row.label}
-                                    </td>
-                                    {[1, 2, 3].map((providerIdx) => {
-                                       let subtotal = 0;
-                                       let ivaCalculado = 0;
-                                       let totalConIva = 0;
-                                       let retencionCalculada = 0;
-                                       let totalNeto = 0;
+                           {/* Totales con leyendas */}
+                           {[
+                              { key: "subtotal", label: "Subtotal" },
+                              { key: "iva", label: "IVA Calculado" },
+                              { key: "totalConIva", label: "Total con IVA" },
+                              { key: "retencion", label: "Retenciones" },
+                              { key: "totalNeto", label: "Total Neto" },
+                           ].map((row, i) => (
+                              <tr key={i} className="font-medium bg-gray-100">
+                                 <td className="px-3 py-2 text-right border">
+                                    {row.label}
+                                 </td>
+                                 {[1, 2, 3].map((providerIdx) => {
+                                    let subtotal = 0;
+                                    let ivaCalculado = 0;
+                                    let totalConIva = 0;
+                                    let retencionCalculada = 0;
+                                    let totalNeto = 0;
 
-                                       data.forEach((item, index) => {
-                                          const providerNumber =
-                                             index * 3 + providerIdx;
-                                          const cantidad =
-                                             Number(item.Cantidad) || 0;
-                                          const precioSinIva =
-                                             Number(
-                                                values[
-                                                   `PrecioUnitarioSinIva${providerNumber}`
-                                                ],
-                                             ) || 0;
-                                          const ivaPct =
-                                             Number(
-                                                values[
-                                                   `PorcentajeIVA${providerNumber}`
-                                                ],
-                                             ) || 0;
-                                          const ret =
-                                             Number(
-                                                values[
-                                                   `Retenciones${providerNumber}`
-                                                ],
-                                             ) || 0;
+                                    data.forEach((item, index) => {
+                                       const providerNumber = index * 3 + providerIdx;
+                                       const cantidad = Number(item.Cantidad) || 0;
+                                       const precioSinIva =
+                                          Number(
+                                             formValues[
+                                                `PrecioUnitarioSinIva${providerNumber}`
+                                             ],
+                                          ) || 0;
+                                       const ivaPct =
+                                          Number(
+                                             formValues[`PorcentajeIVA${providerNumber}`],
+                                          ) || 0;
+                                       const ret =
+                                          Number(
+                                             formValues[`Retenciones${providerNumber}`],
+                                          ) || 0;
 
-                                          const st = precioSinIva * cantidad;
-                                          const iva = st * (ivaPct / 100);
-                                          const tcIva = st + iva;
-                                          const neto = tcIva - ret;
+                                       const st = precioSinIva * cantidad;
+                                       const iva = st * (ivaPct / 100);
+                                       const tcIva = st + iva;
+                                       const neto = tcIva - ret;
 
-                                          subtotal += st;
-                                          ivaCalculado += iva;
-                                          totalConIva += tcIva;
-                                          retencionCalculada += ret;
-                                          totalNeto += neto;
-                                       });
+                                       subtotal += st;
+                                       ivaCalculado += iva;
+                                       totalConIva += tcIva;
+                                       retencionCalculada += ret;
+                                       totalNeto += neto;
+                                    });
 
-                                       const mapTotals: any = {
-                                          subtotal,
-                                          iva: ivaCalculado,
-                                          totalConIva,
-                                          retencion: retencionCalculada,
-                                          totalNeto,
-                                       };
+                                    const mapTotals: any = {
+                                       subtotal,
+                                       iva: ivaCalculado,
+                                       totalConIva,
+                                       retencion: retencionCalculada,
+                                       totalNeto,
+                                    };
 
-                                       return (
-                                          <td
-                                             key={providerIdx}
-                                             colSpan={5}
-                                             className="px-2 py-1 text-right border">
-                                             {formatCurrency(
-                                                mapTotals[row.key],
-                                                true,
-                                                false,
-                                             )}
-                                          </td>
-                                       );
-                                    })}
-                                 </tr>
-                              ))}
-                           </tbody>
-                        </table>
-                     </div>
-
-                     {/* Observaciones */}
-                     <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
-                        <FormikTextArea
-                           label="Observaciones de la Cotización"
-                           name="ObservacionesCot"
-                        />
-                     </div>
+                                    return (
+                                       <td
+                                          key={providerIdx}
+                                          colSpan={5}
+                                          className="px-2 py-1 text-right border">
+                                          {formatCurrency(
+                                             mapTotals[row.key],
+                                             true,
+                                             false,
+                                          )}
+                                       </td>
+                                    );
+                                 })}
+                              </tr>
+                           ))}
+                        </tbody>
+                     </table>
                   </div>
-               )}
-            </FormikForm>
+
+                  {/* Observaciones */}
+                  <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
+                     <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Observaciones de la Cotización
+                     </label>
+                     <textarea
+                        name="ObservacionesCot"
+                        value={formValues.ObservacionesCot || ""}
+                        onChange={(e) =>
+                           handleInputChange("ObservacionesCot", e.target.value)
+                        }
+                        rows={4}
+                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                     />
+                  </div>
+
+                  {/* Botón Submit */}
+                  {IdRequisicion?.data?.status !== "OC" && (
+                     <div className="flex justify-end">
+                        <button
+                           type="submit"
+                           className="px-6 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
+                           Guardar las cotizaciones
+                        </button>
+                     </div>
+                  )}
+               </div>
+            </form>
          )}
       </ModalComponent>
    );
