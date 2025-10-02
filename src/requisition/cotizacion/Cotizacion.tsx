@@ -245,7 +245,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }) => AxiosRequest(url, method, data),
       onMutate() {
          setSpiner(true);
-         setReloadTable(false);
+         setReloadTable(true)
       },
       onSuccess: (data) => {
          // mutationCotized.mutate({
@@ -258,6 +258,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          setOpen(false);
          setInitialValues({});
          showToast(data.message, data.status);
+         setReloadTable(false)
+
       },
       onError: (error: any) => {
          showToast(
