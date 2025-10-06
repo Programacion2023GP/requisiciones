@@ -35,8 +35,27 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
 
    const [search, setSearch] = useState("");
    const [values, setValues] = useState<any>(null);
-   const userGroups: number[] = JSON.parse(localStorage.getItem("group") || "[]");
-   const groupArray: number[] = JSON.parse(localStorage.getItem("group") || "[]");
+   // Obtener el valor de localStorage
+   const rawGroup = localStorage.getItem("group");
+
+   // Inicializar array vacío
+   let userGroups: number[] = [];
+
+   // Intentar parsear y convertir a números
+   try {
+      const parsed = JSON.parse(rawGroup || "[]");
+      if (Array.isArray(parsed)) {
+         userGroups = parsed.map(Number); // Si es array, map a números
+      } else {
+         userGroups = [Number(parsed)]; // Si es un solo valor, meterlo en array
+      }
+   } catch (e) {
+      userGroups = []; // En caso de error, array vacío
+   }
+
+   // Lo mismo puedes usar para groupArray si quieres
+   const groupArray = [...userGroups];
+
    const [groups, types, director] = useQueries({
       queries: [
          { queryKey: ["departamentos/index"], queryFn: () => GetAxios("departamentos/index") },
@@ -85,55 +104,52 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    const formik = useRef<FormikProps<any>>(null);
 
    // --- Cargar datos al abrir el modal ---
-   useEffect(() => {
-      if (!open) return;
+// --- Valores iniciales simples ---
+useEffect(() => {
+  if (!open || !groups.data?.data) return;
 
-      const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
+  const departamentoId = groupArray[0] ?? 0;
+  const departamento = groups.data.data.find((it: any) => it.IDDepartamento == departamentoId);
+  const centroCosto = departamento?.Centro_Costo ?? 0;
 
-      let finalValues: any;
+  const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
 
-      if (formRequisicion) {
-         finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
+  let finalValues: any;
 
-         // Productos existentes
-         let productos = Array.isArray(formRequisicion)
-            ? formRequisicion.map((item: any) => ({
-               Cantidad: item.Cantidad || "",
-               Descripcion: item.Descripcion || "",
-               IDDetalle: item.IDDetalle || 0,
-            }))
-            : formRequisicion.Productos || [];
+  if (formRequisicion) {
+    finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
 
-         // Asegurar que siempre haya 200 filas
-         if (productos.length < 200) {
-            productos = [
-               ...productos,
-               ...Array.from({ length: 200 - productos.length }, () => ({
-                  Cantidad: "",
-                  Descripcion: "",
-               })),
-            ];
-         }
+    let productos = Array.isArray(formRequisicion)
+      ? formRequisicion.map((item: any) => ({
+          Cantidad: item.Cantidad || "",
+          Descripcion: item.Descripcion || "",
+          IDDetalle: item.IDDetalle || 0,
+        }))
+      : formRequisicion.Productos || [];
 
-         finalValues.Productos = productos;
-      } else {
-         // Valores por defecto con 200 filas
+    if (productos.length < 200) {
+      productos = [
+        ...productos,
+        ...Array.from({ length: 200 - productos.length }, () => ({ Cantidad: "", Descripcion: "" })),
+      ];
+    }
 
-         finalValues = {
-            Solicitante: "",
-            IDDepartamento: groupArray[0] ?? 0, // primer elemento del array
-            Centro_Costo:
-               Number(groups.data?.data.find((it: any) => it.IDDepartamento == (groupArray[0] ?? 0))
-                  ?.Centro_Costo) ?? 0, 
-            IDTipo: 0,
-            FechaCaptura: "",
-            Observaciones: "",
-            Productos: Array.from({ length: 200 }, () => ({ Cantidad: "", Descripcion: "" })),
-         };
-      }
+    finalValues.Productos = productos;
+  } else {
+    finalValues = {
+      Solicitante: "",
+      IDDepartamento: departamentoId,
+      Centro_Costo: centroCosto,
+      IDTipo: 0,
+      FechaCaptura: "",
+      Observaciones: "",
+      Productos: Array.from({ length: 200 }, () => ({ Cantidad: "", Descripcion: "" })),
+    };
+  }
 
-      setValues(finalValues);
-   }, [open, editData]);
+  setValues(finalValues);
+}, [open, groups.data, editData]);
+
 
 
    const handleSubmit = (formValues: any) => {
@@ -160,18 +176,13 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       sm: 12,
    };
    const handleModified = (name: string, value: number | string) => {
-      const val = value as number;
-      name === "IDDepartamento" &&
-         val > 0 &&
-         formik.current?.setFieldValue(
-            "Centro_Costo",
-            groups.data?.data.find((it: any) => it.IDDepartamento == value)
-               .Centro_Costo > 0
-               ? groups.data?.data.find((it: any) => it.IDDepartamento == value)
-                  .Centro_Costo
-               : 0,
-         );
+      if (name === "IDDepartamento") {
+         const departamento = groups.data?.data.find((it: any) => it.IDDepartamento == Number(value));
+         const centroCosto = departamento?.Centro_Costo ?? 0;
+         formik.current?.setFieldValue("Centro_Costo", centroCosto);
+      }
    };
+
    return (
       <ModalComponent open={open} setOpen={() => setOpen(false)} title={title}>
          {mutation.status === "pending" && <Spinner />}
@@ -253,7 +264,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                            <div className=" w-full">
                               <h3 className="text-lg font-semibold">Productos</h3>
                               <input
-                              
+
                                  type="text"
                                  placeholder="Buscar descripción..."
                                  value={search}
@@ -296,10 +307,10 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                                              />
                                           </td>
                                           <td className="border p-1 text-center">
-                                             <Button  onClick={() => setValue(`Productos[${idx}]`, { Cantidad: "", Descripcion: "", IDDetalle: prod.IDDetalle || 0 })} color={"red"} variant={"outline"}>
-                                               <IoMdClose/>
+                                             <Button onClick={() => setValue(`Productos[${idx}]`, { Cantidad: "", Descripcion: "", IDDetalle: prod.IDDetalle || 0 })} color={"red"} variant={"outline"}>
+                                                <IoMdClose />
                                              </Button>
-                                           
+
                                           </td>
                                        </tr>
                                     ))}
