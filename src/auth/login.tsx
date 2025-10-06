@@ -46,7 +46,7 @@ const LoginComponent = () => {
           "menuPermiso",
           JSON.stringify(data.data.menuPermiso)
         );
-        localStorage.setItem("group", data.data.group);
+localStorage.setItem("group", JSON.stringify(data.data.group));
         localStorage.setItem("token", data.data.token);
         localStorage.setItem("name", data.data.name);
         localStorage.setItem("role", data.data.role);
