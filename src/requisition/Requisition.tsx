@@ -257,21 +257,24 @@ const RequisicionesAdd = () => {
    ]);
    const buttonElement = useMemo(
       () => (
-         <Tooltip content="Agregar Requisición">
-            <div className="mb-4">
-               <Button
-                  id="btn-add-requisition"
-                  onClick={() => {
-                     setOpen(true);
-                     ObservableDelete("FormRequisicion");
-                  }}
-                  size="medium"
-                  color="blue"
-                  variant="solid">
-                  <icons.Tb.TbFileTextSpark size={20} />
-               </Button>
-            </div>
-         </Tooltip>
+         <>
+            <Tooltip content="Agregar Requisición">
+               <div className="mb-4">
+                  <Button
+                     id="btn-add-requisition"
+                     onClick={() => {
+                        setOpen(true);
+                        ObservableDelete("FormRequisicion");
+                     }}
+                     size="medium"
+                     color="blue"
+                     variant="solid">
+                     <icons.Tb.TbFileTextSpark size={20} />
+                  </Button>
+               </div>
+            </Tooltip>
+            {/* agregar boton de refrescar */}
+         </>
       ),
       [],
    );
