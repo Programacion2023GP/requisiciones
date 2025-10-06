@@ -80,7 +80,7 @@ const Actions: React.FC<{
          );
       },
    });
-   const userGroups = localStorage.getItem("group")?.split(",") ?? [];
+      const userGroups: number[] = JSON.parse(localStorage.getItem("group") || "[]");
 
    const mutationPdf = useMutation({
       mutationFn: ({
@@ -291,6 +291,7 @@ const Actions: React.FC<{
          ([key, value]) => value === permission && permisos[key] === 1,
       );
    };
+
    const buttonVobo = (idTipo: number): boolean => {
       const group = localStorage.getItem("group");
       if (group === null) {
@@ -433,10 +434,12 @@ const Actions: React.FC<{
                         ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
                         )) */}
-                     {
+                     {((data.Status == "CP" &&
+                     userGroups.includes((data?.IDDepartamento))
+                      ) ||
                         ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
-                        ) && (
+                        ))  && (
                         <div className="w-fit">
                            <Tooltip content="Editar">
                               <Button
@@ -712,7 +715,7 @@ const Actions: React.FC<{
                            </div>
                         </>
                      )}
-                     {((userGroups.includes(String(data?.IDDepartamento)) &&
+                     {((userGroups.includes((data?.IDDepartamento)) &&
                         newStatus(data.Status) == "AU") ||
                         ["AUTORIZADOR", "SISTEMAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",

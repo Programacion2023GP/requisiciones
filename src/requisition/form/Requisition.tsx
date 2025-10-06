@@ -1,243 +1,157 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import ModalComponent from "../../components/modal/Modal";
 import {
-   FormikAutocomplete,
    FormikInput,
-   FormikNumberInput,
    FormikTextArea,
+   FormikAutocomplete,
 } from "../../components/formik/FormikInputs/FormikInput";
 import FormikForm from "../../components/formik/Formik";
 import * as Yup from "yup";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { FormikProps } from "formik";
-import CollapseComponent from "../../components/colapse/Colapse";
-import { ColComponent } from "../../responsive/Responsive";
 import Button from "../../components/form/Button";
-import { showConfirmationAlert, showToast } from "../../sweetalert/Sweetalert";
-import { BsTrash3Fill } from "react-icons/bs";
 import Spinner from "../../loading/Loading";
+import { showToast } from "../../sweetalert/Sweetalert";
 import Observable from "../../extras/observable";
-import PdfRequisition from "../pdf/Pdfrequisition";
+import { IoMdClose } from "react-icons/io";
 
 type PropsRequisition = {
    open: boolean;
    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
    title: string;
    setReloadTable: React.Dispatch<React.SetStateAction<boolean>>;
+   editData?: any;
 };
-type PropsHandleAddProducts = {
-   cont: Array<number>;
-   dropInitialValue: (index: number) => any;
-};
-const HandleAddProduct: React.FC<PropsHandleAddProducts> = ({
-   cont,
-   dropInitialValue,
-}) => {
-   return (
-      <>
-         {cont.map((item: any, index) => {
-            return (
-               <ColComponent responsive={{ "2xl": 4, lg: 6, md: 6 }}>
-                  <div className="relative flex flex-col px-2 py-6 mb-2 bg-white border-2 border-gray-300 rounded-md shadow-sm">
-                     <BsTrash3Fill
-                        id="form-requisition-deleteproduct"
-                        className="absolute z-50 w-5 h-5 text-red-500 cursor-pointer right-1 top-2"
-                        onClick={() => {
-                           dropInitialValue(item);
-                        }}
-                     />
-                     <div
-                        className={`relative ${item != cont[cont.length - 1] && "opacity-40"}`}>
-                        {/* Capa bloqueante, se asegura de cubrir completamente el área */}
-                        <div
-                           className={`w-full h-full absolute top-0 left-0 ${
-                              item != cont[cont.length - 1]
-                                 ? "cursor-not-allowed z-[500]  pointer-events-auto"
-                                 : ""
-                           }`}
-                        />
 
-                        {/* Campos de entrada de Formik */}
-                        <FormikInput
-                           id={`form-requisition-quantityproduct${item}`}
-                           name={`Cantidad${item}`}
-                           label="Cantidad"
-                           type="number"
-                           // decimals={true}
-                        />
-
-                        <FormikInput
-                           name={`Descripcion${item}`}
-                           label="Descripción"
-                           id={`form-requisition-descriptionproduct${item}`}
-                        />
-                     </div>
-                  </div>
-               </ColComponent>
-            );
-         })}
-      </>
-   );
-};
 const RequisitionForm: React.FC<PropsRequisition> = ({
    open,
    setOpen,
    title,
    setReloadTable,
+   editData,
 }) => {
    const { ObservableGet } = Observable();
 
-   const mutation = useMutation({
-      mutationFn: ({
-         url,
-         method,
-         data,
-      }: {
-         url: string;
-         method: "POST" | "PUT" | "DELETE";
-         data?: any;
-      }) => AxiosRequest(url, method, data),
-      onMutate(variables) {
-         setReloadTable(false);
-      },
-      onSuccess: (data) => {
-         setOpen(false);
-         setOpenPdf(false);
-         setReloadTable(true);
-
-         showToast(data.message, data.status);
-         if (mutation.status === "success") {
-            mutation.reset();
-         }
-      },
-      onError: (error: any) => {
-         setOpenPdf(false);
-         showToast(
-            error.response?.data?.message || "Error al realizar la acción",
-            "error",
-         );
-      },
+   const [search, setSearch] = useState("");
+   const [values, setValues] = useState<any>(null);
+   const userGroups: number[] = JSON.parse(localStorage.getItem("group") || "[]");
+   const groupArray: number[] = JSON.parse(localStorage.getItem("group") || "[]");
+   const [groups, types, director] = useQueries({
+      queries: [
+         { queryKey: ["departamentos/index"], queryFn: () => GetAxios("departamentos/index") },
+         { queryKey: ["tipos/index"], queryFn: () => GetAxios("tipos/index") },
+         {
+            queryKey: ["departaments/director", localStorage.getItem("group")],
+            queryFn: () =>
+               GetAxios(
+                  `departaments/director/${groupArray[0] ?? 0}`,
+               ),
+         },
+      ],
    });
-   const dataFormik = {
-      IDDepartamento: parseInt(localStorage.getItem("group") ?? "0", 10),
-      Observaciones: "",
-      Solicitante: "",
-      IDTipo: 0,
-      FechaCaptura: "",
-      Centro_Costo: parseInt(localStorage.getItem("centro_costo") ?? "0", 10),
-      Cantidad1: 0,
-      Descripcion1: "",
-   };
-   const object = Yup.object({
-      Solicitante: Yup.string().required("El solicitante es requerido"),
-      IDDepartamento:
-         localStorage.getItem("role") === "CAPTURA"
-            ? Yup.number().nullable()
-            : Yup.number()
-                 .transform(
-                    (value, originalValue) => (isNaN(value) ? null : value), // Si no es un número, lo convierte en null
-                 )
-                 .min(1, "El departamento es requerido")
-                 .required("El departamento es requerido"),
-      Centro_Costo:
-         localStorage.getItem("role") === "CAPTURA"
-            ? Yup.number().nullable()
-            : Yup.number()
-                 .min(1, "El costo es requerido")
-                 .required("El costo es requerido"),
-      IDTipo: Yup.number()
-         .min(1, "El tipo es requerido")
-         .required("El tipo es requerido"),
-      FechaCaptura: Yup.string().required("La fecha es requerida"),
-      Observaciones: Yup.string().required("Las observaciones es requerido"),
-      Cantidad1: Yup.number()
-         .min(1, "La cantidad debe ser mayor a 0")
-         .required("La cantidad es requerida"),
-      Descripcion1: Yup.string().required("La descripcion es requerida"),
-   }) as Yup.ObjectSchema<{
-      Solicitante: string;
-      IDDepartamento: number;
-      IDTipo: number;
-      Centro_Costo: number;
-      Observaciones: string;
-      [key: string]: any;
-   }>;
-   const [values, setValues] = useState<Record<string, any> | null>(null);
-   const [cont, setCont] = useState<Array<number>>([1]);
-   const [validationSchema, setValidationSchema] = useState(object);
-   // const [spiner, setSpiner] = useState<boolean>(false);
-   const [openPdf, setOpenPdf] = useState<boolean>(false);
+
 
    useEffect(() => {
-      const FormRequisicion = ObservableGet("FormRequisicion") as Record<
-         string,
-         any
-      >;
-      let dataForm = FormRequisicion?.data?.data;
-      console.log("la data", dataForm);
-      dataForm = Array.isArray(dataForm) ? dataForm[0] : dataForm;
-
-      const finalJson: Record<string, any> = { ...dataForm };
-
-      console.log("Inicio del procesamiento:", finalJson);
-
-      const conteo: number[] = [];
-      if (Array.isArray(FormRequisicion?.data?.data)) {
-         FormRequisicion.data.data.forEach((item: any, index: number) => {
-            finalJson[`Cantidad${index + 1}`] = item.Cantidad;
-            finalJson[`IDDetalle${index + 1}`] = item.IDDetalle;
-
-            finalJson[`Descripcion${index + 1}`] = item.Descripcion;
-            conteo.push(index + 1);
-         });
+      //  console.log(open,director.data.data)
+      const nombre = director.data?.data?.[0]?.Nombre_Director || "";
+      if (formik.current?.values["Solicitante"] != "") {
+         return;
       }
-      delete finalJson["Cantidad"];
-      delete finalJson["Descripcion"];
+      formik.current?.setFieldValue("Solicitante", nombre);
 
-      setValues(Object.keys(finalJson).length > 0 ? finalJson : dataFormik);
-      setCont(Array.isArray(FormRequisicion?.data?.data) ? conteo : [1]);
+   }, [open, director]);
+   const schema = Yup.object({
+      Solicitante: Yup.string().required("El solicitante es requerido"),
+      IDDepartamento: Yup.number().min(1, "El departamento es requerido").required(),
+      Centro_Costo: Yup.number().min(1, "El centro de costo es requerido").required(),
+      IDTipo: Yup.number().min(1, "El tipo es requerido").required(),
+      FechaCaptura: Yup.string().required("La fecha es requerida"),
+      Observaciones: Yup.string().required("Las observaciones son requeridas"),
+   });
 
-      setValidationSchema(object);
-   }, [open]);
+   const mutation = useMutation({
+      mutationFn: ({ url, method, data }: any) => AxiosRequest(url, method, data),
+      onSuccess: (data) => {
+         setReloadTable(true);
+         setOpen(false);
+         showToast(data.message, data.status);
+      },
+      onError: (err: any) => {
+         showToast(err.response?.data?.message || "Error al guardar", "error");
+      },
+   });
 
-   const formik = useRef<FormikProps<Record<string, any>> | null>(null);
-   const { ObservablePost } = Observable();
+   const formik = useRef<FormikProps<any>>(null);
 
-   const onSumbit = async (values: Record<string, any>) => {
-      setValues(values);
-      const products = Object.keys(values)
-         .filter((key) => key.startsWith("Cantidad"))
-         .map((key) => {
-            const index = key.replace("Cantidad", ""); // Extract the index
-            return {
-               Cantidad: values[key],
-               Descripcion: values[`Descripcion${index}`],
-            };
-         });
-      try {
-         const result = await ObservablePost("PdfRequisicion", {
-            data: {
-               products: products,
-               pdfData: {
-                  Nombre_CC: values.Centro_Costo,
-                  Observaciones: values.Observaciones,
-               },
-               status: "CP",
-            },
-         });
-      } catch (e) {
-      } finally {
-         // setSpiner(false);
-         setOpenPdf(true);
+   // --- Cargar datos al abrir el modal ---
+   useEffect(() => {
+      if (!open) return;
 
-         // mutation.mutate({
-         //   url: "/requisiciones/create",
-         //   method: "POST",
-         //   data: values,
-         // });
+      const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
+
+      let finalValues: any;
+
+      if (formRequisicion) {
+         finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
+
+         // Productos existentes
+         let productos = Array.isArray(formRequisicion)
+            ? formRequisicion.map((item: any) => ({
+               Cantidad: item.Cantidad || "",
+               Descripcion: item.Descripcion || "",
+               IDDetalle: item.IDDetalle || 0,
+            }))
+            : formRequisicion.Productos || [];
+
+         // Asegurar que siempre haya 200 filas
+         if (productos.length < 200) {
+            productos = [
+               ...productos,
+               ...Array.from({ length: 200 - productos.length }, () => ({
+                  Cantidad: "",
+                  Descripcion: "",
+               })),
+            ];
+         }
+
+         finalValues.Productos = productos;
+      } else {
+         // Valores por defecto con 200 filas
+
+         finalValues = {
+            Solicitante: "",
+            IDDepartamento: groupArray[0] ?? 0, // primer elemento del array
+            Centro_Costo:
+               Number(groups.data?.data.find((it: any) => it.IDDepartamento == (groupArray[0] ?? 0))
+                  ?.Centro_Costo) ?? 0, 
+            IDTipo: 0,
+            FechaCaptura: "",
+            Observaciones: "",
+            Productos: Array.from({ length: 200 }, () => ({ Cantidad: "", Descripcion: "" })),
+         };
       }
+
+      setValues(finalValues);
+   }, [open, editData]);
+
+
+   const handleSubmit = (formValues: any) => {
+      const productosLlenos = formValues.Productos.filter(
+         (p: any) =>
+            p.Descripcion?.trim() !== "" && parseFloat(p.Cantidad || 0) > 0
+            || (p.IDDetalle && p.IDDetalle > 0) // <-- enviar también si tienen IDDetalle
+      );
+
+
+      mutation.mutate({
+         method: "POST",
+         url: "requisiciones/create",
+         data: { ...formValues, Productos: productosLlenos },
+      });
    };
+
+   if (!values) return null; // Espera a cargar datos
    const responsive = {
       "2xl": 6,
       xl: 6,
@@ -245,35 +159,6 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       md: 12,
       sm: 12,
    };
-   const queries = useQueries({
-      queries: [
-         {
-            queryKey: ["departamentos/index"],
-            queryFn: () => GetAxios("departamentos/index"),
-            refetchOnWindowFocus: true,
-         },
-         {
-            queryKey: ["tipos/index"],
-            queryFn: () => GetAxios("tipos/index"),
-            refetchOnWindowFocus: true,
-         },
-         {
-            queryKey: ["departaments/director", localStorage.getItem("group")],
-            queryFn: () =>
-               GetAxios(
-                  `departaments/director/${localStorage.getItem("group")}`,
-               ),
-         },
-      ],
-   });
-   const [groups, types, director] = queries;
-   //   useEffect(() => {
-   //     console.log(open,director.data.data)
-   //     const nombre = director.data?.data?.[0]?.Nombre_Director || "";
-   //     formik.current?.setFieldValue("Solicitante", nombre);
-   const userGroups = localStorage.getItem("group")?.split(",") ?? [];
-
-   // }, [director.data,open]);
    const handleModified = (name: string, value: number | string) => {
       const val = value as number;
       name === "IDDepartamento" &&
@@ -283,267 +168,153 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
             groups.data?.data.find((it: any) => it.IDDepartamento == value)
                .Centro_Costo > 0
                ? groups.data?.data.find((it: any) => it.IDDepartamento == value)
-                    .Centro_Costo
+                  .Centro_Costo
                : 0,
          );
    };
-   const dropInitialValue = (index: number): any => {
-      if (cont.length == 1) {
-         showToast("No se puede borrar el unico producto existente", "warning");
-         return;
-      }
-
-      // Limpia los valores y validaciones dinámicas asociadas
-      delete formik.current?.values[`Cantidad${index}`];
-      delete formik.current?.values[`Descripcion${index}`];
-
-      setValues((prev: any) => {
-         const updatedValues = { ...prev };
-         delete updatedValues[`Cantidad${index}`]; // Eliminar el valor de Cantidad
-         delete updatedValues[`Descripcion${index}`]; // Eliminar el valor de Descripcion
-         return updatedValues;
-      });
-
-      setValidationSchema(
-         (
-            prev: Yup.ObjectSchema<{
-               Solicitante: string;
-               IDDepartamento: number;
-               IDTipo: number;
-               Centro_Costo: number;
-               Observaciones: string;
-               [key: string]: any;
-            }>,
-         ) => {
-            const updatedFields = { ...prev.fields };
-
-            delete updatedFields[`Cantidad${index}`];
-            delete updatedFields[`Descripcion${index}`];
-
-            return Yup.object(updatedFields) as Yup.ObjectSchema<{
-               Solicitante: string;
-               IDDepartamento: number;
-               IDTipo: number;
-               Centro_Costo: number;
-               Observaciones: string;
-               [key: string]: any;
-            }>;
-         },
-      );
-      setCont((prev) => prev.filter((i: number) => i !== index));
-   };
-
-   const handleMoreProducts = () => {
-      const cantidad =
-         formik?.current?.values[`Cantidad${cont[cont.length - 1]}`];
-
-      const descripcion =
-         formik?.current?.values[`Descripcion${cont[cont.length - 1]}`];
-      // Asegurarte de que 'cantidad' es un número antes de hacer la comparación
-      if (
-         (parseInt(cantidad) > 0 &&
-            typeof descripcion === "string" &&
-            descripcion !== "") ||
-         cont.length == 0
-      ) {
-         const size = cont[cont.length - 1];
-
-         formik?.current?.setValues((prev: any) => ({
-            ...prev,
-            [`Cantidad${size + 1}`]: 0,
-            [`Descripcion${size + 1}`]: "",
-            [`IDDetalle${size + 1}`]: 0,
-         }));
-         setValidationSchema((prev: any) => {
-            const updatedFields = { ...prev.fields };
-            updatedFields[`Cantidad${size + 1}`] = Yup.number()
-               .min(1, "La cantidad debe ser mayor a 0")
-               .required("La cantidad es requerida");
-            updatedFields[`Descripcion${size + 1}`] = Yup.string().required(
-               "La descripcion es requerida",
-            );
-            return Yup.object(updatedFields) as Yup.ObjectSchema<{
-               Solicitante: string;
-               IDDepartamento: number;
-               IDTipo: number;
-               Centro_Costo: number;
-               Observaciones: string;
-               [key: string]: any;
-            }>;
-         });
-
-         setCont((prev) => [...prev, prev[prev.length - 1] + 1]);
-      } else {
-         showToast(
-            "No se pueden agregar mas productos hasta terminar de llenar el anterior",
-            "info",
-         );
-      }
-   };
-
    return (
-      <>
-         {openPdf && (
-            <PdfRequisition
-               open={openPdf}
-               setOpen={() => {
-                  setOpenPdf(false);
+      <ModalComponent open={open} setOpen={() => setOpen(false)} title={title}>
+         {mutation.status === "pending" && <Spinner />}
+         <div className="p-3">
+            <FormikForm
+               id="form-requisition"
+               ref={formik}
+               initialValues={values}
+               validationSchema={schema}
+               onSubmit={handleSubmit}
+               buttonMessage="Registrar"
+               children={(v, setValue) => {
+                  const filteredProducts = v.Productos.filter((prod: any) =>
+                     prod.Descripcion?.toLowerCase().includes(search.toLowerCase())
+                  );
+
+                  return (
+                     <>
+                        {localStorage.getItem("role") == "SISTEMAS" ? (
+                           <FormikAutocomplete
+                              responsive={responsive}
+                              loading={groups.isLoading}
+                              name="IDDepartamento"
+                              label={"selecciona el departamento"}
+                              options={groups.data?.data}
+                              idKey={"IDDepartamento"}
+                              labelKey={"Nombre_Departamento"}
+                              handleModified={handleModified}
+                              handleModifiedOptions={{
+                                 name: "IDDepartamento",
+                              }}
+                           />
+                        ) : (
+                           <FormikAutocomplete
+                              disabled={userGroups.length === 1}
+                              responsive={responsive}
+                              loading={groups.isLoading}
+                              name="IDDepartamento"
+                              label="Selecciona el departamento"
+                              options={groups.data?.data?.filter(it =>
+                                 userGroups.includes(it.IDDepartamento) // comparar número con número
+                              )}
+
+                              idKey="IDDepartamento"
+                              labelKey="Nombre_Departamento"
+                              handleModified={handleModified}
+                              handleModifiedOptions={{ name: "IDDepartamento" }}
+                           />
+
+                        )}
+
+
+                        <FormikAutocomplete
+                           disabled={
+                              localStorage.getItem("role") != "SISTEMAS"
+                           }
+                           responsive={responsive}
+                           loading={groups.isLoading}
+                           name="Centro_Costo"
+                           label={"selecciona el centro de costo"}
+                           options={groups.data?.data}
+                           idKey={"Centro_Costo"}
+                           labelKey={"Centro_Costo"}
+                        />
+                        <FormikAutocomplete
+                           responsive={responsive}
+
+                           name="IDTipo"
+                           label="Tipo"
+                           options={types.data?.data}
+                           idKey="IDTipo"
+                           labelKey="Descripcion"
+                        />
+                        <FormikInput responsive={responsive} name="Solicitante" label="Solicitante" />
+                        <FormikInput name="FechaCaptura" label="Fecha" type="date" />
+                        <FormikTextArea name="Observaciones" label="Observaciones" />
+
+                        <div className="mt-6 w-full">
+                           <div className=" w-full">
+                              <h3 className="text-lg font-semibold">Productos</h3>
+                              <input
+                              
+                                 type="text"
+                                 placeholder="Buscar descripción..."
+                                 value={search}
+                                 onChange={(e) => setSearch(e.target.value)}
+                                 className="border px-3 py-1 w-full my-4 rounded-md text-sm focus:ring focus:ring-blue-200"
+                              />
+                           </div>
+                           <div className="border rounded-md overflow-y-auto max-h-[400px] shadow-sm">
+                              <table className="w-full text-sm border-collapse">
+                                 <thead className="bg-gray-100 sticky top-0">
+                                    <tr>
+                                       <th className="border p-2 w-14 text-center">#</th>
+                                       <th className="border p-2 w-28 text-center">Cantidad</th>
+                                       <th className="border p-2 text-left">Descripción</th>
+                                       <th className="border p-2 w-14 text-center">Eliminar</th>
+                                    </tr>
+                                 </thead>
+                                 <tbody>
+                                    {filteredProducts.map((prod: any, idx: number) => (
+                                       <tr key={idx} className="odd:bg-gray-50">
+                                          <td className="border text-center text-gray-600 p-1">{idx + 1}</td>
+                                          <td className="border p-1 text-center">
+                                             <input
+                                                type="number"
+                                                name={`Productos[${idx}].Cantidad`}
+                                                value={prod.Cantidad}
+                                                onChange={(e) => setValue(`Productos[${idx}].Cantidad`, e.target.value)}
+                                                className="w-full px-2 py-1 text-center border-none focus:ring-0 focus:outline-none"
+                                                placeholder="0"
+                                             />
+                                          </td>
+                                          <td className="border p-1">
+                                             <input
+                                                type="text"
+                                                name={`Productos[${idx}].Descripcion`}
+                                                value={prod.Descripcion}
+                                                onChange={(e) => setValue(`Productos[${idx}].Descripcion`, e.target.value)}
+                                                className="w-full px-2 py-1 border-none focus:ring-0 focus:outline-none"
+                                                placeholder="Descripción del producto"
+                                             />
+                                          </td>
+                                          <td className="border p-1 text-center">
+                                             <Button  onClick={() => setValue(`Productos[${idx}]`, { Cantidad: "", Descripcion: "", IDDetalle: prod.IDDetalle || 0 })} color={"red"} variant={"outline"}>
+                                               <IoMdClose/>
+                                             </Button>
+                                           
+                                          </td>
+                                       </tr>
+                                    ))}
+                                 </tbody>
+
+                              </table>
+                           </div>
+                        </div>
+                     </>
+                  );
                }}
-               children={
-                  <div className="flex items-end justify-end w-full ">
-                     <div className="mt-2 mr-8 w-fit">
-                        <Button
-                           variant="solid"
-                           color="blue"
-                           size="small"
-                           onClick={() => {
-                              mutation.mutate({
-                                 url: "/requisiciones/create",
-                                 method: "POST",
-                                 data: values,
-                              });
-                           }}>
-                           Registrar
-                        </Button>
-                     </div>
-                  </div>
-               }
             />
-         )}
-         {values && Object.keys(values).length > 0 && (
-            <ModalComponent
-               open={open}
-               setOpen={() => {
-                  setOpen(false);
-               }}
-               title={title}>
-               {mutation.status === "pending" && <Spinner />}
-               <div className="p-2 mt-2 ">
-                  <FormikForm
-                     // key={cont[cont.length - 1]}
-                     id="form-requisition-submit"
-                     onSubmit={onSumbit}
-                     ref={formik}
-                     buttonMessage={"Vista previa"}
-                     validationSchema={validationSchema}
-                     initialValues={values}
-                     children={(v, setValue) => {
-                        console.log("group", groups.data?.data);
-                        return (
-                           <>
-                              {localStorage.getItem("role") == "SISTEMAS" ? (
-                                 <FormikAutocomplete
-                                    responsive={responsive}
-                                    loading={groups.isLoading}
-                                    name="IDDepartamento"
-                                    label={"selecciona el departamento"}
-                                    options={groups.data?.data}
-                                    idKey={"IDDepartamento"}
-                                    labelKey={"Nombre_Departamento"}
-                                    handleModified={handleModified}
-                                    handleModifiedOptions={{
-                                       name: "IDDepartamento",
-                                    }}
-                                 />
-                              ) : (
-                                 <FormikAutocomplete
-                                    disabled={
-                                       (
-                                          localStorage
-                                             .getItem("group")
-                                             ?.split(",") ?? []
-                                       ).length === 1
-                                    }
-                                    responsive={responsive}
-                                    loading={groups.isLoading}
-                                    name="IDDepartamento"
-                                    label={"selecciona el departamento"}
-                                    options={groups.data?.data?.filter((it) =>
-                                       userGroups.includes(
-                                          it.IDDepartamento.toString(),
-                                       ),
-                                    )}
-                                    idKey={"IDDepartamento"}
-                                    labelKey={"Nombre_Departamento"}
-                                    handleModified={handleModified}
-                                    handleModifiedOptions={{
-                                       name: "IDDepartamento",
-                                    }}
-                                 />
-                              )}
-
-                              <FormikAutocomplete
-                                 disabled={
-                                    localStorage.getItem("role") != "SISTEMAS"
-                                 }
-                                 responsive={responsive}
-                                 loading={groups.isLoading}
-                                 name="Centro_Costo"
-                                 label={"selecciona el centro de costo"}
-                                 options={groups.data?.data}
-                                 idKey={"Centro_Costo"}
-                                 labelKey={"Centro_Costo"}
-                              />
-
-                              <FormikAutocomplete
-                                 responsive={responsive}
-                                 loading={types.isLoading}
-                                 name="IDTipo"
-                                 label={"selecciona el tipo"}
-                                 options={types.data?.data}
-                                 idKey={"IDTipo"}
-                                 labelKey={"Descripcion"}
-                                 id="requisition-type"
-                              />
-                              <FormikInput
-                                 responsive={responsive}
-                                 name="Solicitante"
-                                 label="Solicitante"
-                                 id="requisition-solicitante"
-                              />
-                              <FormikInput
-                                 // responsive={responsive}
-                                 name="FechaCaptura"
-                                 type="date"
-                                 label="Fecha de factura"
-                                 id="requisition-factura"
-                              />
-                              <FormikTextArea
-                                 id="requisition-observation"
-                                 label="Observaciones"
-                                 name="Observaciones"
-                              />
-                              {!v?.IDRequisicion && (
-                                 <CollapseComponent
-                                    title="Detalles de la requisición"
-                                    id="requisition-products"
-                                    buttonId="btn-requisition-products">
-                                    <div className="mt-2"></div>
-                                    <div className="mb-4 w-fit">
-                                       <Button
-                                          id="form-requisition-addproduct"
-                                          type="button"
-                                          color="teal"
-                                          variant="solid"
-                                          size="small"
-                                          onClick={handleMoreProducts}>
-                                          Agregar Producto
-                                       </Button>
-                                    </div>
-                                    <HandleAddProduct
-                                       cont={cont}
-                                       dropInitialValue={dropInitialValue}
-                                    />
-                                 </CollapseComponent>
-                              )}
-                           </>
-                        );
-                     }}
-                  />
-               </div>
-            </ModalComponent>
-         )}
-      </>
+         </div>
+      </ModalComponent>
    );
 };
+
 export default RequisitionForm;
