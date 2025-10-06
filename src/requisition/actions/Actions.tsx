@@ -427,16 +427,15 @@ const Actions: React.FC<{
                 </Tooltip>
               </div> */}
 
-              {/* ((data.Status == "CP" &&
+                     {/* ((data.Status == "CP" &&
                         data.IDDepartamento ==
                            Number(localStorage.getItem("group"))) ||
                         ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
                         )) */}
-                     {
-                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
-                           localStorage.getItem("role") ?? "",
-                        ) && (
+                     {["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                        localStorage.getItem("role") ?? "",
+                     ) && (
                         <div className="w-fit">
                            <Tooltip content="Editar">
                               <Button
