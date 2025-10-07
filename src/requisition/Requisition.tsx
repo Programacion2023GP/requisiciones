@@ -464,6 +464,7 @@ const RequisicionesAdd = () => {
             </div>
             {open && (
                <RequisitionForm
+               
                   open={open}
                   setOpen={() => {
                      setOpen(false);

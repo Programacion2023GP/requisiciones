@@ -16,6 +16,8 @@ import { showToast } from "../../sweetalert/Sweetalert";
 import Observable from "../../extras/observable";
 import { IoMdClose } from "react-icons/io";
 import Chip from "../../components/chip/Chip";
+import { IoMdCopy } from "react-icons/io";
+import Tooltip from "../../components/toltip/Toltip";
 
 type PropsRequisition = {
    open: boolean;
@@ -156,7 +158,21 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       setValues(finalValues);
    }, [open, groups.data, editData]);
 
+const duplicateRequisition = () => {
+      let formValues = formik.current?.values;
+      const productosLlenos = formValues.Productos.filter(
+         (p: any) =>
+            p.Descripcion?.trim() !== "" && parseFloat(p.Cantidad || 0) > 0
+            || (p.IDDetalle && p.IDDetalle > 0) // <-- enviar también si tienen IDDetalle
+      );
+      delete formValues.IDRequisicion
 
+      mutation.mutate({
+         method: "POST",
+         url: "requisiciones/create",
+         data: { ...formValues, Productos: productosLlenos },
+      });
+   };
 
    const handleSubmit = (formValues: any) => {
       const productosLlenos = formValues.Productos.filter(
@@ -190,7 +206,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    };
 
    return (
-      <ModalComponent open={open} setOpen={() => setOpen(false)} title={title}>
+      <ModalComponent open={open} actions={values?.IDRequisicion && <Tooltip  content={"Duplicar requisicion"}><Button onClick={duplicateRequisition} color={"indigo"} variant={"text"} children={<IoMdCopy size={20}/>}/></Tooltip>} setOpen={() => setOpen(false)} title={title}>
          {mutation.status === "pending" && <Spinner />}
          <div className="p-3">
             <FormikForm
@@ -278,7 +294,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
 
                         <div className="max-h-24 overflow-y-auto">
                            <div className="flex flex-wrap gap-1">
-                              {detailstypes.data.data
+                              {detailstypes?.data?.data
                                  .filter(it => it.IDTipo === v.IDTipo)
                                  .map(it => (
                                     <span
