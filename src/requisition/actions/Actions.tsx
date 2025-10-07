@@ -29,6 +29,7 @@ import {
    FormikTextArea,
 } from "../../components/formik/FormikInputs/FormikInput";
 import ChangeStatusRequisition from "../status/ChangeStatus";
+import icons from "./../../constants/icons";
 
 const Actions: React.FC<{
    data: Record<string, any>;
@@ -80,12 +81,8 @@ const Actions: React.FC<{
          );
       },
    });
-   const userGroups: number[] = Array.isArray(JSON.parse(localStorage.getItem("group") || "[]"))
-      ? JSON.parse(localStorage.getItem("group") || "[]").map(Number)
-      : [Number(JSON.parse(localStorage.getItem("group") || "0"))];
+   const userGroups = localStorage.getItem("group")?.split(",") ?? [];
 
-   // Convertir IDDepartamento a número para la comparación
-   const isUserGroup = userGroups.includes(Number(data?.IDDepartamento ?? -1));
    const mutationPdf = useMutation({
       mutationFn: ({
          url,
@@ -295,36 +292,17 @@ const Actions: React.FC<{
          ([key, value]) => value === permission && permisos[key] === 1,
       );
    };
-
    const buttonVobo = (idTipo: number): boolean => {
-         const rawGroup = localStorage.getItem("group");
-
-   // Inicializar array vacío
-   let userGroups: number[] = [];
-
-   // Intentar parsear y convertir a números
-   try {
-      const parsed = JSON.parse(rawGroup || "[]");
-      if (Array.isArray(parsed)) {
-         userGroups = parsed.map(Number); // Si es array, map a números
-      } else {
-         userGroups = [Number(parsed)]; // Si es un solo valor, meterlo en array
+      const group = localStorage.getItem("group");
+      if (group === null) {
+         return false;
       }
-   } catch (e) {
-      userGroups = []; // En caso de error, array vacío
-   }
-
-
-      // const group = localStorage.getItem("group");
-      // if (group === null) {
-      //    return false;
-      // }
-      // let idGroup = parseInt(group, 10);
-      // console.log(idTipo, idGroup);
+      let idGroup = parseInt(group, 10);
+      console.log(idTipo, idGroup);
       if (
-         (userGroups.includes(84) && idTipo == 5) ||
-         (userGroups.includes(83) && idTipo == 7) ||
-         (userGroups.includes(27) && idTipo == 6)
+         (idGroup == 84 && idTipo == 5) ||
+         (idGroup == 83 && idTipo == 7) ||
+         (idGroup == 27 && idTipo == 6)
       ) {
          // console.log("aqui")
          return true;
@@ -340,148 +318,118 @@ const Actions: React.FC<{
    }, [data]);
    return (
       <>
-         {data.Status != "CA" && (
-            <>
-               {spiner && <Spinner />}
+         {spiner && <Spinner />}
 
-               {open.tracing && (
-                  <TracingComponent
-                     open={open.tracing}
-                     setOpen={() => {
-                        setOpen((prev) => ({
-                           pdf: false,
-                           autorized: false,
-                           cotizacion: false,
-                           view: false,
-                           tracing: false,
-                        }));
-                     }}
-                  />
-               )}
-               {open.autorized && (
-                  <AutorizedComponent
-                     setReloadTable={setReloadTable}
-                     open={open.autorized}
-                     setOpen={() => {
-                        setOpen((prev) => ({
-                           pdf: false,
-                           autorized: false,
-                           cotizacion: false,
-                           view: false,
-                           tracing: false,
-                        }));
-                     }}
-                  />
-               )}
+         {open.tracing && (
+            <TracingComponent
+               open={open.tracing}
+               setOpen={() => {
+                  setOpen((prev) => ({
+                     pdf: false,
+                     autorized: false,
+                     cotizacion: false,
+                     view: false,
+                     tracing: false,
+                  }));
+               }}
+            />
+         )}
+         {open.autorized && (
+            <AutorizedComponent
+               setReloadTable={setReloadTable}
+               open={open.autorized}
+               setOpen={() => {
+                  setOpen((prev) => ({
+                     pdf: false,
+                     autorized: false,
+                     cotizacion: false,
+                     view: false,
+                     tracing: false,
+                  }));
+               }}
+            />
+         )}
 
-               {open.pdf && (
-                  <Pdfrequisition
-                     open={open.pdf}
-                     setOpen={() => {
-                        setOpen((prev) => ({
-                           autorized: false,
-                           pdf: false,
-                           cotizacion: false,
-                           view: false,
-                           tracing: false,
-                        }));
-                     }}
-                  />
-               )}
-               {changeStatus && (
-                  <ChangeStatusRequisition
-                     setReloadTable={setReloadTable}
-                     open={changeStatus}
-                     setOpen={() => {
-                        setChangeStatus(false);
-                     }}
-                  />
-               )}
-               {open.cotizacion && (
-                  <CotizacionComponent
-                     setReloadTable={setReloadTable}
-                     open={open.cotizacion}
-                     setOpen={() => {
-                        setOpen((prev) => ({
-                           autorized: false,
-                           pdf: false,
-                           cotizacion: false,
-                           view: false,
-                           tracing: false,
-                        }));
-                     }}
-                  />
-               )}
-               {open.view && (
-                  <DetailsRequistion
-                     open={open.view}
-                     setOpen={() => {
-                        setOpen((prev) => ({
-                           autorized: false,
-                           pdf: false,
-                           cotizacion: false,
-                           view: false,
-                           tracing: false,
-                        }));
-                     }}
-                  />
-               )}
-               <DropdownComponent>
-                  <div className="flex flex-col gap-2">
-                     {/* <div className="w-fit">
-                <Tooltip content="Ver requisición">
-                  <Button
-                    color="presidencia"
-                    variant="solid"
-                    size="small"
-                    onClick={() => {
-                      mutationView.mutate({
-                        method: "POST",
-                        url: "/requisiciones/show",
-                        data: {
-                          IDRequisicion: data.IDRequisicion,
-                          Ejercicio: data.Ejercicio,
-                        },
-                      });
-                    }}
-                  >
-                    <FaEye />
-                  </Button>
-                </Tooltip>
-              </div> */}
-
-                     {/* ((data.Status == "CP" &&
-                        data.IDDepartamento ==
-                           Number(localStorage.getItem("group"))) ||
-                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
-                           localStorage.getItem("role") ?? "",
-                        )) */}
-                     {((data.Status == "CP" &&
-                        userGroups.includes((data?.IDDepartamento))
-                     ) ||
-                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
-                           localStorage.getItem("role") ?? "",
-                        )) && (
-                           <div className="w-fit">
-                              <Tooltip content="Editar">
-                                 <Button
-                                    color="yellow"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={() => {
-                                       mutationEdit.mutate({
-                                          method: "POST",
-                                          url: "/requisiciones/showRequisicion",
-                                          data: {
-                                             Id: data.Id,
-                                          },
-                                       });
-                                    }}>
-                                    <MdEdit />
-                                 </Button>
-                              </Tooltip>
-                           </div>
-                        )}
+         {open.pdf && (
+            <Pdfrequisition
+               open={open.pdf}
+               setOpen={() => {
+                  setOpen((prev) => ({
+                     autorized: false,
+                     pdf: false,
+                     cotizacion: false,
+                     view: false,
+                     tracing: false,
+                  }));
+               }}
+               watermarkText={data.Status === "CA" ? "RECHAZADA" : ""}
+            />
+         )}
+         {changeStatus && (
+            <ChangeStatusRequisition
+               setReloadTable={setReloadTable}
+               open={changeStatus}
+               setOpen={() => {
+                  setChangeStatus(false);
+               }}
+            />
+         )}
+         {open.cotizacion && (
+            <CotizacionComponent
+               setReloadTable={setReloadTable}
+               open={open.cotizacion}
+               setOpen={() => {
+                  setOpen((prev) => ({
+                     autorized: false,
+                     pdf: false,
+                     cotizacion: false,
+                     view: false,
+                     tracing: false,
+                  }));
+               }}
+            />
+         )}
+         {open.view && (
+            <DetailsRequistion
+               open={open.view}
+               setOpen={() => {
+                  setOpen((prev) => ({
+                     autorized: false,
+                     pdf: false,
+                     cotizacion: false,
+                     view: false,
+                     tracing: false,
+                  }));
+               }}
+            />
+         )}
+         <DropdownComponent>
+            <div className="flex flex-col gap-2">
+               {data.Status != "CA" && (
+                  <>
+                     {["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                        localStorage.getItem("role") ?? "",
+                     ) && (
+                        <div className="w-fit">
+                           <Tooltip content="Editar">
+                              <Button
+                                 color="yellow"
+                                 variant="solid"
+                                 size="small"
+                                 onClick={() => {
+                                    mutationEdit.mutate({
+                                       method: "POST",
+                                       url: "/requisiciones/showRequisicion",
+                                       data: {
+                                          Id: data.Id,
+                                       },
+                                    });
+                                 }}>
+                                 <MdEdit />
+                              </Button>
+                           </Tooltip>
+                        </div>
+                     )}
                      {data.Status != "CP" && (
                         <div className="w-fit">
                            <Tooltip content="Cancelar">
@@ -518,79 +466,82 @@ const Actions: React.FC<{
                         (localStorage.getItem("role") == "SISTEMAS" &&
                            data.AutEspecial == 1 &&
                            !data.UsuarioVoBo)) && (
-                           <PermissionMenu IdMenu={"VoBo"}>
-                              <Tooltip content="Visto bueno">
-                                 <Button
-                                    color="teal"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={() => {
-                                       mutation.mutate({
-                                          method: "PUT",
-                                          url: "/requisiciones/vobo",
-                                          data: { id: data.Id },
-                                       });
-                                    }}>
-                                    <MdOutlineCheckBox />
-                                 </Button>
-                              </Tooltip>
-                           </PermissionMenu>
-                        )}
-                     <div className="w-fit">
-                        <Tooltip content="Ver requisición">
-                           <Button
-                              color="presidencia"
-                              variant="solid"
-                              size="small"
-                              onClick={async () => {
-                                 mutationPdf.mutate({
-                                    method: "POST",
-                                    url: "/requisiciones/detailsRequisicion",
-                                    pdfData: data,
-                                    status: data.Status,
-                                    data: {
-                                       IDRequisicion: data.IDRequisicion,
-                                       Ejercicio: data.Ejercicio,
-                                    },
-                                 });
-                              }}>
-                              <BsFiletypePdf />
-                           </Button>
-                        </Tooltip>
-                     </div>
-                     <div className="w-fit">
-                        <PermissionMenu IdMenu="SeguimientoRequis">
-                           <Tooltip content="Seguimiento de la requisición">
+                        <PermissionMenu IdMenu={"VoBo"}>
+                           <Tooltip content="Visto bueno">
                               <Button
-                                 color="presidencia"
+                                 color="teal"
                                  variant="solid"
                                  size="small"
-                                 onClick={async () => {
-                                    try {
-                                       const result = await ObservablePost(
-                                          "tracingRequisition",
-                                          {
-                                             data: {
-                                                data: data,
-                                             },
-                                          },
-                                       );
-                                    } finally {
-                                       setOpen((prev) => ({
-                                          autorized: false,
-                                          cotizacion: false,
-                                          view: false,
-                                          pdf: false,
-                                          tracing: true,
-                                       }));
-                                    }
+                                 onClick={() => {
+                                    mutation.mutate({
+                                       method: "PUT",
+                                       url: "/requisiciones/vobo",
+                                       data: { id: data.Id },
+                                    });
                                  }}>
-                                 <TbReport />
+                                 <MdOutlineCheckBox />
                               </Button>
                            </Tooltip>
                         </PermissionMenu>
-                     </div>
-
+                     )}
+                  </>
+               )}
+               <div className="w-fit">
+                  <Tooltip content="Ver requisición">
+                     <Button
+                        color="presidencia"
+                        variant="solid"
+                        size="small"
+                        onClick={async () => {
+                           mutationPdf.mutate({
+                              method: "POST",
+                              url: "/requisiciones/detailsRequisicion",
+                              pdfData: data,
+                              status: data.Status,
+                              data: {
+                                 IDRequisicion: data.IDRequisicion,
+                                 Ejercicio: data.Ejercicio,
+                              },
+                           });
+                        }}>
+                        <BsFiletypePdf />
+                     </Button>
+                  </Tooltip>
+               </div>
+               <div className="w-fit">
+                  <PermissionMenu IdMenu="SeguimientoRequis">
+                     <Tooltip content="Seguimiento de la requisición">
+                        <Button
+                           color="presidencia"
+                           variant="solid"
+                           size="small"
+                           onClick={async () => {
+                              try {
+                                 const result = await ObservablePost(
+                                    "tracingRequisition",
+                                    {
+                                       data: {
+                                          data: data,
+                                       },
+                                    },
+                                 );
+                              } finally {
+                                 setOpen((prev) => ({
+                                    autorized: false,
+                                    cotizacion: false,
+                                    view: false,
+                                    pdf: false,
+                                    tracing: true,
+                                 }));
+                              }
+                           }}>
+                           <icons.Tb.TbHistory />
+                        </Button>
+                     </Tooltip>
+                  </PermissionMenu>
+               </div>
+               {data.Status != "CA" && (
+                  <>
                      <div className="w-fit">
                         <PermissionMenu IdMenu="CambioEstatus">
                            <Tooltip content="Cambiar status">
@@ -737,7 +688,7 @@ const Actions: React.FC<{
                            </div>
                         </>
                      )}
-                     {((userGroups.includes((data?.IDDepartamento)) &&
+                     {((userGroups.includes(String(data?.IDDepartamento)) &&
                         newStatus(data.Status) == "AU") ||
                         ["AUTORIZADOR", "SISTEMAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
@@ -758,27 +709,27 @@ const Actions: React.FC<{
                                  onClick={async () => {
                                     newStatus(data.Status) != "SU"
                                        ? showConfirmationAlert(
-                                          `El estatus se cambiara a ${newStatus(data.Status)} `,
-                                          "Esta acción no se puede deshacer.",
-                                       ).then((isConfirmed) => {
-                                          if (isConfirmed) {
-                                             mutation.mutate({
-                                                method: "PUT",
-                                                url: "/requisiciones/update",
-                                                data: {
-                                                   Status: newStatus(
-                                                      data.Status,
-                                                   ),
-                                                   id: data.Id,
-                                                },
-                                             });
-                                          } else {
-                                             showToast(
-                                                "La acción fue cancelada.",
-                                                "error",
-                                             );
-                                          }
-                                       })
+                                            `El estatus se cambiara a ${newStatus(data.Status)} `,
+                                            "Esta acción no se puede deshacer.",
+                                         ).then((isConfirmed) => {
+                                            if (isConfirmed) {
+                                               mutation.mutate({
+                                                  method: "PUT",
+                                                  url: "/requisiciones/update",
+                                                  data: {
+                                                     Status: newStatus(
+                                                        data.Status,
+                                                     ),
+                                                     id: data.Id,
+                                                  },
+                                               });
+                                            } else {
+                                               showToast(
+                                                  "La acción fue cancelada.",
+                                                  "error",
+                                               );
+                                            }
+                                         })
                                        : setOpenSu(true);
                                  }}
                                  className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}>
@@ -788,79 +739,78 @@ const Actions: React.FC<{
                               </div>
                            </Tooltip>
                         )}
-                  </div>
-               </DropdownComponent>
-               <ModalComponent
-                  title="Surtir la orden"
-                  open={openSu}
-                  setOpen={() => {
-                     setOpenSu(false);
-                  }}
-                  children={
-                     <>
-                        <div className="mb-6"> </div>
-                        <FormikForm
-                           buttonMessage="Surtir"
-                           initialValues={{ ClavePresupuestal: 1 }}
-                           children={() => (
-                              <FormikNumberInput
-                                 label="Numero de orden de compra"
-                                 name="ClavePresupuestal"
-                                 decimals={false}
-                              />
-                           )}
-                           onSubmit={(values) => {
-                              mutation.mutate({
-                                 method: "PUT",
-                                 url: "/requisiciones/update",
-                                 data: {
-                                    Status: newStatus(data.Status),
-                                    id: data.Id,
-                                    ClavePresupuestal: values.ClavePresupuestal,
-                                 },
-                              });
-                           }}
+                  </>
+               )}
+            </div>
+         </DropdownComponent>
+         <ModalComponent
+            title="Surtir la orden"
+            open={openSu}
+            setOpen={() => {
+               setOpenSu(false);
+            }}
+            children={
+               <>
+                  <div className="mb-6"> </div>
+                  <FormikForm
+                     buttonMessage="Surtir"
+                     initialValues={{ ClavePresupuestal: 1 }}
+                     children={() => (
+                        <FormikNumberInput
+                           label="Numero de orden de compra"
+                           name="ClavePresupuestal"
+                           decimals={false}
                         />
-                     </>
-                  }
-               />
+                     )}
+                     onSubmit={(values) => {
+                        mutation.mutate({
+                           method: "PUT",
+                           url: "/requisiciones/update",
+                           data: {
+                              Status: newStatus(data.Status),
+                              id: data.Id,
+                              ClavePresupuestal: values.ClavePresupuestal,
+                           },
+                        });
+                     }}
+                  />
+               </>
+            }
+         />
 
-               <ModalComponent
-                  title="Cancelación de requisición"
-                  open={canceled}
-                  setOpen={() => {
-                     setCanceled(false);
-                  }}
-                  children={
-                     <>
-                        <div className="mb-6"> </div>
-                        <FormikForm
-                           buttonMessage="Cancelar"
-                           initialValues={{ Motivo_Cancelacion: "" }}
-                           children={() => (
-                              <FormikTextArea
-                                 label="Motivo de cancelación"
-                                 name="Motivo_Cancelacion"
-                              />
-                           )}
-                           onSubmit={(values) => {
-                              mutation.mutate({
-                                 method: "PUT",
-                                 url: "/requisiciones/update",
-                                 data: {
-                                    Status: "CA",
-                                    id: data.Id,
-                                    Motivo_Cancelacion:
-                                       values.Motivo_Cancelacion,
-                                 },
-                              });
-                           }}
+         <ModalComponent
+            title="Cancelación de requisición"
+            open={canceled}
+            setOpen={() => {
+               setCanceled(false);
+            }}
+            children={
+               <>
+                  <div className="mb-6"> </div>
+                  <FormikForm
+                     buttonMessage="Cancelar"
+                     initialValues={{ Motivo_Cancelacion: "" }}
+                     children={() => (
+                        <FormikTextArea
+                           label="Motivo de cancelación"
+                           name="Motivo_Cancelacion"
                         />
-                     </>
-                  }
-               />
-            </>
-         )}
+                     )}
+                     onSubmit={(values) => {
+                        mutation.mutate({
+                           method: "PUT",
+                           url: "/requisiciones/update",
+                           data: {
+                              Status: "CA",
+                              id: data.Id,
+                              Motivo_Cancelacion: values.Motivo_Cancelacion,
+                           },
+                        });
+                     }}
+                  />
+               </>
+            }
+         />
       </>
    );
 };
