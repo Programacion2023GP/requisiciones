@@ -15,6 +15,7 @@ import Spinner from "../../loading/Loading";
 import { showToast } from "../../sweetalert/Sweetalert";
 import Observable from "../../extras/observable";
 import { IoMdClose } from "react-icons/io";
+import Chip from "../../components/chip/Chip";
 
 type PropsRequisition = {
    open: boolean;
@@ -56,7 +57,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    // Lo mismo puedes usar para groupArray si quieres
    const groupArray = [...userGroups];
 
-   const [groups, types, director] = useQueries({
+   const [groups, types, director, detailstypes] = useQueries({
       queries: [
          { queryKey: ["departamentos/index"], queryFn: () => GetAxios("departamentos/index") },
          { queryKey: ["tipos/index"], queryFn: () => GetAxios("tipos/index") },
@@ -66,6 +67,11 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                GetAxios(
                   `departaments/director/${groupArray[0] ?? 0}`,
                ),
+         },
+         {
+            queryKey: ["detailstypes/index"],
+            queryFn: () => GetAxios("detailstypes/index"),
+            refetchOnWindowFocus: true,
          },
       ],
    });
@@ -104,51 +110,51 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    const formik = useRef<FormikProps<any>>(null);
 
    // --- Cargar datos al abrir el modal ---
-// --- Valores iniciales simples ---
-useEffect(() => {
-  if (!open || !groups.data?.data) return;
+   // --- Valores iniciales simples ---
+   useEffect(() => {
+      if (!open || !groups.data?.data) return;
 
-  const departamentoId = groupArray[0] ?? 0;
-  const departamento = groups.data.data.find((it: any) => it.IDDepartamento == departamentoId);
-  const centroCosto = departamento?.Centro_Costo ?? 0;
+      const departamentoId = groupArray[0] ?? 0;
+      const departamento = groups.data.data.find((it: any) => it.IDDepartamento == departamentoId);
+      const centroCosto = departamento?.Centro_Costo ?? 0;
 
-  const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
+      const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
 
-  let finalValues: any;
+      let finalValues: any;
 
-  if (formRequisicion) {
-    finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
+      if (formRequisicion) {
+         finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
 
-    let productos = Array.isArray(formRequisicion)
-      ? formRequisicion.map((item: any) => ({
-          Cantidad: item.Cantidad || "",
-          Descripcion: item.Descripcion || "",
-          IDDetalle: item.IDDetalle || 0,
-        }))
-      : formRequisicion.Productos || [];
+         let productos = Array.isArray(formRequisicion)
+            ? formRequisicion.map((item: any) => ({
+               Cantidad: item.Cantidad || "",
+               Descripcion: item.Descripcion || "",
+               IDDetalle: item.IDDetalle || 0,
+            }))
+            : formRequisicion.Productos || [];
 
-    if (productos.length < 200) {
-      productos = [
-        ...productos,
-        ...Array.from({ length: 200 - productos.length }, () => ({ Cantidad: "", Descripcion: "" })),
-      ];
-    }
+         if (productos.length < 200) {
+            productos = [
+               ...productos,
+               ...Array.from({ length: 200 - productos.length }, () => ({ Cantidad: "", Descripcion: "" })),
+            ];
+         }
 
-    finalValues.Productos = productos;
-  } else {
-    finalValues = {
-      Solicitante: "",
-      IDDepartamento: departamentoId,
-      Centro_Costo: centroCosto,
-      IDTipo: 0,
-      FechaCaptura: "",
-      Observaciones: "",
-      Productos: Array.from({ length: 200 }, () => ({ Cantidad: "", Descripcion: "" })),
-    };
-  }
+         finalValues.Productos = productos;
+      } else {
+         finalValues = {
+            Solicitante: "",
+            IDDepartamento: departamentoId,
+            Centro_Costo: centroCosto,
+            IDTipo: 0,
+            FechaCaptura: "",
+            Observaciones: "",
+            Productos: Array.from({ length: 200 }, () => ({ Cantidad: "", Descripcion: "" })),
+         };
+      }
 
-  setValues(finalValues);
-}, [open, groups.data, editData]);
+      setValues(finalValues);
+   }, [open, groups.data, editData]);
 
 
 
@@ -256,10 +262,35 @@ useEffect(() => {
                            idKey="IDTipo"
                            labelKey="Descripcion"
                         />
+
                         <FormikInput responsive={responsive} name="Solicitante" label="Solicitante" />
                         <FormikInput name="FechaCaptura" label="Fecha" type="date" />
                         <FormikTextArea name="Observaciones" label="Observaciones" />
+                        {v.IDTipo > 0 && (
 
+                           <div className="mb-2 w-full">
+                              <span className="font-semibold w-full text-gray-700">
+                                 Estos son los tipos de productos que se pueden agregar:
+                              </span>
+                           </div>
+
+                        )}
+
+                        <div className="max-h-24 overflow-y-auto">
+                           <div className="flex flex-wrap gap-1">
+                              {detailstypes.data.data
+                                 .filter(it => it.IDTipo === v.IDTipo)
+                                 .map(it => (
+                                    <span
+                                       key={it.IDDetalleTipo}
+                                       className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200 shadow-sm"
+                                    >
+                                       {it.Nombre}
+                                    </span>
+                                 ))
+                              }
+                           </div>
+                        </div>
                         <div className="mt-6 w-full">
                            <div className=" w-full">
                               <h3 className="text-lg font-semibold">Productos</h3>

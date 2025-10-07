@@ -148,8 +148,15 @@ export const Agtable: React.FC<TypeTable> = ({
     }
   }, []);
   useEffect(() => {
-    if (data.length > 0) {
+    console.log(backUrl)
+    if (backUrl && data.length > 0) {
       setDataTable((prev) => ({
+        ...prev,
+        data: data,
+      }));
+    }
+    else if (!backUrl) {
+         setDataTable((prev) => ({
         ...prev,
         data: data,
       }));

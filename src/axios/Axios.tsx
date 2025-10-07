@@ -54,7 +54,7 @@ export const AxiosRequest = async (
     } else if (method === "PUT") {
       response = await axiosInstance.put(url, values);
     } else if (method === "DELETE") {
-      response = await axiosInstance.delete(url);
+ response = await  axiosInstance.delete(url, { data: values })
     } else {
       throw new Error("Método no soportado");
     }

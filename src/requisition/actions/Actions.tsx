@@ -705,11 +705,14 @@ const Actions: React.FC<{
                                        onClick={async () => {
                                           try {
                                              // customLog(`${JSON.stringify(data)}`, "green");
+                                             console.log("aqui",data)
                                              const result =
                                                 await ObservablePost(
                                                    "IdRequisicion",
                                                    {
                                                       data: {
+                                                         Nombre_Departamento:data?.Nombre_Departamento,
+                                                         Centro_Costo:data?.Centro_Costo,
                                                          IDRequisicion:
                                                             data.IDRequisicion,
                                                          Ejercicio:
