@@ -29,6 +29,7 @@ import {
    FormikTextArea,
 } from "../../components/formik/FormikInputs/FormikInput";
 import ChangeStatusRequisition from "../status/ChangeStatus";
+import { GrFormView } from "react-icons/gr";
 
 const Actions: React.FC<{
    data: Record<string, any>;
@@ -145,12 +146,14 @@ const Actions: React.FC<{
       onMutate(variables) {
          setSpiner(true);
       },
-      onSuccess: async (data) => {
+      onSuccess: async (data,variables) => {
          setSpiner(false);
+         console.log("mutate",variables?.data?.edicion)
          try {
             const result = await ObservablePost("FormRequisicion", {
                data: {
                   data: data.data,
+                  edicion:variables?.data?.edicion,
                },
             });
          } catch (e) {
@@ -297,22 +300,22 @@ const Actions: React.FC<{
    };
 
    const buttonVobo = (idTipo: number): boolean => {
-         const rawGroup = localStorage.getItem("group");
+      const rawGroup = localStorage.getItem("group");
 
-   // Inicializar array vacío
-   let userGroups: number[] = [];
+      // Inicializar array vacío
+      let userGroups: number[] = [];
 
-   // Intentar parsear y convertir a números
-   try {
-      const parsed = JSON.parse(rawGroup || "[]");
-      if (Array.isArray(parsed)) {
-         userGroups = parsed.map(Number); // Si es array, map a números
-      } else {
-         userGroups = [Number(parsed)]; // Si es un solo valor, meterlo en array
+      // Intentar parsear y convertir a números
+      try {
+         const parsed = JSON.parse(rawGroup || "[]");
+         if (Array.isArray(parsed)) {
+            userGroups = parsed.map(Number); // Si es array, map a números
+         } else {
+            userGroups = [Number(parsed)]; // Si es un solo valor, meterlo en array
+         }
+      } catch (e) {
+         userGroups = []; // En caso de error, array vacío
       }
-   } catch (e) {
-      userGroups = []; // En caso de error, array vacío
-   }
 
 
       // const group = localStorage.getItem("group");
@@ -456,32 +459,47 @@ const Actions: React.FC<{
                         ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
                         )) */}
-                     {((data.Status == "CP" &&
-                        userGroups.includes((data?.IDDepartamento))
-                     ) ||
-                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
-                           localStorage.getItem("role") ?? "",
-                        )) && (
-                           <div className="w-fit">
-                              <Tooltip content="Editar">
-                                 <Button
-                                    color="yellow"
-                                    variant="solid"
-                                    size="small"
-                                    onClick={() => {
-                                       mutationEdit.mutate({
-                                          method: "POST",
-                                          url: "/requisiciones/showRequisicion",
-                                          data: {
-                                             Id: data.Id,
-                                          },
-                                       });
-                                    }}>
-                                    <MdEdit />
-                                 </Button>
-                              </Tooltip>
-                           </div>
-                        )}
+
+                     <div className="w-fit">
+                        <Tooltip content={`${((data.Status == "CP" &&
+                                          userGroups.includes((data?.IDDepartamento))
+                                       ) ||
+                                          ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                                             localStorage.getItem("role") ?? "",
+                                          ))?"Editar":"Vista"}`}>
+                           <Button
+                              id="formRequisition_edit"
+                              color="yellow"
+                              variant="solid"
+                              size="small"
+                              onClick={() => {
+                                 mutationEdit.mutate({
+                                    method: "POST",
+                                    url: "/requisiciones/showRequisicion",
+                                    data: {
+                                       Id: data.Id,
+                                       edicion: ((data.Status == "CP" &&
+                                          userGroups.includes((data?.IDDepartamento))
+                                       ) ||
+                                          ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                                             localStorage.getItem("role") ?? "",
+                                          ))
+                                    },
+                                 });
+                              }}>
+                                 {
+                                    ((data.Status == "CP" &&
+                                          userGroups.includes((data?.IDDepartamento))
+                                       ) ||
+                                          ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                                             localStorage.getItem("role") ?? "",
+                                          ))?<MdEdit /> :<GrFormView/>
+                                 }
+                       
+                           </Button>
+                        </Tooltip>
+                     </div>
+
                      {data.Status != "CP" && (
                         <div className="w-fit">
                            <Tooltip content="Cancelar">
@@ -705,14 +723,14 @@ const Actions: React.FC<{
                                        onClick={async () => {
                                           try {
                                              // customLog(`${JSON.stringify(data)}`, "green");
-                                             console.log("aqui",data)
+                                             console.log("aqui", data)
                                              const result =
                                                 await ObservablePost(
                                                    "IdRequisicion",
                                                    {
                                                       data: {
-                                                         Nombre_Departamento:data?.Nombre_Departamento,
-                                                         Centro_Costo:data?.Centro_Costo,
+                                                         Nombre_Departamento: data?.Nombre_Departamento,
+                                                         Centro_Costo: data?.Centro_Costo,
                                                          IDRequisicion:
                                                             data.IDRequisicion,
                                                          Ejercicio:

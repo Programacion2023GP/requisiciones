@@ -37,6 +37,8 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    const { ObservableGet } = Observable();
 
    const [search, setSearch] = useState("");
+   const [registrar, setRegistrar] = useState("");
+
    const [values, setValues] = useState<any>(null);
    // Obtener el valor de localStorage
    const rawGroup = localStorage.getItem("group");
@@ -58,7 +60,6 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
 
    // Lo mismo puedes usar para groupArray si quieres
    const groupArray = [...userGroups];
-
    const [groups, types, director, detailstypes] = useQueries({
       queries: [
          { queryKey: ["departamentos/index"], queryFn: () => GetAxios("departamentos/index") },
@@ -110,21 +111,23 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    });
 
    const formik = useRef<FormikProps<any>>(null);
-
+   
    // --- Cargar datos al abrir el modal ---
    // --- Valores iniciales simples ---
    useEffect(() => {
       if (!open || !groups.data?.data) return;
+            const edicion = (ObservableGet("FormRequisicion") as any)?.data?.edicion || editData;
+
+      const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
 
       const departamentoId = groupArray[0] ?? 0;
       const departamento = groups.data.data.find((it: any) => it.IDDepartamento == departamentoId);
       const centroCosto = departamento?.Centro_Costo ?? 0;
-
-      const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
-
+      
       let finalValues: any;
-
+      
       if (formRequisicion) {
+         setRegistrar(edicion ? "Registrar":"")
          finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
 
          let productos = Array.isArray(formRequisicion)
@@ -204,7 +207,6 @@ const duplicateRequisition = () => {
          formik.current?.setFieldValue("Centro_Costo", centroCosto);
       }
    };
-
    return (
       <ModalComponent open={open} actions={values?.IDRequisicion && <Tooltip  content={"Duplicar requisicion"}><Button onClick={duplicateRequisition} color={"indigo"} variant={"text"} children={<IoMdCopy size={20}/>}/></Tooltip>} setOpen={() => setOpen(false)} title={title}>
          {mutation.status === "pending" && <Spinner />}
@@ -215,7 +217,7 @@ const duplicateRequisition = () => {
                initialValues={values}
                validationSchema={schema}
                onSubmit={handleSubmit}
-               buttonMessage="Registrar"
+               buttonMessage={registrar}
                children={(v, setValue) => {
                   const filteredProducts = v.Productos.filter((prod: any) =>
                      prod.Descripcion?.toLowerCase().includes(search.toLowerCase())

@@ -41,7 +41,7 @@ const tw = createTw({});
 const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
  const tutorial: Guide[] = [
   // {
-  //   question: "¿Cómo registrar una requisición?",
+  //   question: "¿Cómo duplicar una requisicion?",
   //   referenceStart: "#btn-add-requisition",
   //   response: "Haz clic en el botón para añadir una nueva requisición.",
   //   afterOpenTutorial: () => {
