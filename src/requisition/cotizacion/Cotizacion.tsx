@@ -275,12 +275,11 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
-
       if (!validateForm()) {
          showToast("Por favor corrija los errores en el formulario", "error");
          return;
       }
-
+      
       if (
          formValues.IDproveedor1 &&
          formValues.IDproveedor2 &&
@@ -292,6 +291,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             data: formValues,
          });
       } else {
+         console.log("valores",formValues)
          showConfirmationAlert(
             `Advertencia`,
             "¿La cotización no cuenta con los 3 provedores deseas continuar?.",
@@ -460,7 +460,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          setOpen={() => setOpen(false)}>
          {(suppliers.status === "pending" || spiner) && <Spinner />}
          {openPresupuestos && (
-            <ModalComponent fullScreen={false} zIndex={4000} open={openPresupuestos} setOpen={() => setOpenPresupuestos(false)} title={`Presupuestos de  ${IdRequisicion.data.Nombre_Departamento}`} children={<TablaPresupuestos ingresos={ingresos}/>} />
+            <ModalComponent fullScreen={false} zIndex={4000} open={openPresupuestos} setOpen={() => setOpenPresupuestos(false)} title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`} children={<TablaPresupuestos ingresos={ingresos}/>} />
          )}
 
 
