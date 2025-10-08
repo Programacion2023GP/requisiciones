@@ -11,10 +11,10 @@ export type Guide = {
   afterOpenTutorial?: () => void;
   afterActions?: () => void;
   question: string;
-  referenceStart: string; // selector CSS
+  referenceStart: string;
   response: string;
   action?: () => void;
-  steps?: Omit<Guide,'question'>[];
+  steps?: Omit<Guide, 'question'>[];
 };
 
 const CustomTutorial = ({ guide }: Tutorial) => {
@@ -24,21 +24,18 @@ const CustomTutorial = ({ guide }: Tutorial) => {
   const [currentSubStep, setCurrentSubStep] = useState<number | null>(null);
   const [highlight, setHighlight] = useState<DOMRect | null>(null);
 
-  // localizar elemento a resaltar
-
-  useEffect(() => {
-  if (!startGuide) return; // ⚠️ salir si el tutorial terminó
-
   const stepToShow =
     currentSubStep !== null
       ? guide[currentStep].steps?.[currentSubStep]
       : guide[currentStep];
 
-  if (!stepToShow) return;
+  // Scroll y resaltado
+useEffect(() => {
+  if (!startGuide || !stepToShow) return;
 
   stepToShow.afterActions?.();
 
-  const waitForElement = (selector: string, timeout = 3000): Promise<HTMLElement | null> => {
+  const waitForElement = (selector: string, timeout = 5000): Promise<HTMLElement | null> => {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
         const el = document.querySelector(selector) as HTMLElement | null;
@@ -47,6 +44,7 @@ const CustomTutorial = ({ guide }: Tutorial) => {
           resolve(el);
         }
       }, 100);
+
       setTimeout(() => {
         clearInterval(interval);
         resolve(null);
@@ -54,61 +52,82 @@ const CustomTutorial = ({ guide }: Tutorial) => {
     });
   };
 
+  const scrollToElement = (el: HTMLElement) => {
+    // Verificar si tiene contenedor con scroll
+    const scrollParent = el.closest<HTMLElement>('[style*="overflow"]');
+    if (scrollParent) {
+      scrollParent.scrollTo({
+        top: el.offsetTop - scrollParent.offsetTop - scrollParent.clientHeight / 2 + el.clientHeight / 2,
+        behavior: 'smooth',
+      });
+    } else {
+      // Scroll de la ventana
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   waitForElement(stepToShow.referenceStart).then((el) => {
-    if (!startGuide) return; // ⚠️ comprobar de nuevo
-    if (el) setHighlight(el.getBoundingClientRect());
+    if (!startGuide || !el) return;
+
+    // Hacer scroll primero
+    scrollToElement(el);
+
+    // Esperar que el navegador actualice el layout
+    requestAnimationFrame(() => {
+      setHighlight(el.getBoundingClientRect());
+    });
   });
 }, [startGuide, currentStep, currentSubStep, guide]);
 
 
-  const nextStep = () => {
-    const step = guide[currentStep];
+  // Avanzar al siguiente paso
+  const nextStep = async () => {
+  if (!stepToShow) return;
 
-    // Acción del paso actual
-    if (currentSubStep !== null) {
-      step.steps?.[currentSubStep]?.action?.();
+  // Ejecutar acción si existe
+  if (stepToShow.action) {
+    await stepToShow.action();
+  }
+
+  const mainStep = guide[currentStep];
+
+  let nextMainStep = currentStep;
+  let nextSubStep = currentSubStep;
+
+  // Manejo de subpasos
+  if (mainStep.steps && mainStep.steps.length > 0) {
+    if (currentSubStep === null) {
+      nextSubStep = 0;
+    } else if (currentSubStep < mainStep.steps.length - 1) {
+      nextSubStep = currentSubStep + 1;
     } else {
-      step.action?.();
+      nextSubStep = null;
+      nextMainStep = currentStep + 1;
     }
+  } else {
+    nextMainStep = currentStep + 1;
+    nextSubStep = null;
+  }
 
-    // Manejo de pasos internos
-    if (step.steps && step.steps.length > 0) {
-      if (currentSubStep === null) {
-        setCurrentSubStep(0);
-        return;
-      }
-      if (currentSubStep < step.steps.length - 1) {
-        setCurrentSubStep((s) => s! + 1);
-        return;
-      } else {
-        setCurrentSubStep(null);
-      setStartGuide(false);
-      setOpen(false);
+  if (nextMainStep >= guide.length) {
+    // Fin del tutorial
+    setStartGuide(false);
+    setOpen(false);
+    setCurrentStep(0);
+    setCurrentSubStep(null);
+    return;
+  }
 
-      }
-    }
+  // Actualizar estado una sola vez
+  setCurrentStep(nextMainStep);
+  setCurrentSubStep(nextSubStep);
+};
 
-    // Avanzar en el tutorial principal
-    if (currentStep < guide.length - 1) {
-      setCurrentStep((s) => s + 1);
-    } else {
-      // Finalizar
-      setStartGuide(false);
-      setOpen(false);
-      setCurrentStep(0);
-      setCurrentSubStep(null);
-    }
-  };
-
-  const stepToShow =
-    currentSubStep !== null
-      ? guide[currentStep].steps?.[currentSubStep]
-      : guide[currentStep];
 
   return (
     <>
       {!startGuide ? (
-        <div className="fixed bottom-6 right-6">
+        <div className="fixed bottom-6 right-6 z-[9998]">
           {!open ? (
             <button
               onClick={() => setOpen(true)}
@@ -152,10 +171,8 @@ const CustomTutorial = ({ guide }: Tutorial) => {
       ) : (
         createPortal(
           <>
-            {/* Overlay oscuro */}
             <div className="fixed inset-0 bg-black/60 z-[9998]" />
 
-            {/* Resaltado */}
             {highlight && (
               <div
                 className="fixed border-4 border-cyan-400 rounded-lg z-[9999] transition-all duration-300"
@@ -168,47 +185,90 @@ const CustomTutorial = ({ guide }: Tutorial) => {
               ></div>
             )}
 
-            {/* Personaje + bocadillo */}
-            {highlight && stepToShow && (
-              <div
-                className="fixed flex flex-col items-center z-[10000]"
-                style={{
-                  top: highlight.bottom + 20,
-                  left: highlight.left,
-                }}
-              >
-                <div className="flex items-start space-x-3">
-                  {/* Avatar */}
-                  <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
-                    <img
-                      src="https://randomuser.me/api/portraits/women/44.jpg"
-                      alt="Avatar"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+            {highlight && stepToShow && (() => {
+              const bocadilloWidth = 256;
+              const bocadilloHeight = 500;
+              let left = highlight.left;
+              let top = highlight.bottom + 20;
 
-                  {/* Bocadillo */}
-                  <div className="mt-2 bg-white shadow-lg rounded-xl p-3 w-64 relative">
-                    <p className="text-sm text-gray-700">{stepToShow.response}</p>
-                    <div className="flex justify-end mt-2">
-                      <button
-                        onClick={nextStep}
-                        className="px-3 py-1 text-sm hover:cursor-pointer bg-cyan-500 text-white rounded hover:bg-cyan-600"
-                      >
-                        {currentStep === guide.length - 1 &&
-                        currentSubStep ===
-                          (guide[currentStep].steps?.length ?? 1) - 1
-                          ? "Finalizar"
-                          : "Siguiente"}
-                      </button>
+              // Ajustar posición horizontal
+              if (highlight.left + bocadilloWidth > window.innerWidth - 10) {
+                left = highlight.right - bocadilloWidth;
+              }
+              if (left < 10) left = 10;
+
+              // Verificar si el bocadillo está fuera de la vista y hacer scroll
+              const bocadilloBottom = top + bocadilloHeight;
+              if (bocadilloBottom > window.innerHeight) {
+                window.scrollBy({
+                  top: bocadilloBottom - window.innerHeight + 20,
+                  behavior: 'smooth'
+                });
+              }
+
+              let isLastStep = false;
+
+              if (currentStep !== null) {
+                const step = guide[currentStep];
+                if (step) {
+                  const hasSubSteps = (step.steps?.length ?? 0) > 0;
+                  isLastStep = hasSubSteps
+                    ? currentSubStep === (step.steps!.length - 1)
+                    : currentStep === guide.length - 1;
+                }
+              }
+
+              return (
+                <div
+                  className="fixed flex flex-col items-center z-[10000]"
+                  style={{ top, left }}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="w-16 h-16 rounded-full overflow-hidden shadow-lg">
+                      <img
+                        src="https://randomuser.me/api/portraits/women/44.jpg"
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
                     </div>
 
-                    {/* Triángulo del bocadillo */}
-                    <div className="absolute -left-2 top-4 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent border-r-white"></div>
+                    <div className="mt-2 bg-white shadow-lg rounded-xl p-3 w-64 relative">
+                      <p className="text-sm text-gray-700">{stepToShow.response}</p>
+                      <div className="flex justify-between mt-2 space-x-2">
+                        {!isLastStep && (
+                          <button
+                            onClick={nextStep}
+                            className="px-3 py-1 text-sm hover:cursor-pointer bg-cyan-500 text-white rounded hover:bg-cyan-600"
+                          >
+                            Siguiente
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => {
+                            setStartGuide(false);
+                            setOpen(false);
+                            setCurrentStep(0);
+                            setCurrentSubStep(null);
+                          }}
+                          className="px-3 py-1 text-sm hover:cursor-pointer bg-red-500 text-white rounded hover:bg-red-600"
+                        >
+                          Salir
+                        </button>
+                      </div>
+
+                      <div
+                        className={`absolute top-4 w-0 h-0 border-t-8 border-b-8 border-r-8 border-transparent
+              ${highlight.left + bocadilloWidth > window.innerWidth - 10
+                            ? "border-l-white border-r-0 -right-2"
+                            : "border-r-white -left-2"
+                          }`}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </>,
           document.body
         )

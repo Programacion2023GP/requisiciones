@@ -210,7 +210,7 @@ const duplicateRequisition = () => {
       }
    };
    return (
-      <ModalComponent open={open} actions={values?.IDRequisicion && <Tooltip  content={"Duplicar requisicion"}><Button onClick={duplicateRequisition} color={"indigo"} variant={"text"} children={<IoMdCopy size={20}/>}/></Tooltip>} setOpen={() => setOpen(false)} title={title}>
+      <ModalComponent open={open} actions={values?.IDRequisicion && <Tooltip  content={"Duplicar requisicion"}><Button id="requisitionduplicate" onClick={duplicateRequisition} color={"indigo"} variant={"text"} children={<IoMdCopy size={20}/>}/></Tooltip>} setOpen={() => setOpen(false)} title={title}>
          {mutation.status === "pending" && <Spinner />}
          <div className="p-3">
             <FormikForm
@@ -275,7 +275,7 @@ const duplicateRequisition = () => {
                         />
                         <FormikAutocomplete
                            responsive={responsive}
-
+                           id="requisition-type"
                            name="IDTipo"
                            label="Tipo"
                            options={types.data?.data}
@@ -284,8 +284,8 @@ const duplicateRequisition = () => {
                         />
 
                         <FormikInput responsive={responsive} name="Solicitante" label="Solicitante" />
-                        <FormikInput name="FechaCaptura" label="Fecha" type="date" />
-                        <FormikTextArea name="Observaciones" label="Observaciones" />
+                        <FormikInput name="FechaCaptura" label="Fecha" type="date" id="requisition-fecha"/>
+                        <FormikTextArea name="Observaciones" label="Observaciones" id="requisition-observation"/>
                         {v.IDTipo > 0 && (
 
                            <div className="mb-2 w-full">
@@ -296,7 +296,7 @@ const duplicateRequisition = () => {
 
                         )}
 
-                        <div className="max-h-24 overflow-y-auto">
+                        <div id="requisition-informative" className="max-h-24 overflow-y-auto">
                            <div className="flex flex-wrap gap-1">
                               {detailstypes?.data?.data
                                  .filter(it => it.IDTipo === v.IDTipo)
@@ -324,8 +324,8 @@ const duplicateRequisition = () => {
                               />
                            </div>
                            <div className="border rounded-md overflow-y-auto max-h-[400px] shadow-sm">
-                              <table className="w-full text-sm border-collapse">
-                                 <thead className="bg-gray-100 sticky top-0">
+                              <table  className="w-full text-sm border-collapse">
+                                 <thead id="requisitiontableproducts" className="bg-gray-100 sticky top-0">
                                     <tr>
                                        <th className="border p-2 w-14 text-center">#</th>
                                        <th className="border p-2 w-28 text-center">Cantidad</th>
@@ -333,7 +333,7 @@ const duplicateRequisition = () => {
                                        <th className="border p-2 w-14 text-center">Eliminar</th>
                                     </tr>
                                  </thead>
-                                 <tbody>
+                                 <tbody >
                                     {filteredProducts.map((prod: any, idx: number) => (
                                        <tr key={idx} className="odd:bg-gray-50">
                                           <td className="border text-center text-gray-600 p-1">{idx + 1}</td>
@@ -358,7 +358,7 @@ const duplicateRequisition = () => {
                                              />
                                           </td>
                                           <td className="border p-1 text-center">
-                                             <Button onClick={() => setValue(`Productos[${idx}]`, { Cantidad: "", Descripcion: "", IDDetalle: prod.IDDetalle || 0 })} color={"red"} variant={"outline"}>
+                                             <Button  onClick={() => setValue(`Productos[${idx}]`, { Cantidad: "", Descripcion: "", IDDetalle: prod.IDDetalle || 0 })} color={"red"} variant={"outline"}>
                                                 <IoMdClose />
                                              </Button>
 

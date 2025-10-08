@@ -37,6 +37,7 @@ import YearSelect from "./select/Dropdown";
 import StatusColumn from "./columns/status/Status";
 import RequisitionForm from "./form/Requisition";
 import { icons } from "../constants";
+import { IoRefresh } from "react-icons/io5";
 
 type ChipsProps = {
    captura: boolean;
@@ -207,6 +208,12 @@ const RequisicionesAdd = () => {
          cellRenderer: (params: any) => <StatusColumn data={params.data} />,
       },
       {
+         headerName: "Motivo de cancelación",
+         field: "Motivo_Cancelacion",
+         sortable: true,
+         filter: true,
+      },
+      {
          headerName: "Tipo",
          field: "TipoNombre",
          sortable: true,
@@ -258,36 +265,54 @@ const RequisicionesAdd = () => {
    const buttonElement = useMemo(
       () => (
          <>
-            <Tooltip content="Agregar Requisición">
-               <div className="mb-4">
-                  <Button
-                     id="btn-add-requisition"
-                     onClick={async () => {
-                        ObservableDelete("FormRequisicion");
+            <div className="flex flex-row  space-x-2 w-full">
 
-                        try {
-                           const result = await ObservablePost("FormRequisicion", {
-                              data: {
-                                 data: null,
-                                 edicion: true,
-                              },
-                           });
-                           console.log(result);
-                        } catch (e) {
-                           console.error(e);
-                        } finally {
-                           setOpen(true);
-                        }
-                     }}
-                     size="medium"
-                     color="blue"
-                     variant="solid"
-                  >
-                     <icons.Tb.TbFileTextSpark size={20} />
+               <Tooltip content="Agregar Requisición">
+                  <div className="mb-4">
+                     <Button
+                        id="btn-add-requisition"
+                        onClick={async () => {
+                           ObservableDelete("FormRequisicion");
+
+                           try {
+                              const result = await ObservablePost("FormRequisicion", {
+                                 data: {
+                                    data: null,
+                                    edicion: true,
+                                 },
+                              });
+                              console.log(result);
+                           } catch (e) {
+                              console.error(e);
+                           } finally {
+                              setOpen(true);
+                           }
+                        }}
+                        size="medium"
+                        color="blue"
+                        variant="solid"
+                     >
+                        <icons.Tb.TbFileTextSpark size={20} />
+                     </Button>
+
+                  </div>
+               </Tooltip>
+               <div className="">
+                  <Button onClick={() => {
+                     setReloadTable(false)
+                     setTimeout(() => {
+                        setFilters(`Ejercicio = '${new Date().getFullYear()}'`);
+
+                        setReloadTable(true)
+
+                     }, 300);
+                     // setReloadTable(!reloadTable)
+                     // setReloadTable(true)
+                  }} color="yellow" variant="solid" >
+                     <IoRefresh size={20} />
                   </Button>
-
                </div>
-            </Tooltip>
+            </div>
             {/* agregar boton de refrescar */}
          </>
       ),
@@ -460,6 +485,7 @@ const RequisicionesAdd = () => {
                      table: "Listado",
                      buttonElement: "RequisicionesAdd",
                   }}
+
                   // getRowClass={getRowClass}
                   backUrl={{
                      pathName: "requisiciones/index",

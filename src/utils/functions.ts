@@ -34,6 +34,37 @@ export function formatCurrency(
 
    return total;
 }
+export const waitAndClick = async (selector: string, timeout = 3000): Promise<boolean> => {
+  const waitForElement = (selector: string, timeout = 3000): Promise<HTMLElement | null> => {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        const el = document.querySelector(selector) as HTMLElement | null;
+        if (el) {
+          clearInterval(interval);
+          resolve(el);
+        }
+      }, 100);
+      setTimeout(() => {
+        clearInterval(interval);
+        resolve(null);
+      }, timeout);
+    });
+  };
+
+  const el = await waitForElement(selector, timeout);
+
+  if (el) {
+    console.log(`✅ Click en: ${selector}`);
+    const clickEvent = new MouseEvent("click", { bubbles: true, cancelable: true });
+    el.dispatchEvent(clickEvent); // mejor que el.click()
+    return true;
+  } else {
+    console.warn(`⚠️ Elemento no encontrado: ${selector}`);
+    return false;
+  }
+};
+;
+
 
 // export function formatCurrency(
 //    amount: number | bigint,

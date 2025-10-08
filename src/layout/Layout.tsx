@@ -11,6 +11,7 @@ import { LuMenu } from "react-icons/lu";
 import { Document, PDFViewer, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { createTw } from "react-pdf-tailwind";
 import CustomTutorial, { Guide } from "../components/tutorial/CustomTutorial";
+import { waitAndClick } from "../utils/functions";
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "white",
@@ -41,82 +42,69 @@ const tw = createTw({});
 const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
   const tutorial: Guide[] = [
     {
-      question: "Como duplicar una requisicion",
-      referenceStart: "#tablerequisitionactions",
+      question: "¿Cómo registrar una requisicion?",
+      referenceStart: "#btn-add-requisition",
+      response: "Haz clic en el botón para añadir una nueva requisición.",
+      afterOpenTutorial: () => {
+        const mnuSeguridad = document.querySelector<HTMLElement>("#MnuRequisiciones")?.click();
+      },
+
+      action: () => {
+        document.querySelector<HTMLButtonElement>("#btn-add-requisition")?.click();
+      },
+      steps: [
+        {
+          referenceStart: "#requisition-type",
+          response: "Selecciona el tipo de requisición.",
+        },
+        {
+          referenceStart: "#requisition-fecha",
+          response: "Ingresa la fecha de hoy",
+        },
+        // {
+        //   referenceStart: "#requisition-informative",
+        //   response: "Aqui respondemos a travez del tipo seleccionado que tipos de productos puedes agregar"
+        // },
+        {
+          referenceStart: "#requisition-observation",
+          response: "Ingresa el motivo de la requisición.",
+        },
+     
+       
+        {
+          referenceStart:"#requisitiontableproducts",
+          response:"Agrega los productos con cantidad y descripción y finalizamos en el botón azul de registrar"
+        },
+      
+
+      ],
+    },
+    {
+      question: "¿Como duplicar una requisicion?",
+      referenceStart: "#tableRequisitionActions",
       response: "Presionamos las acciones de requisiciones",
-     action: () => {
-  const tryClick = () => {
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
-   
-  };
-  tryClick();
-}
+      action: async () => {
+        await waitAndClick("#tableRequisitionActions");
+      },
+      steps: [
+        {
+          referenceStart: "#formRequisition_edit",
+          response: "Seleccionamos el boton amarillo.",
+          action: async () => {
+            document.querySelector<HTMLElement>("#formRequisition_edit")?.click()
+            // await waitAndClick("#formRequisition_edit");
+          },
+        },
+        {
+          referenceStart: "#requisitionduplicate",
+          response: "Seleccionamos el boton duplicar requisición.",
+
+        }
+      ]
 
 
-    }
-    // {
-    //   question: "¿Cómo duplicar una requisicion?",
-    //   referenceStart: "#btn-add-requisition",
-    //   response: "Haz clic en el botón para añadir una nueva requisición.",
-    //   afterOpenTutorial: () => {
-    //     const mnuSeguridad = document.querySelector<HTMLElement>("#MnuRequisiciones")?.click();
-    //   },
+    },
 
-    //   action: () => {
-    //     document.querySelector<HTMLButtonElement>("#btn-add-requisition")?.click();
-    //   },
-    //   steps: [
-    //     {
-    //       referenceStart: "#requisition-type",
-    //       response: "Selecciona el tipo de requisición.",
-    //     },
-    //     {
-    //       referenceStart: "#requisition-solicitante",
-    //       response: "Aquí aparecerá automáticamente el nombre de tu director.",
-    //     },
-    //     {
-    //       referenceStart: "#requisition-observation",
-    //       response: "Ingresa el motivo de la requisición.",
-    //     },
-    //     {
-    //       referenceStart: "#requisition-products",
-    //       response: "Abre la lista de productos de la requisición.",
-    //       action: () => {
-    //         document.querySelector<HTMLButtonElement>("#btn-requisition-products")?.click();
-    //       },
-    //     },
-    //     {
-    //       referenceStart: "#form-requisition-addproduct",
-    //       response: "Agrega un nuevo producto a la lista.",
-    //     },
-    //     {
-    //       referenceStart: "#form-requisition-quantityproduct1",
-    //       response: "Especifica la cantidad del producto.",
-    //     },
-    //     {
-    //       referenceStart: "#form-requisition-descriptionproduct1",
-    //       response: "Agrega la descripción del producto.",
-    //     },
-    //     {
-    //       referenceStart: "#form-requisition-deleteproduct",
-    //       response: "Elimina un producto de la lista.",
-    //     },
-    //     {
-    //       referenceStart: "#form-requisition-submitpreview",
-    //       response: "Revisa la previsualización de la requisición.",
-    //     },
-    //   ],
-    // },
     // {
     //   question: "¿Cómo registrar un usuario?",
     //   referenceStart: "#btn-menu-sidebar",

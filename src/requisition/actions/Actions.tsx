@@ -428,7 +428,7 @@ const Actions: React.FC<{
                      }}
                   />
                )}
-               <DropdownComponent id="tablerequisitionactions">
+               <DropdownComponent id="tableRequisitionActions">
                   <div className="flex flex-col gap-2">
                      {/* <div className="w-fit">
                 <Tooltip content="Ver requisición">

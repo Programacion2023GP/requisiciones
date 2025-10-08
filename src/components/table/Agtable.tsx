@@ -14,6 +14,7 @@ import Typography from "../typografy/Typografy";
 import { useMutation, useQueries } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { PermissionMenu } from "../../extras/menupermisos";
+import { IoRefresh } from "react-icons/io5";
 
 type FiltersColapseOptions = {
   titles: string[];
@@ -130,7 +131,6 @@ export const Agtable: React.FC<TypeTable> = ({
   };
   useMemo(() => {
     if (backUrl?.restart) {
-      console.log("restaurando busqueda");
       mutation.mutate({
         url: backUrl?.pathName ? backUrl.pathName : "",
         method: "POST",
@@ -138,6 +138,7 @@ export const Agtable: React.FC<TypeTable> = ({
       });
     }
   }, [backUrl?.restart]);
+
   useMemo(() => {
     if (backUrl?.pathName && !backUrl?.restart) {
       mutation.mutate({
@@ -200,6 +201,7 @@ export const Agtable: React.FC<TypeTable> = ({
   // useEffect(() =>{
   //   console.log("nueva",filteredData)
   // },[filteredData])
+  
   const handleChange = (search: string) => {
     setSearch((prev) => ({
       ...prev,
@@ -405,15 +407,22 @@ export const Agtable: React.FC<TypeTable> = ({
             borderLeft: "2px solid #c1c1c1",
           }}
         >
-          <div className="mx-2 mt-1">
-            {permissionsUserTable?.buttonElement ? (
-              <PermissionMenu IdMenu={permissionsUserTable?.buttonElement}>
-                {buttonElement}
-              </PermissionMenu>
-            ) : (
-              buttonElement
-            )}
-          </div>
+         <div className="mx-2 mt-1 flex flex-row  ">
+  {permissionsUserTable?.buttonElement ? (
+    <PermissionMenu IdMenu={permissionsUserTable?.buttonElement}>
+      <div className="flex flex-row  space-x-2 w-full">
+      
+          {buttonElement}
+      
+      </div>
+    </PermissionMenu>
+  ) : (
+    <div className="flex-1">
+      {buttonElement}
+    </div>
+  )}
+</div>
+
         </div>
         <PermissionMenu IdMenu={permissionsUserTable?.table}>
           <RowComponent>

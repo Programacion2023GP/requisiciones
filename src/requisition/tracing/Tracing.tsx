@@ -26,6 +26,7 @@ export type Requisition = {
   UsuarioOC: string | null;
   FechaOrdenCompra: string | null;
   Status: string | null;
+  Motivo_Cancelacion?:string,
 };
 
 type DataT = {
@@ -73,6 +74,8 @@ const TracingComponent: React.FC<PdfRequisitionType> = ({ open, setOpen }) => {
     { title: "Asignación", autor: data.data.UsuarioAS, date: data.data.FechaAsignacion },
     { title: "Cotización", autor: data.data.UsuarioCO, date: data.data.FechaCotizacion },
     { title: "Orden de compra", autor: data.data.UsuarioOC, date: data.data.FechaOrdenCompra },
+    { title: "Motivo de cancelacion", autor: "", date: data.data.Motivo_Cancelacion },
+
   ];
 
   return (
