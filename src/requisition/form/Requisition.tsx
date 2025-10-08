@@ -119,15 +119,17 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
             const edicion = (ObservableGet("FormRequisicion") as any)?.data?.edicion || editData;
 
       const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
-
+      console.log("aqui es ",edicion,formRequisicion)
       const departamentoId = groupArray[0] ?? 0;
       const departamento = groups.data.data.find((it: any) => it.IDDepartamento == departamentoId);
       const centroCosto = departamento?.Centro_Costo ?? 0;
       
       let finalValues: any;
-      
-      if (formRequisicion) {
+      if (edicion) {
          setRegistrar(edicion ? "Registrar":"")
+      }
+      if (formRequisicion) {
+         
          finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
 
          let productos = Array.isArray(formRequisicion)

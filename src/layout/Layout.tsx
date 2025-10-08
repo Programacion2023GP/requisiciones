@@ -39,90 +39,114 @@ const styles = StyleSheet.create({
 const tw = createTw({});
 
 const LayoutRenderer: React.FC<LayoutType> = ({ outlet, sidebar, open }) => {
- const tutorial: Guide[] = [
-  // {
-  //   question: "¿Cómo duplicar una requisicion?",
-  //   referenceStart: "#btn-add-requisition",
-  //   response: "Haz clic en el botón para añadir una nueva requisición.",
-  //   afterOpenTutorial: () => {
-  //     const mnuSeguridad = document.querySelector<HTMLElement>("#MnuRequisiciones")?.click();
-  //   },
+  const tutorial: Guide[] = [
+    {
+      question: "Como duplicar una requisicion",
+      referenceStart: "#tablerequisitionactions",
+      response: "Presionamos las acciones de requisiciones",
+     action: () => {
+  const tryClick = () => {
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+       document.querySelector<HTMLElement>("#tablerequisitionactions")?.click()
+   
+  };
+  tryClick();
+}
 
-  //   action: () => {
-  //     document.querySelector<HTMLButtonElement>("#btn-add-requisition")?.click();
-  //   },
-  //   steps: [
-  //     {
-  //       referenceStart: "#requisition-type",
-  //       response: "Selecciona el tipo de requisición.",
-  //     },
-  //     {
-  //       referenceStart: "#requisition-solicitante",
-  //       response: "Aquí aparecerá automáticamente el nombre de tu director.",
-  //     },
-  //     {
-  //       referenceStart: "#requisition-observation",
-  //       response: "Ingresa el motivo de la requisición.",
-  //     },
-  //     {
-  //       referenceStart: "#requisition-products",
-  //       response: "Abre la lista de productos de la requisición.",
-  //       action: () => {
-  //         document.querySelector<HTMLButtonElement>("#btn-requisition-products")?.click();
-  //       },
-  //     },
-  //     {
-  //       referenceStart: "#form-requisition-addproduct",
-  //       response: "Agrega un nuevo producto a la lista.",
-  //     },
-  //     {
-  //       referenceStart: "#form-requisition-quantityproduct1",
-  //       response: "Especifica la cantidad del producto.",
-  //     },
-  //     {
-  //       referenceStart: "#form-requisition-descriptionproduct1",
-  //       response: "Agrega la descripción del producto.",
-  //     },
-  //     {
-  //       referenceStart: "#form-requisition-deleteproduct",
-  //       response: "Elimina un producto de la lista.",
-  //     },
-  //     {
-  //       referenceStart: "#form-requisition-submitpreview",
-  //       response: "Revisa la previsualización de la requisición.",
-  //     },
-  //   ],
-  // },
-  // {
-  //   question: "¿Cómo registrar un usuario?",
-  //   referenceStart: "#btn-menu-sidebar",
-  //   response: "Haz clic en el menú lateral.",
-  //   action: () => {
-  //     const sidebar = document.querySelector<HTMLButtonElement>("#btn-menu-sidebar");
-  //     const mnuSeguridad = document.querySelector<HTMLElement>("#MnuSeguridad");
 
-  //     if (sidebar && mnuSeguridad) {
-  //       const isHidden = mnuSeguridad.offsetParent === null;
-  //       if (isHidden) {
-  //         sidebar.click();
-  //         console.log("Menú abierto");
-  //       } else {
-  //         console.log("El menú ya estaba abierto");
-  //       }
-  //     }
-  //   },
-  //   steps: [
-  //     {
-  //       referenceStart: "#MnuSeguridad",
-  //       response: "Accede al apartado de usuarios.",
-  //       action: () => {
-  //         const mnuSeguridad = document.querySelector<HTMLElement>("#MnuSeguridad");
-  //         mnuSeguridad?.click();
-  //       },
-  //     },
-  //   ],
-  // },
-];
+    }
+    // {
+    //   question: "¿Cómo duplicar una requisicion?",
+    //   referenceStart: "#btn-add-requisition",
+    //   response: "Haz clic en el botón para añadir una nueva requisición.",
+    //   afterOpenTutorial: () => {
+    //     const mnuSeguridad = document.querySelector<HTMLElement>("#MnuRequisiciones")?.click();
+    //   },
+
+    //   action: () => {
+    //     document.querySelector<HTMLButtonElement>("#btn-add-requisition")?.click();
+    //   },
+    //   steps: [
+    //     {
+    //       referenceStart: "#requisition-type",
+    //       response: "Selecciona el tipo de requisición.",
+    //     },
+    //     {
+    //       referenceStart: "#requisition-solicitante",
+    //       response: "Aquí aparecerá automáticamente el nombre de tu director.",
+    //     },
+    //     {
+    //       referenceStart: "#requisition-observation",
+    //       response: "Ingresa el motivo de la requisición.",
+    //     },
+    //     {
+    //       referenceStart: "#requisition-products",
+    //       response: "Abre la lista de productos de la requisición.",
+    //       action: () => {
+    //         document.querySelector<HTMLButtonElement>("#btn-requisition-products")?.click();
+    //       },
+    //     },
+    //     {
+    //       referenceStart: "#form-requisition-addproduct",
+    //       response: "Agrega un nuevo producto a la lista.",
+    //     },
+    //     {
+    //       referenceStart: "#form-requisition-quantityproduct1",
+    //       response: "Especifica la cantidad del producto.",
+    //     },
+    //     {
+    //       referenceStart: "#form-requisition-descriptionproduct1",
+    //       response: "Agrega la descripción del producto.",
+    //     },
+    //     {
+    //       referenceStart: "#form-requisition-deleteproduct",
+    //       response: "Elimina un producto de la lista.",
+    //     },
+    //     {
+    //       referenceStart: "#form-requisition-submitpreview",
+    //       response: "Revisa la previsualización de la requisición.",
+    //     },
+    //   ],
+    // },
+    // {
+    //   question: "¿Cómo registrar un usuario?",
+    //   referenceStart: "#btn-menu-sidebar",
+    //   response: "Haz clic en el menú lateral.",
+    //   action: () => {
+    //     const sidebar = document.querySelector<HTMLButtonElement>("#btn-menu-sidebar");
+    //     const mnuSeguridad = document.querySelector<HTMLElement>("#MnuSeguridad");
+
+    //     if (sidebar && mnuSeguridad) {
+    //       const isHidden = mnuSeguridad.offsetParent === null;
+    //       if (isHidden) {
+    //         sidebar.click();
+    //         console.log("Menú abierto");
+    //       } else {
+    //         console.log("El menú ya estaba abierto");
+    //       }
+    //     }
+    //   },
+    //   steps: [
+    //     {
+    //       referenceStart: "#MnuSeguridad",
+    //       response: "Accede al apartado de usuarios.",
+    //       action: () => {
+    //         const mnuSeguridad = document.querySelector<HTMLElement>("#MnuSeguridad");
+    //         mnuSeguridad?.click();
+    //       },
+    //     },
+    //   ],
+    // },
+  ];
 
   return (
     <RowComponent>

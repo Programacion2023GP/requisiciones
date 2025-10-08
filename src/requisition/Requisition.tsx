@@ -262,15 +262,30 @@ const RequisicionesAdd = () => {
                <div className="mb-4">
                   <Button
                      id="btn-add-requisition"
-                     onClick={() => {
-                        setOpen(true);
+                     onClick={async () => {
                         ObservableDelete("FormRequisicion");
+
+                        try {
+                           const result = await ObservablePost("FormRequisicion", {
+                              data: {
+                                 data: null,
+                                 edicion: true,
+                              },
+                           });
+                           console.log(result);
+                        } catch (e) {
+                           console.error(e);
+                        } finally {
+                           setOpen(true);
+                        }
                      }}
                      size="medium"
                      color="blue"
-                     variant="solid">
+                     variant="solid"
+                  >
                      <icons.Tb.TbFileTextSpark size={20} />
                   </Button>
+
                </div>
             </Tooltip>
             {/* agregar boton de refrescar */}
@@ -400,43 +415,43 @@ const RequisicionesAdd = () => {
                                  chipsOpen.rechazada ||
                                  chipsOpen.todos ||
                                  chipsOpen.surtida) && (
-                                 <YearSelect
-                                    onChange={(value) => {
-                                       console.log(sql);
-                                       if (
-                                          sql == "" &&
-                                          (value == null || value == undefined)
-                                       ) {
-                                          showToast(
-                                             "Demasiada información por favor pon almenos un filtro",
-                                             "info",
-                                          );
-                                          return;
-                                       }
-                                       const whereSql = `${sql ? `status = '${sql}'` : ""} ${value == null || value == undefined ? "" : sql != "" ? " and " + value : value}`;
+                                    <YearSelect
+                                       onChange={(value) => {
+                                          console.log(sql);
+                                          if (
+                                             sql == "" &&
+                                             (value == null || value == undefined)
+                                          ) {
+                                             showToast(
+                                                "Demasiada información por favor pon almenos un filtro",
+                                                "info",
+                                             );
+                                             return;
+                                          }
+                                          const whereSql = `${sql ? `status = '${sql}'` : ""} ${value == null || value == undefined ? "" : sql != "" ? " and " + value : value}`;
 
-                                       setFilters(whereSql);
-                                       setReloadTable(true);
-                                       // setFilters(value)
-                                    }}
-                                    setClosed={() => {
-                                       setChipsOpen({
-                                          rechazada: false,
-                                          captura: false,
-                                          autorizada: false,
-                                          asignado: false,
-                                          cotizado: false,
-                                          ordenDeCompra: false,
-                                          surtida: false,
-                                          realizada: false,
-                                          todos: false,
-                                       });
-                                    }}
-                                 />
-                              )}
+                                          setFilters(whereSql);
+                                          setReloadTable(true);
+                                          // setFilters(value)
+                                       }}
+                                       setClosed={() => {
+                                          setChipsOpen({
+                                             rechazada: false,
+                                             captura: false,
+                                             autorizada: false,
+                                             asignado: false,
+                                             cotizado: false,
+                                             ordenDeCompra: false,
+                                             surtida: false,
+                                             realizada: false,
+                                             todos: false,
+                                          });
+                                       }}
+                                    />
+                                 )}
                            </>
                         )}
-                        // onhandleClick={() => console.log("el onhandle")}
+                     // onhandleClick={() => console.log("el onhandle")}
                      />
                   ))}
                </div>
@@ -464,7 +479,7 @@ const RequisicionesAdd = () => {
             </div>
             {open && (
                <RequisitionForm
-               
+
                   open={open}
                   setOpen={() => {
                      setOpen(false);

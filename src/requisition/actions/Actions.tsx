@@ -50,7 +50,7 @@ const Actions: React.FC<{
    const [openSu, setOpenSu] = useState<boolean>(false);
    const [autorized, SetAutorized] = useState(false);
    const [canceled, setCanceled] = useState(false);
-   const { ObservablePost } = Observable();
+   const { ObservablePost,ObservableDelete } = Observable();
    const mutation = useMutation({
       mutationFn: ({
          url,
@@ -148,7 +148,6 @@ const Actions: React.FC<{
       },
       onSuccess: async (data,variables) => {
          setSpiner(false);
-         console.log("mutate",variables?.data?.edicion)
          try {
             const result = await ObservablePost("FormRequisicion", {
                data: {
@@ -429,7 +428,7 @@ const Actions: React.FC<{
                      }}
                   />
                )}
-               <DropdownComponent>
+               <DropdownComponent id="tablerequisitionactions">
                   <div className="flex flex-col gap-2">
                      {/* <div className="w-fit">
                 <Tooltip content="Ver requisición">
@@ -461,7 +460,7 @@ const Actions: React.FC<{
                         )) */}
 
                      <div className="w-fit">
-                        <Tooltip content={`${((data.Status == "CP" &&
+                        <Tooltip content={`${(((data.Status == "CP") &&
                                           userGroups.includes((data?.IDDepartamento))
                                        ) ||
                                           ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
@@ -473,6 +472,8 @@ const Actions: React.FC<{
                               variant="solid"
                               size="small"
                               onClick={() => {
+                                                         ObservableDelete("FormRequisicion");
+
                                  mutationEdit.mutate({
                                     method: "POST",
                                     url: "/requisiciones/showRequisicion",
