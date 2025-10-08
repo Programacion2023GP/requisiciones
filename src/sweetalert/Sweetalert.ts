@@ -18,27 +18,40 @@ export const showToast = (message: string, icon: ToastIcon = 'success') => {
     }
   });
 };
-export const showConfirmationAlert = (title: string, text: string,  position: 'top-start' | 'top-end' | 'top' | 'center-start' | 'center' | 'center-end' | 'bottom-start' | 'bottom-end' | 'bottom' = 'center'
+export const showConfirmationAlert = (
+  title: string,
+  text: string,
+  position:
+    | 'top-start'
+    | 'top-end'
+    | 'top'
+    | 'center-start'
+    | 'center'
+    | 'center-end'
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'bottom' = 'center'
 ): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     Swal.fire({
-    position: position,    // Posición en la parte superior derecha
-      title: title,           // Título de la alerta
-      text: text,             // Mensaje de la alerta
-      icon: 'warning',        // Tipo de icono (advertencia)
-      showCancelButton: true, // Habilitar el botón "Cancelar"
-      confirmButtonText: 'Aceptar', // Texto del botón "Aceptar"
-      cancelButtonText: 'Cancelar', // Texto del botón "Cancelar"
-      reverseButtons: true,   // Invierte la posición de los botones
-      allowOutsideClick: false          // No permite cerrar la alerta haciendo clic fuera de ella
-    }).then((result) => {
-      if (result.isConfirmed) {
-        resolve(true); // Resuelve la promesa como "true" si el usuario hace clic en "Aceptar"
-      } else {
-        resolve(false); // Resuelve la promesa como "false" si el usuario hace clic en "Cancelar"
-      }
-    }).catch((error) => {
-      reject(error); // Si ocurre algún error, rechaza la promesa
-    });
+      position,
+      title,
+      text,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Aceptar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      allowOutsideClick: false,
+      didOpen: () => {
+        // Aplica el z-index directamente al contenedor principal de SweetAlert
+        const container = document.querySelector('.swal2-container') as HTMLElement;
+        if (container) {
+          container.style.zIndex = '40000';
+        }
+      },
+    })
+      .then((result) => resolve(result.isConfirmed))
+      .catch((error) => reject(error));
   });
 };
