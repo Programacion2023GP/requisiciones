@@ -51,14 +51,18 @@ const bumpVersion = async () => {
       `📦 Versión actual: v${major}.${minor}.${patch}.${build} ${stage || ""}\n`,
    );
 
-   const bumpMajor = await askYesNo("¿Incrementar versión MAYOR? (y/n): ");
+   const bumpMajor = await askYesNo(
+      "¿Incrementar versión MAYOR? (cambios que afecten a la API) (y/n): ",
+   );
    if (bumpMajor) {
       major++;
       minor = 0;
       patch = 0;
       build = 0;
    } else {
-      const bumpMinor = await askYesNo("¿Incrementar versión MENOR? (y/n): ");
+      const bumpMinor = await askYesNo(
+         "¿Incrementar versión MENOR? (cambios visuales y funciones a gran escala) (y/n): ",
+      );
       if (bumpMinor) {
          minor++;
          patch = 0;
