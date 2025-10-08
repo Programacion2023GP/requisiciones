@@ -9,3 +9,6 @@ se realizo el cambio de la unidad
 ##### VITE_VERSION = v2.1.3.1 BETA
 
 se agrego un cambio x
+
+#####VITE_VERSION = v2.1.4.1 BETA
+Se estilizo los status de la tabla, se agrego el boton de refrescar tabla y que se pudieran ver pdf en canceladas y marca de agua al rechazarla
