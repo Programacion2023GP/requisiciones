@@ -70,6 +70,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          let initialFormValues: Record<string, any> = {};
 
          productsData.forEach((it: any, index) => {
+            console.log("🚀 ~ CotizacionComponent ~ it:", it);
             initialFormValues[`IDRequisicion`] = it.IDRequisicion;
             initialFormValues[`Ejercicio`] = it.Ejercicio;
             initialFormValues[`IDproveedor1`] = Number(it.IDproveedor1);
@@ -91,9 +92,17 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   it[`PrecioUnitarioConIva${providerNum}`] || 0;
                initialFormValues[`Retenciones${fieldNumber}`] =
                   it[`Retenciones${providerNum}`] || 0;
+
+               initialFormValues[`Importe${fieldNumber}`] =
+                  Number(it[`PrecioUnitarioSinIva${providerNum}`]) *
+                     Number(it.Cantidad) || 0;
             });
          });
 
+         console.log(
+            "🚀 ~ CotizacionComponent ~ initialFormValues:",
+            initialFormValues,
+         );
          setFormValues(initialFormValues);
          setData(productsData);
       },
@@ -261,7 +270,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }
    };
 
-   const handleInputChange = (name: string, value: any) => {
+   const handleInputChange = (name: string, value: any, cantidad?: number) => {
       setFormValues((prev) => ({
          ...prev,
          [name]: value,
@@ -277,10 +286,16 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }
 
       // Recalcular IVA si es necesario
-      calculateIVA(name, value);
+      calculateIVA(name, value, cantidad);
    };
 
-   const calculateIVA = (fieldName: string, fieldValue: any) => {
+   const calculateIVA = (
+      fieldName: string,
+      fieldValue: any,
+      cantidad: number = 0,
+   ) => {
+      console.log("🚀 ~ calculateIVA ~ fieldName:", fieldName);
+      console.log("🚀 ~ calculateIVA ~ fieldValue:", fieldValue);
       const calculateIVAHelper = (
          precioSinIva: number,
          porcentajeIVA: number,
@@ -319,11 +334,16 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   precioSinIva,
                   porcentajeIVA,
                );
+               const importe = Number(fieldValue) * cantidad;
 
                setFormValues((prev) => ({
                   ...prev,
                   [`ImporteIva${providerNumber}`]: importeIva,
                   [`PrecioUnitarioConIva${providerNumber}`]: precioConIva,
+                  [`Importe${providerNumber}`]:
+                     fieldName === `PrecioUnitarioSinIva${providerNumber}`
+                        ? importe
+                        : prev[`Importe${providerNumber}`],
                }));
             }
          });
@@ -341,23 +361,29 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       });
    }, []);
 
-   const renderInput = (name: string, disabled: boolean = false) => (
-      <div className="w-full">
-         <input
-            type="text"
-            name={name}
-            value={formValues[name] || ""}
-            onChange={(e) => handleInputChange(name, e.target.value)}
-            disabled={disabled}
-            className={`w-full px-2 py-1 text-sm border rounded ${
-               disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-            } ${errors[name] ? "border-red-500" : "border-gray-300"}`}
-         />
-         {errors[name] && (
-            <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
-         )}
-      </div>
-   );
+   const renderInput = (
+      name: string,
+      disabled: boolean = false,
+      cantidad: number = 0,
+   ) => {
+      return (
+         <div className="w-full">
+            <input
+               type="text"
+               name={name}
+               value={formValues[name] || ""}
+               onChange={(e) =>
+                  handleInputChange(name, e.target.value, cantidad)
+               }
+               disabled={disabled}
+               className={`w-full px-2 py-1 text-sm border rounded ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"} ${errors[name] ? "border-red-500" : "border-gray-300"}`}
+            />
+            {errors[name] && (
+               <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
+            )}
+         </div>
+      );
+   };
 
    const renderSelect = (
       name: string,
@@ -482,7 +508,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                  <th
                                     key={offset}
                                     className="px-3 py-2 text-center border"
-                                    colSpan={5}>
+                                    colSpan={6}>
                                     {IdRequisicion?.data?.status == "OC" ? (
                                        <Button
                                           color="blue"
@@ -544,6 +570,9 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        Ret.
                                     </th>
                                     <th className="px-3 py-2 text-center border">
+                                       Imp.
+                                    </th>
+                                    <th className="px-3 py-2 text-center border">
                                        IVA cal.
                                     </th>
                                     <th className="px-3 py-2 text-center border">
@@ -578,6 +607,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     {[1, 2, 3].map((offset) => {
                                        const providerNumber =
                                           index * 3 + offset;
+
                                        return (
                                           <React.Fragment key={offset}>
                                              <td className="px-2 py-1 border">
@@ -585,6 +615,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                    `PrecioUnitarioSinIva${providerNumber}`,
                                                    IdRequisicion?.data
                                                       ?.status === "OC",
+                                                   item.Cantidad,
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
@@ -599,6 +630,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                    `Retenciones${providerNumber}`,
                                                    IdRequisicion?.data
                                                       ?.status === "OC",
+                                                )}
+                                             </td>
+                                             <td className="px-2 py-1 border">
+                                                {renderInput(
+                                                   `Importe${providerNumber}`,
+                                                   true,
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
@@ -686,7 +723,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     return (
                                        <td
                                           key={providerIdx}
-                                          colSpan={5}
+                                          colSpan={6}
                                           className="px-2 py-1 text-right border">
                                           {formatCurrency(
                                              mapTotals[row.key],

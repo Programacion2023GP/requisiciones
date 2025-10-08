@@ -3,8 +3,16 @@ import { icons } from "../../constants";
 import Tooltip from "../toltip/Toltip";
 
 interface Departamento {
-   id: number;
-   nombre: string;
+   Centro_Costo: number;
+   FUM: string;
+   FechaAlta: null;
+   Firma_Director: string;
+   IDDepartamento: number;
+   Nombre_CC: string;
+   Nombre_Departamento: string;
+   Nombre_Director: string;
+   Usuario: string;
+   UsuarioFUM: string;
 }
 
 interface TransferListProps {
@@ -26,13 +34,13 @@ const TransferList: React.FC<TransferListProps> = ({
 
    const disponibles = departamentos.filter(
       (d) =>
-         !selected.includes(d.id) &&
-         d.nombre.toLowerCase().includes(searchLeft.toLowerCase()),
+         !selected.includes(d.IDDepartamento) &&
+         d.Nombre_CC.toLowerCase().includes(searchLeft.toLowerCase()),
    );
    const elegidos = departamentos.filter(
       (d) =>
-         selected.includes(d.id) &&
-         d.nombre.toLowerCase().includes(searchRight.toLowerCase()),
+         selected.includes(d.IDDepartamento) &&
+         d.Nombre_CC.toLowerCase().includes(searchRight.toLowerCase()),
    );
 
    // Helpers
@@ -47,7 +55,10 @@ const TransferList: React.FC<TransferListProps> = ({
    };
 
    const moveAllRight = () => {
-      updateSelected([...selected, ...disponibles.map((d) => d.id)]);
+      updateSelected([
+         ...selected,
+         ...disponibles.map((d) => d.IDDepartamento),
+      ]);
       setLeftChecked([]);
    };
 
@@ -58,7 +69,9 @@ const TransferList: React.FC<TransferListProps> = ({
 
    const moveAllLeft = () => {
       updateSelected(
-         selected.filter((id) => !elegidos.map((d) => d.id).includes(id)),
+         selected.filter(
+            (id) => !elegidos.map((d) => d.IDDepartamento).includes(id),
+         ),
       );
       setRightChecked([]);
    };
@@ -83,21 +96,23 @@ const TransferList: React.FC<TransferListProps> = ({
          <ul className="flex-1 overflow-y-auto text-sm">
             {items.map((d) => (
                <li
-                  key={d.id}
+                  key={d.IDDepartamento}
                   className="flex items-center px-2 py-1 hover:bg-gray-100">
                   <input
                      type="checkbox"
                      className="mr-2"
-                     checked={checked.includes(d.id)}
+                     checked={checked.includes(d.IDDepartamento)}
                      onChange={(e) => {
                         if (e.target.checked) {
-                           setChecked([...checked, d.id]);
+                           setChecked([...checked, d.IDDepartamento]);
                         } else {
-                           setChecked(checked.filter((cid) => cid !== d.id));
+                           setChecked(
+                              checked.filter((cid) => cid !== d.IDDepartamento),
+                           );
                         }
                      }}
                   />
-                  {d.nombre}
+                  {d.Nombre_CC}
                </li>
             ))}
             {items.length === 0 && (
