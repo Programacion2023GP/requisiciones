@@ -62,14 +62,15 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    const groupArray = [...userGroups];
    const [groups, types, director, detailstypes] = useQueries({
       queries: [
-         { queryKey: ["departamentos/index"], queryFn: () => GetAxios("departamentos/index") },
+         {
+            queryKey: ["departamentos/index"],
+            queryFn: () => GetAxios("departamentos/index"),
+         },
          { queryKey: ["tipos/index"], queryFn: () => GetAxios("tipos/index") },
          {
             queryKey: ["departaments/director", localStorage.getItem("group")],
             queryFn: () =>
-               GetAxios(
-                  `departaments/director/${groupArray[0] ?? 0}`,
-               ),
+               GetAxios(`departaments/director/${groupArray[0] ?? 0}`),
          },
          {
             queryKey: ["detailstypes/index"],
@@ -79,7 +80,6 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       ],
    });
 
-
    useEffect(() => {
       //  console.log(open,director.data.data)
       const nombre = director.data?.data?.[0]?.Nombre_Director || "";
@@ -87,19 +87,23 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
          return;
       }
       formik.current?.setFieldValue("Solicitante", nombre);
-
    }, [open, director]);
    const schema = Yup.object({
       Solicitante: Yup.string().required("El solicitante es requerido"),
-      IDDepartamento: Yup.number().min(1, "El departamento es requerido").required(),
-      Centro_Costo: Yup.number().min(1, "El centro de costo es requerido").required(),
+      IDDepartamento: Yup.number()
+         .min(1, "El departamento es requerido")
+         .required(),
+      Centro_Costo: Yup.number()
+         .min(1, "El centro de costo es requerido")
+         .required(),
       IDTipo: Yup.number().min(1, "El tipo es requerido").required(),
       FechaCaptura: Yup.string().required("La fecha es requerida"),
       Observaciones: Yup.string().required("Las observaciones son requeridas"),
    });
 
    const mutation = useMutation({
-      mutationFn: ({ url, method, data }: any) => AxiosRequest(url, method, data),
+      mutationFn: ({ url, method, data }: any) =>
+         AxiosRequest(url, method, data),
       onSuccess: (data) => {
          setReloadTable(true);
          setOpen(false);
@@ -111,39 +115,47 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
    });
 
    const formik = useRef<FormikProps<any>>(null);
-   
+
    // --- Cargar datos al abrir el modal ---
    // --- Valores iniciales simples ---
    useEffect(() => {
       if (!open || !groups.data?.data) return;
-            const edicion = (ObservableGet("FormRequisicion") as any)?.data?.edicion || editData;
+      const edicion =
+         (ObservableGet("FormRequisicion") as any)?.data?.edicion || editData;
 
-      const formRequisicion = (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
-      console.log("aqui es ",edicion,formRequisicion)
+      const formRequisicion =
+         (ObservableGet("FormRequisicion") as any)?.data?.data || editData;
+      console.log("aqui es ", edicion, formRequisicion);
       const departamentoId = groupArray[0] ?? 0;
-      const departamento = groups.data.data.find((it: any) => it.IDDepartamento == departamentoId);
+      const departamento = groups.data.data.find(
+         (it: any) => it.IDDepartamento == departamentoId,
+      );
       const centroCosto = departamento?.Centro_Costo ?? 0;
-      
+
       let finalValues: any;
       if (edicion) {
-         setRegistrar(edicion ? "Registrar":"")
+         setRegistrar(edicion ? "Registrar" : "");
       }
       if (formRequisicion) {
-         
-         finalValues = Array.isArray(formRequisicion) ? { ...formRequisicion[0] } : { ...formRequisicion };
+         finalValues = Array.isArray(formRequisicion)
+            ? { ...formRequisicion[0] }
+            : { ...formRequisicion };
 
          let productos = Array.isArray(formRequisicion)
             ? formRequisicion.map((item: any) => ({
-               Cantidad: item.Cantidad || "",
-               Descripcion: item.Descripcion || "",
-               IDDetalle: item.IDDetalle || 0,
-            }))
+                 Cantidad: item.Cantidad || "",
+                 Descripcion: item.Descripcion || "",
+                 IDDetalle: item.IDDetalle || 0,
+              }))
             : formRequisicion.Productos || [];
 
          if (productos.length < 200) {
             productos = [
                ...productos,
-               ...Array.from({ length: 200 - productos.length }, () => ({ Cantidad: "", Descripcion: "" })),
+               ...Array.from({ length: 200 - productos.length }, () => ({
+                  Cantidad: "",
+                  Descripcion: "",
+               })),
             ];
          }
 
@@ -156,21 +168,24 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
             IDTipo: 0,
             FechaCaptura: "",
             Observaciones: "",
-            Productos: Array.from({ length: 200 }, () => ({ Cantidad: "", Descripcion: "" })),
+            Productos: Array.from({ length: 200 }, () => ({
+               Cantidad: "",
+               Descripcion: "",
+            })),
          };
       }
 
       setValues(finalValues);
    }, [open, groups.data, editData]);
 
-const duplicateRequisition = () => {
+   const duplicateRequisition = () => {
       let formValues = formik.current?.values;
       const productosLlenos = formValues.Productos.filter(
          (p: any) =>
-            p.Descripcion?.trim() !== "" && parseFloat(p.Cantidad || 0) > 0
-            || (p.IDDetalle && p.IDDetalle > 0) // <-- enviar también si tienen IDDetalle
+            (p.Descripcion?.trim() !== "" && parseFloat(p.Cantidad || 0) > 0) ||
+            (p.IDDetalle && p.IDDetalle > 0), // <-- enviar también si tienen IDDetalle
       );
-      delete formValues.IDRequisicion
+      delete formValues.IDRequisicion;
 
       mutation.mutate({
          method: "POST",
@@ -182,10 +197,9 @@ const duplicateRequisition = () => {
    const handleSubmit = (formValues: any) => {
       const productosLlenos = formValues.Productos.filter(
          (p: any) =>
-            p.Descripcion?.trim() !== "" && parseFloat(p.Cantidad || 0) > 0
-            || (p.IDDetalle && p.IDDetalle > 0) // <-- enviar también si tienen IDDetalle
+            (p.Descripcion?.trim() !== "" && parseFloat(p.Cantidad || 0) > 0) ||
+            (p.IDDetalle && p.IDDetalle > 0), // <-- enviar también si tienen IDDetalle
       );
-
 
       mutation.mutate({
          method: "POST",
@@ -204,13 +218,31 @@ const duplicateRequisition = () => {
    };
    const handleModified = (name: string, value: number | string) => {
       if (name === "IDDepartamento") {
-         const departamento = groups.data?.data.find((it: any) => it.IDDepartamento == Number(value));
+         const departamento = groups.data?.data.find(
+            (it: any) => it.IDDepartamento == Number(value),
+         );
          const centroCosto = departamento?.Centro_Costo ?? 0;
          formik.current?.setFieldValue("Centro_Costo", centroCosto);
       }
    };
    return (
-      <ModalComponent open={open} actions={values?.IDRequisicion && <Tooltip  content={"Duplicar requisicion"}><Button id="requisitionduplicate" onClick={duplicateRequisition} color={"indigo"} variant={"text"} children={<IoMdCopy size={20}/>}/></Tooltip>} setOpen={() => setOpen(false)} title={title}>
+      <ModalComponent
+         open={open}
+         actions={
+            values?.IDRequisicion && (
+               <Tooltip content={"Duplicar requisicion"}>
+                  <Button
+                     id="requisitionduplicate"
+                     onClick={duplicateRequisition}
+                     color={"indigo"}
+                     variant={"text"}
+                     children={<IoMdCopy size={20} />}
+                  />
+               </Tooltip>
+            )
+         }
+         setOpen={() => setOpen(false)}
+         title={title}>
          {mutation.status === "pending" && <Spinner />}
          <div className="p-3">
             <FormikForm
@@ -222,7 +254,9 @@ const duplicateRequisition = () => {
                buttonMessage={registrar}
                children={(v, setValue) => {
                   const filteredProducts = v.Productos.filter((prod: any) =>
-                     prod.Descripcion?.toLowerCase().includes(search.toLowerCase())
+                     prod.Descripcion?.toLowerCase().includes(
+                        search.toLowerCase(),
+                     ),
                   );
 
                   return (
@@ -248,23 +282,18 @@ const duplicateRequisition = () => {
                               loading={groups.isLoading}
                               name="IDDepartamento"
                               label="Selecciona el departamento"
-                              options={groups.data?.data?.filter(it =>
-                                 userGroups.includes(it.IDDepartamento) // comparar número con número
+                              options={groups.data?.data?.filter(
+                                 (it) => userGroups.includes(it.IDDepartamento), // comparar número con número
                               )}
-
                               idKey="IDDepartamento"
                               labelKey="Nombre_Departamento"
                               handleModified={handleModified}
                               handleModifiedOptions={{ name: "IDDepartamento" }}
                            />
-
                         )}
 
-
                         <FormikAutocomplete
-                           disabled={
-                              localStorage.getItem("role") != "SISTEMAS"
-                           }
+                           disabled={localStorage.getItem("role") != "SISTEMAS"}
                            responsive={responsive}
                            loading={groups.isLoading}
                            name="Centro_Costo"
@@ -283,90 +312,141 @@ const duplicateRequisition = () => {
                            labelKey="Descripcion"
                         />
 
-                        <FormikInput responsive={responsive} name="Solicitante" label="Solicitante" />
-                        <FormikInput name="FechaCaptura" label="Fecha" type="date" id="requisition-fecha"/>
-                        <FormikTextArea name="Observaciones" label="Observaciones" id="requisition-observation"/>
+                        <FormikInput
+                           responsive={responsive}
+                           name="Solicitante"
+                           label="Solicitante"
+                        />
+                        <FormikInput
+                           name="FechaCaptura"
+                           label="Fecha"
+                           type="date"
+                           id="requisition-fecha"
+                        />
+                        <FormikTextArea
+                           name="Observaciones"
+                           label="Observaciones"
+                           id="requisition-observation"
+                        />
                         {v.IDTipo > 0 && (
-
-                           <div className="mb-2 w-full">
-                              <span className="font-semibold w-full text-gray-700">
-                                 Estos son los tipos de productos que se pueden agregar:
+                           <div className="w-full mb-2">
+                              <span className="w-full font-semibold text-gray-700">
+                                 Estos son los tipos de productos que se pueden
+                                 agregar:
                               </span>
                            </div>
-
                         )}
 
-                        <div id="requisition-informative" className="max-h-24 overflow-y-auto">
+                        <div
+                           id="requisition-informative"
+                           className="overflow-y-auto max-h-24">
                            <div className="flex flex-wrap gap-1">
                               {detailstypes?.data?.data
-                                 .filter(it => it.IDTipo === v.IDTipo)
-                                 .map(it => (
+                                 .filter((it) => it.IDTipo === v.IDTipo)
+                                 .map((it) => (
                                     <span
                                        key={it.IDDetalleTipo}
-                                       className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border border-purple-200 shadow-sm"
-                                    >
+                                       className="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-800 border border-purple-200 rounded-md shadow-sm bg-gradient-to-r from-purple-100 to-pink-100">
                                        {it.Nombre}
                                     </span>
-                                 ))
-                              }
+                                 ))}
                            </div>
                         </div>
-                        <div className="mt-6 w-full">
-                           <div className=" w-full">
-                              <h3 className="text-lg font-semibold">Productos</h3>
+                        <div className="w-full mt-6">
+                           <div className="w-full ">
+                              <h3 className="text-lg font-semibold">
+                                 Productos
+                              </h3>
                               <input
-
                                  type="text"
                                  placeholder="Buscar descripción..."
                                  value={search}
                                  onChange={(e) => setSearch(e.target.value)}
-                                 className="border px-3 py-1 w-full my-4 rounded-md text-sm focus:ring focus:ring-blue-200"
+                                 className="w-full px-3 py-1 my-4 text-sm border rounded-md focus:ring focus:ring-blue-200"
                               />
                            </div>
                            <div className="border rounded-md overflow-y-auto max-h-[400px] shadow-sm">
-                              <table  className="w-full text-sm border-collapse">
-                                 <thead id="requisitiontableproducts" className="bg-gray-100 sticky top-0">
+                              <table className="w-full text-sm border-collapse">
+                                 <thead
+                                    id="requisitiontableproducts"
+                                    className="sticky top-0 bg-gray-100">
                                     <tr>
-                                       <th className="border p-2 w-14 text-center">#</th>
-                                       <th className="border p-2 w-28 text-center">Cantidad</th>
-                                       <th className="border p-2 text-left">Descripción</th>
-                                       <th className="border p-2 w-14 text-center">Eliminar</th>
+                                       <th className="p-2 text-center border w-14">
+                                          #
+                                       </th>
+                                       <th className="p-2 text-center border w-28">
+                                          Cantidad
+                                       </th>
+                                       <th className="p-2 text-left border">
+                                          Descripción
+                                       </th>
+                                       <th className="p-2 text-center border w-14">
+                                          Eliminar
+                                       </th>
                                     </tr>
                                  </thead>
-                                 <tbody >
-                                    {filteredProducts.map((prod: any, idx: number) => (
-                                       <tr key={idx} className="odd:bg-gray-50">
-                                          <td className="border text-center text-gray-600 p-1">{idx + 1}</td>
-                                          <td className="border p-1 text-center">
-                                             <input
-                                                type="number"
-                                                name={`Productos[${idx}].Cantidad`}
-                                                value={prod.Cantidad}
-                                                onChange={(e) => setValue(`Productos[${idx}].Cantidad`, e.target.value)}
-                                                className="w-full px-2 py-1 text-center border-none focus:ring-0 focus:outline-none"
-                                                placeholder="0"
-                                             />
-                                          </td>
-                                          <td className="border p-1">
-                                             <input
-                                                type="text"
-                                                name={`Productos[${idx}].Descripcion`}
-                                                value={prod.Descripcion}
-                                                onChange={(e) => setValue(`Productos[${idx}].Descripcion`, e.target.value)}
-                                                className="w-full px-2 py-1 border-none focus:ring-0 focus:outline-none"
-                                                placeholder="Descripción del producto"
-                                             />
-                                          </td>
-                                          <td className="border p-1 text-center">
-                                             <Button  onClick={() => setValue(`Productos[${idx}]`, { Cantidad: "", Descripcion: "", IDDetalle: prod.IDDetalle || 0 })} color={"red"} variant={"outline"}>
-                                                <IoMdClose />
-                                             </Button>
-
-                                          </td>
-                                       </tr>
-                                    ))}
+                                 <tbody>
+                                    {filteredProducts.map(
+                                       (prod: any, idx: number) => (
+                                          <tr
+                                             key={idx}
+                                             className="odd:bg-gray-50">
+                                             <td className="p-1 text-center text-gray-600 border">
+                                                {idx + 1}
+                                             </td>
+                                             <td className="p-1 text-center border">
+                                                <input
+                                                   type="number"
+                                                   name={`Productos[${idx}].Cantidad`}
+                                                   value={prod.Cantidad}
+                                                   onChange={(e) =>
+                                                      setValue(
+                                                         `Productos[${idx}].Cantidad`,
+                                                         e.target.value,
+                                                      )
+                                                   }
+                                                   className="w-full px-2 py-1 text-center border-none focus:ring-0 focus:outline-none"
+                                                   placeholder="0"
+                                                />
+                                             </td>
+                                             <td className="p-1 border">
+                                                <input
+                                                   type="text"
+                                                   name={`Productos[${idx}].Descripcion`}
+                                                   value={prod.Descripcion}
+                                                   onChange={(e) =>
+                                                      setValue(
+                                                         `Productos[${idx}].Descripcion`,
+                                                         e.target.value,
+                                                      )
+                                                   }
+                                                   className="w-full px-2 py-1 border-none focus:ring-0 focus:outline-none"
+                                                   placeholder="Descripción del producto"
+                                                />
+                                             </td>
+                                             <td className="p-1 text-center border">
+                                                <Button
+                                                   onClick={() =>
+                                                      setValue(
+                                                         `Productos[${idx}]`,
+                                                         {
+                                                            Cantidad: "",
+                                                            Descripcion: "",
+                                                            IDDetalle:
+                                                               prod.IDDetalle ||
+                                                               0,
+                                                         },
+                                                      )
+                                                   }
+                                                   color={"red"}
+                                                   variant={"outline"}>
+                                                   <IoMdClose />
+                                                </Button>
+                                             </td>
+                                          </tr>
+                                       ),
+                                    )}
                                  </tbody>
-
                               </table>
                            </div>
                         </div>

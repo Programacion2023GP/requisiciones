@@ -23,6 +23,7 @@ type PdfRequisitionType = {
    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
    filePath?: string;
    children?: React.ReactNode;
+   watermarkText?: string;
 };
 const tw = createTw({});
 
@@ -31,6 +32,7 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
    setOpen,
    filePath,
    children,
+   watermarkText = "RECHAZADA",
 }) => {
    const data = Observable().ObservableGet("PdfRequisicion") as any;
    const [myData, setData] = useState<Array<Record<string, any>>>([]);
@@ -114,6 +116,25 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
       setData(groupArrays(products, 2));
    }, []);
 
+   const styles = StyleSheet.create({
+      watermark: {
+         position: "absolute",
+         fontSize: 120,
+         fontWeight: "bold",
+         color: "rgba(0, 0, 0, 0.1)",
+         transform: "rotate(-45deg)",
+         // centrar en la página
+         top: "135%",
+         left: "8%",
+         transformOriginX: "-50%",
+         transformOriginY: "-150%",
+         // el `fixed` del View asegurará que se repita
+         textAlign: "center",
+         originX: "center",
+         originY: "center",
+      },
+   });
+
    return (
       <ModalComponent
          title="Requisición"
@@ -125,7 +146,26 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
             <Document>
                {myData.map((item: any, indexData) => (
                   <Page size="LETTER" orientation="landscape">
+                     {/* {watermarkText && (
+                        <View fixed style={{ width: "100%", height: "100%" }}>
+                           <Text style={styles.watermark}>{watermarkText}</Text>
+                        </View>
+                     )} */}
                      <View style={tw("p-4")}>
+                        {watermarkText && (
+                           <View
+                              fixed
+                              style={{
+                                 position: "absolute",
+                                 width: "100%",
+                                 height: "100%",
+                              }}>
+                              <Text style={styles.watermark}>
+                                 {watermarkText}
+                              </Text>
+                           </View>
+                        )}
+
                         <PdfHeader />
 
                         <View
