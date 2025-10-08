@@ -84,7 +84,7 @@ const bumpVersion = async () => {
   fs.writeFileSync(envPath, newEnv);
 
   // Agrega entrada en versions.md
-const versionEntry = `\n${fullVersion}\n${changelog.trim()}\n`;
+const versionEntry = `\n#####${fullVersion}\n${changelog.trim()}\n`;
   fs.appendFileSync(versionsPath, versionEntry);
 
   console.log(`\n✅ Versión actualizada a ${newVersion}`);
