@@ -29,6 +29,7 @@ import {
    FormikTextArea,
 } from "../../components/formik/FormikInputs/FormikInput";
 import ChangeStatusRequisition from "../status/ChangeStatus";
+import { GrFormView } from "react-icons/gr";
 
 const Actions: React.FC<{
    data: Record<string, any>;
@@ -49,7 +50,7 @@ const Actions: React.FC<{
    const [openSu, setOpenSu] = useState<boolean>(false);
    const [autorized, SetAutorized] = useState(false);
    const [canceled, setCanceled] = useState(false);
-   const { ObservablePost } = Observable();
+   const { ObservablePost,ObservableDelete } = Observable();
    const mutation = useMutation({
       mutationFn: ({
          url,
@@ -80,8 +81,12 @@ const Actions: React.FC<{
          );
       },
    });
-   const userGroups = localStorage.getItem("group")?.split(",") ?? [];
+   const userGroups: number[] = Array.isArray(JSON.parse(localStorage.getItem("group") || "[]"))
+      ? JSON.parse(localStorage.getItem("group") || "[]").map(Number)
+      : [Number(JSON.parse(localStorage.getItem("group") || "0"))];
 
+   // Convertir IDDepartamento a número para la comparación
+   const isUserGroup = userGroups.includes(Number(data?.IDDepartamento ?? -1));
    const mutationPdf = useMutation({
       mutationFn: ({
          url,
@@ -141,12 +146,13 @@ const Actions: React.FC<{
       onMutate(variables) {
          setSpiner(true);
       },
-      onSuccess: async (data) => {
+      onSuccess: async (data,variables) => {
          setSpiner(false);
          try {
             const result = await ObservablePost("FormRequisicion", {
                data: {
                   data: data.data,
+                  edicion:variables?.data?.edicion,
                },
             });
          } catch (e) {
@@ -291,17 +297,36 @@ const Actions: React.FC<{
          ([key, value]) => value === permission && permisos[key] === 1,
       );
    };
+
    const buttonVobo = (idTipo: number): boolean => {
-      const group = localStorage.getItem("group");
-      if (group === null) {
-         return false;
+      const rawGroup = localStorage.getItem("group");
+
+      // Inicializar array vacío
+      let userGroups: number[] = [];
+
+      // Intentar parsear y convertir a números
+      try {
+         const parsed = JSON.parse(rawGroup || "[]");
+         if (Array.isArray(parsed)) {
+            userGroups = parsed.map(Number); // Si es array, map a números
+         } else {
+            userGroups = [Number(parsed)]; // Si es un solo valor, meterlo en array
+         }
+      } catch (e) {
+         userGroups = []; // En caso de error, array vacío
       }
-      let idGroup = parseInt(group, 10);
-      console.log(idTipo, idGroup);
+
+
+      // const group = localStorage.getItem("group");
+      // if (group === null) {
+      //    return false;
+      // }
+      // let idGroup = parseInt(group, 10);
+      // console.log(idTipo, idGroup);
       if (
-         (idGroup == 84 && idTipo == 5) ||
-         (idGroup == 83 && idTipo == 7) ||
-         (idGroup == 27 && idTipo == 6)
+         (userGroups.includes(84) && idTipo == 5) ||
+         (userGroups.includes(83) && idTipo == 7) ||
+         (userGroups.includes(27) && idTipo == 6)
       ) {
          // console.log("aqui")
          return true;
@@ -403,7 +428,7 @@ const Actions: React.FC<{
                      }}
                   />
                )}
-               <DropdownComponent>
+               <DropdownComponent id="tableRequisitionActions">
                   <div className="flex flex-col gap-2">
                      {/* <div className="w-fit">
                 <Tooltip content="Ver requisición">
@@ -427,36 +452,55 @@ const Actions: React.FC<{
                 </Tooltip>
               </div> */}
 
-              {/* ((data.Status == "CP" &&
+                     {/* ((data.Status == "CP" &&
                         data.IDDepartamento ==
                            Number(localStorage.getItem("group"))) ||
                         ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
                         )) */}
-                     {
-                        ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
-                           localStorage.getItem("role") ?? "",
-                        ) && (
-                        <div className="w-fit">
-                           <Tooltip content="Editar">
-                              <Button
-                                 color="yellow"
-                                 variant="solid"
-                                 size="small"
-                                 onClick={() => {
-                                    mutationEdit.mutate({
-                                       method: "POST",
-                                       url: "/requisiciones/showRequisicion",
-                                       data: {
-                                          Id: data.Id,
-                                       },
-                                    });
-                                 }}>
-                                 <MdEdit />
-                              </Button>
-                           </Tooltip>
-                        </div>
-                     )}
+
+                     <div className="w-fit">
+                        <Tooltip content={`${(((data.Status == "CP") &&
+                                          userGroups.includes((data?.IDDepartamento))
+                                       ) ||
+                                          ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                                             localStorage.getItem("role") ?? "",
+                                          ))?"Editar":"Vista"}`}>
+                           <Button
+                              id="formRequisition_edit"
+                              color="yellow"
+                              variant="solid"
+                              size="small"
+                              onClick={() => {
+                                                         ObservableDelete("FormRequisicion");
+
+                                 mutationEdit.mutate({
+                                    method: "POST",
+                                    url: "/requisiciones/showRequisicion",
+                                    data: {
+                                       Id: data.Id,
+                                       edicion: ((data.Status == "CP" &&
+                                          userGroups.includes((data?.IDDepartamento))
+                                       ) ||
+                                          ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                                             localStorage.getItem("role") ?? "",
+                                          ))
+                                    },
+                                 });
+                              }}>
+                                 {
+                                    ((data.Status == "CP" &&
+                                          userGroups.includes((data?.IDDepartamento))
+                                       ) ||
+                                          ["SISTEMAS", "DIRECTORCOMPRAS", "REQUISITOR"].includes(
+                                             localStorage.getItem("role") ?? "",
+                                          ))?<MdEdit /> :<GrFormView/>
+                                 }
+                       
+                           </Button>
+                        </Tooltip>
+                     </div>
+
                      {data.Status != "CP" && (
                         <div className="w-fit">
                            <Tooltip content="Cancelar">
@@ -493,24 +537,24 @@ const Actions: React.FC<{
                         (localStorage.getItem("role") == "SISTEMAS" &&
                            data.AutEspecial == 1 &&
                            !data.UsuarioVoBo)) && (
-                        <PermissionMenu IdMenu={"VoBo"}>
-                           <Tooltip content="Visto bueno">
-                              <Button
-                                 color="teal"
-                                 variant="solid"
-                                 size="small"
-                                 onClick={() => {
-                                    mutation.mutate({
-                                       method: "PUT",
-                                       url: "/requisiciones/vobo",
-                                       data: { id: data.Id },
-                                    });
-                                 }}>
-                                 <MdOutlineCheckBox />
-                              </Button>
-                           </Tooltip>
-                        </PermissionMenu>
-                     )}
+                           <PermissionMenu IdMenu={"VoBo"}>
+                              <Tooltip content="Visto bueno">
+                                 <Button
+                                    color="teal"
+                                    variant="solid"
+                                    size="small"
+                                    onClick={() => {
+                                       mutation.mutate({
+                                          method: "PUT",
+                                          url: "/requisiciones/vobo",
+                                          data: { id: data.Id },
+                                       });
+                                    }}>
+                                    <MdOutlineCheckBox />
+                                 </Button>
+                              </Tooltip>
+                           </PermissionMenu>
+                        )}
                      <div className="w-fit">
                         <Tooltip content="Ver requisición">
                            <Button
@@ -680,11 +724,14 @@ const Actions: React.FC<{
                                        onClick={async () => {
                                           try {
                                              // customLog(`${JSON.stringify(data)}`, "green");
+                                             console.log("aqui", data)
                                              const result =
                                                 await ObservablePost(
                                                    "IdRequisicion",
                                                    {
                                                       data: {
+                                                         Nombre_Departamento: data?.Nombre_Departamento,
+                                                         Centro_Costo: data?.Centro_Costo,
                                                          IDRequisicion:
                                                             data.IDRequisicion,
                                                          Ejercicio:
@@ -712,7 +759,7 @@ const Actions: React.FC<{
                            </div>
                         </>
                      )}
-                     {((userGroups.includes(String(data?.IDDepartamento)) &&
+                     {((userGroups.includes((data?.IDDepartamento)) &&
                         newStatus(data.Status) == "AU") ||
                         ["AUTORIZADOR", "SISTEMAS", "REQUISITOR"].includes(
                            localStorage.getItem("role") ?? "",
@@ -733,27 +780,27 @@ const Actions: React.FC<{
                                  onClick={async () => {
                                     newStatus(data.Status) != "SU"
                                        ? showConfirmationAlert(
-                                            `El estatus se cambiara a ${newStatus(data.Status)} `,
-                                            "Esta acción no se puede deshacer.",
-                                         ).then((isConfirmed) => {
-                                            if (isConfirmed) {
-                                               mutation.mutate({
-                                                  method: "PUT",
-                                                  url: "/requisiciones/update",
-                                                  data: {
-                                                     Status: newStatus(
-                                                        data.Status,
-                                                     ),
-                                                     id: data.Id,
-                                                  },
-                                               });
-                                            } else {
-                                               showToast(
-                                                  "La acción fue cancelada.",
-                                                  "error",
-                                               );
-                                            }
-                                         })
+                                          `El estatus se cambiara a ${newStatus(data.Status)} `,
+                                          "Esta acción no se puede deshacer.",
+                                       ).then((isConfirmed) => {
+                                          if (isConfirmed) {
+                                             mutation.mutate({
+                                                method: "PUT",
+                                                url: "/requisiciones/update",
+                                                data: {
+                                                   Status: newStatus(
+                                                      data.Status,
+                                                   ),
+                                                   id: data.Id,
+                                                },
+                                             });
+                                          } else {
+                                             showToast(
+                                                "La acción fue cancelada.",
+                                                "error",
+                                             );
+                                          }
+                                       })
                                        : setOpenSu(true);
                                  }}
                                  className={`w-fit flex flex-row gap-2 items-center shadow-md  ${getColorButton(newStatus(data.Status))}  text-white hover:bg-teal-700 focus:ring-teal-500  rounded-xl  hover:shadow-lg focus:ring-4 text-sm py-2 px-4 cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2  `}>

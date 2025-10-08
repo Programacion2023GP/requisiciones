@@ -7,6 +7,7 @@ import Spinner from "../../loading/Loading";
 import Button from "../../components/form/Button";
 import { formatCurrency } from "../../utils/functions";
 import Observable from "../../extras/observable";
+import { FcMoneyTransfer } from "react-icons/fc";
 
 type CotizacionType = {
    open: boolean;
@@ -22,8 +23,42 @@ type Requisition = {
    Ejercicio: number;
    IDRequisicion: number;
    status: "OC" | "CO";
+   Centro_Costo:number,
+   Nombre_Departamento:string,
+   
 };
-
+const TablaPresupuestos = ({ ingresos }: { ingresos: any[] }) => {
+   return (
+      <div className="overflow-x-auto rounded-2xl shadow-sm border border-gray-200">
+         <table className="min-w-full text-sm text-gray-700">
+            <thead className="bg-gray-600 text-white">
+               <tr>
+                  <th className="px-4 py-2 text-left">Partida Específica</th>
+                  <th className="px-4 py-2 text-right">Presupuesto Disponible</th>
+               </tr>
+            </thead>
+            <tbody>
+               {ingresos.map((it, index) => (
+                  <tr
+                     key={index}
+                     className={
+                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                     }
+                  >
+                     <td className="px-4 py-2 font-medium">
+                        {it.PartidaEspecifica}
+                     </td>
+                     <td className="px-4 py-2 text-right">
+                        {formatCurrency(it.PresupuestoDisponible, true, true)
+                        }
+                     </td>
+                  </tr>
+               ))}
+            </tbody>
+         </table>
+      </div>
+   );
+};
 const CotizacionComponent: React.FC<CotizacionType> = ({
    open,
    setOpen,
@@ -32,11 +67,24 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
    const IdRequisicion = Observable().ObservableGet(
       "IdRequisicion",
    ) as RequisitionType;
-
    const [formValues, setFormValues] = useState<Record<string, any>>({});
    const [errors, setErrors] = useState<Record<string, string>>({});
    const [spiner, setSpiner] = useState<boolean>(true);
    const [data, setData] = useState<Array<Record<string, any>>>([]);
+   const [ingresos, setIngresos] = useState([])
+   const [openPresupuestos, setOpenPresupuestos] = useState<boolean>(false)
+   const init = async () => {
+      const response = await fetch(`https://predial.gomezpalacio.gob.mx:4433/api/presupuestos/${IdRequisicion.data.Centro_Costo}`)
+      const data = await response.json();
+      if (response.ok) {
+         setIngresos(data)
+      }
+   }
+   useEffect(() => {
+
+      init();
+      // return 
+   }, [])
 
    const mutationCotized = useMutation({
       mutationFn: ({
@@ -308,8 +356,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                const precioSinIva = isPrecioField
                   ? Number(fieldValue) || 0
                   : Number(
-                       formValues[`PrecioUnitarioSinIva${providerNumber}`],
-                    ) || 0;
+                     formValues[`PrecioUnitarioSinIva${providerNumber}`],
+                  ) || 0;
 
                const porcentajeIVA = isPorcentajeField
                   ? Number(fieldValue) || 0
@@ -349,9 +397,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             value={formValues[name] || ""}
             onChange={(e) => handleInputChange(name, e.target.value)}
             disabled={disabled}
-            className={`w-full px-2 py-1 text-sm border rounded ${
-               disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-            } ${errors[name] ? "border-red-500" : "border-gray-300"}`}
+            className={`w-full px-2 py-1 text-sm border rounded ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+               } ${errors[name] ? "border-red-500" : "border-gray-300"}`}
          />
          {errors[name] && (
             <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
@@ -387,9 +434,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                name={name}
                value={selectedValue}
                onChange={(e) => handleInputChange(name, Number(e.target.value))}
-               className={`w-full px-3 py-2 border rounded ${
-                  errors[name] ? "border-red-500" : "border-gray-300"
-               }`}>
+               className={`w-full px-3 py-2 border rounded ${errors[name] ? "border-red-500" : "border-gray-300"
+                  }`}>
                <option value="">Seleccione...</option>
                {filteredOptions.map((opt) => (
                   <option key={opt[idKey]} value={opt[idKey]}>
@@ -408,8 +454,15 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       <ModalComponent
          title="Detalle de Cotizaciones"
          open={open}
+         actions={<Button onClick={() => setOpenPresupuestos(true)} color={"blue"} variant={"text"}>
+            <FcMoneyTransfer  size={20} />
+         </Button>}
          setOpen={() => setOpen(false)}>
          {(suppliers.status === "pending" || spiner) && <Spinner />}
+         {openPresupuestos && (
+            <ModalComponent fullScreen={false} zIndex={4000} open={openPresupuestos} setOpen={() => setOpenPresupuestos(false)} title={`Presupuestos de  ${IdRequisicion.data.Nombre_Departamento}`} children={<TablaPresupuestos ingresos={ingresos}/>} />
+         )}
+
 
          {Array.isArray(data) && data.length > 0 && (
             <form onSubmit={handleSubmit}>
@@ -440,6 +493,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                         </div>
                      </div>
                   </div>
+
+
 
                   {/* Selección de Proveedores */}
                   {IdRequisicion?.data?.status == "CO" && (
@@ -488,7 +543,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                           color="blue"
                                           variant={
                                              data?.[0]["Proveedor"] ==
-                                             formValues[`IDproveedor${offset}`]
+                                                formValues[`IDproveedor${offset}`]
                                                 ? "solid"
                                                 : "outline"
                                           }
@@ -505,7 +560,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                          ?.IDRequisicion,
                                                    Proveedor:
                                                       formValues[
-                                                         `IDproveedor${offset}`
+                                                      `IDproveedor${offset}`
                                                       ],
                                                 },
                                              });
@@ -514,7 +569,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                              (prov) =>
                                                 prov.IDProveedor ==
                                                 formValues[
-                                                   `IDproveedor${offset}`
+                                                `IDproveedor${offset}`
                                                 ],
                                           )?.NombreCompleto ||
                                              `Proveedor ${offset}`}
@@ -647,19 +702,19 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        const precioSinIva =
                                           Number(
                                              formValues[
-                                                `PrecioUnitarioSinIva${providerNumber}`
+                                             `PrecioUnitarioSinIva${providerNumber}`
                                              ],
                                           ) || 0;
                                        const ivaPct =
                                           Number(
                                              formValues[
-                                                `PorcentajeIVA${providerNumber}`
+                                             `PorcentajeIVA${providerNumber}`
                                              ],
                                           ) || 0;
                                        const ret =
                                           Number(
                                              formValues[
-                                                `Retenciones${providerNumber}`
+                                             `Retenciones${providerNumber}`
                                              ],
                                           ) || 0;
 

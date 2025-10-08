@@ -2,9 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { FiMoreVertical } from "react-icons/fi";
 import { createPortal } from "react-dom";
 type  Props = {
-    children: React.ReactNode
+    children: React.ReactNode,
+    id?:string,
 }
-const DropdownComponent: React.FC<Props> = ({children}) => {
+const DropdownComponent: React.FC<Props> = ({children,id}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -46,6 +47,7 @@ const DropdownComponent: React.FC<Props> = ({children}) => {
   return (
     <div className="relative inline-block text-left">
       <button
+        id={id}
         ref={buttonRef}
         className="flex items-center justify-center w-10 h-10 p-1 rounded-full cursor-pointer bg-white hover:bg-gray-300"
         onClick={(e) => {
