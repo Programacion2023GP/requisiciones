@@ -143,6 +143,7 @@ const TypeRolUser = (data: Record<string, any>) => {
    );
 };
 
+// const departmentsStorage = JSON.parse(localStorage.getItem("group") ?? "[]");
 const Users = () => {
    const formik = useRef<FormikProps<Record<string, any>> | null>(null);
    const [open, setOpen] = useState<boolean>(false);
@@ -387,6 +388,8 @@ const Users = () => {
       if (values.Rol == "REQUISITOR") {
          values.Permiso_Cotizar = true;
       }
+      // console.log("🚀 ~ onSumbit ~ values:", values);
+
       // Llamar a la función mutate para ejecutar la solicitud POST
       mutation.mutate({
          url: "/users/createOrUpdate",
@@ -459,15 +462,8 @@ const Users = () => {
          setFieldValue("Usuario", removeAccents(username));
    };
 
-   const departamentosMock = [
-      { id: 1, nombre: "Recursos Humanos" },
-      { id: 2, nombre: "Sistemas" },
-      { id: 3, nombre: "Finanzas" },
-      { id: 4, nombre: "Compras" },
-      { id: 5, nombre: "Jurídico" },
-   ];
    const handleChange = (ids: number[]) => {
-      console.log("Departamentos seleccionados:", ids);
+      formik.current?.setFieldValue("IdsDepartamentos", ids);
    };
 
    const handlePermissions = () => {};
@@ -527,7 +523,7 @@ const Users = () => {
                         responsive={responsive}
                         loading={groups.isLoading}
                         name="IDDepartamento"
-                        label={"selecciona el departamento"}
+                        label={"selecciona el departamento principal"}
                         options={groups.data?.data}
                         idKey={"IDDepartamento"}
                         labelKey={"Nombre_Departamento"}
@@ -613,10 +609,15 @@ const Users = () => {
                         </>
                      )}
 
-                     {console.log("gruops", groups.data.data)}
                      <TransferList
                         departamentos={groups?.data?.data}
-                        seleccionados={[]}
+                        seleccionados={
+                           values?.IDDepartamentos === null
+                              ? []
+                              : values?.IDDepartamentos.split(",").map(
+                                   (it: number) => Number(it) ?? [],
+                                )
+                        }
                         onChange={handleChange}
                      />
                   </>

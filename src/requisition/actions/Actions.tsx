@@ -441,7 +441,7 @@ const Actions: React.FC<{
                               [
                                  "SISTEMAS",
                                  "DIRECTORCOMPRAS",
-                                 "REQUISITOR",
+                                 // "REQUISITOR",
                               ].includes(localStorage.getItem("role") ?? "")
                                  ? "Editar"
                                  : "Vista"

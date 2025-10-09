@@ -78,6 +78,7 @@ const TransferList: React.FC<TransferListProps> = ({
 
    // Renders
    const renderList = (
+      title: string,
       items: Departamento[],
       checked: number[],
       setChecked: React.Dispatch<React.SetStateAction<number[]>>,
@@ -85,34 +86,45 @@ const TransferList: React.FC<TransferListProps> = ({
       setSearch: React.Dispatch<React.SetStateAction<string>>,
    ) => (
       <div className="flex flex-col w-1/2 p-3 bg-white border rounded-lg shadow-sm">
-         <h2 className="mb-2 font-semibold">Departamentos disponibles</h2>
+         <h2 className="mb-2 text-lg font-semibold text-center">{title}</h2>
          <input
             type="search"
             placeholder="Buscar..."
-            className="px-2 py-1 text-sm border-b"
+            className="w-full px-2 py-1 mb-2 text-sm border rounded"
             value={searchValue}
             onChange={(e) => setSearch(e.target.value)}
          />
-         <ul className="flex-1 overflow-y-auto text-sm">
+         <ul className="overflow-y-auto text-sm max-h-80">
             {items.map((d) => (
                <li
                   key={d.IDDepartamento}
-                  className="flex items-center px-2 py-1 hover:bg-gray-100">
-                  <input
-                     type="checkbox"
-                     className="mr-2"
-                     checked={checked.includes(d.IDDepartamento)}
-                     onChange={(e) => {
-                        if (e.target.checked) {
-                           setChecked([...checked, d.IDDepartamento]);
-                        } else {
-                           setChecked(
-                              checked.filter((cid) => cid !== d.IDDepartamento),
-                           );
-                        }
-                     }}
-                  />
-                  {d.Nombre_CC}
+                  className="flex items-center justify-between px-2 py-1 mb-1 border-b rounded cursor-pointer hover:bg-gray-100"
+                  onClick={() => {
+                     if (checked.includes(d.IDDepartamento)) {
+                        setChecked(
+                           checked.filter((cid) => cid !== d.IDDepartamento),
+                        );
+                     } else {
+                        setChecked([...checked, d.IDDepartamento]);
+                     }
+                  }}>
+                  <span
+                     className={`${checked.includes(d.IDDepartamento) && "font-bold"}`}>
+                     {d.Nombre_CC}
+                  </span>
+                  <button className="font-bold transition">
+                     {checked.includes(d.IDDepartamento) ? (
+                        <icons.Lu.LuBookmarkCheck
+                           size={25}
+                           className="text-presidencia-claro"
+                        />
+                     ) : (
+                        <icons.Lu.LuBookmark
+                           size={25}
+                           className="text-presidencia"
+                        />
+                     )}
+                  </button>
                </li>
             ))}
             {items.length === 0 && (
@@ -125,9 +137,10 @@ const TransferList: React.FC<TransferListProps> = ({
    );
 
    return (
-      <div className="flex w-full gap-6">
+      <div className="flex w-full gap-6 h-[25%] overflow-auto">
          {/* Disponibles */}
          {renderList(
+            "Departamentos disponibles",
             disponibles,
             leftChecked,
             setLeftChecked,
@@ -141,7 +154,7 @@ const TransferList: React.FC<TransferListProps> = ({
                <button
                   onClick={moveRight}
                   disabled={leftChecked.length === 0}
-                  className="px-3 py-1 text-white bg-blue-500 rounded disabled:opacity-40">
+                  className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
                   <icons.Fa.FaAngleRight />
                </button>
             </Tooltip>
@@ -149,7 +162,7 @@ const TransferList: React.FC<TransferListProps> = ({
                <button
                   onClick={moveAllRight}
                   disabled={disponibles.length === 0}
-                  className="px-3 py-1 text-white bg-blue-500 rounded disabled:opacity-40">
+                  className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
                   <icons.Fa.FaAngleDoubleRight />
                </button>
             </Tooltip>
@@ -157,7 +170,7 @@ const TransferList: React.FC<TransferListProps> = ({
                <button
                   onClick={moveLeft}
                   disabled={rightChecked.length === 0}
-                  className="px-3 py-1 text-white bg-blue-500 rounded disabled:opacity-40">
+                  className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
                   <icons.Fa.FaAngleLeft />
                </button>
             </Tooltip>
@@ -165,7 +178,7 @@ const TransferList: React.FC<TransferListProps> = ({
                <button
                   onClick={moveAllLeft}
                   disabled={elegidos.length === 0}
-                  className="px-3 py-1 text-white bg-blue-500 rounded disabled:opacity-40">
+                  className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
                   <icons.Fa.FaAngleDoubleLeft />
                </button>
             </Tooltip>
@@ -173,6 +186,7 @@ const TransferList: React.FC<TransferListProps> = ({
 
          {/* Seleccionados */}
          {renderList(
+            "Departamentos Asignados",
             elegidos,
             rightChecked,
             setRightChecked,
