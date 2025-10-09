@@ -37,6 +37,36 @@ export const GetAxios = async (url: string) => {
     }
   }
 };
+const AxiosFiles = axios.create({
+   baseURL: import.meta.env.VITE_API_URL,
+   responseType: "json",
+   withCredentials: true,
+   headers: {
+      Accept: "application/json",
+      "Content-Type": "multipart/form-data"
+   }
+});
+AxiosFiles.interceptors.request.use(
+   (config) => {
+      const token = localStorage.getItem("token") || "";
+
+      // Asegurar que existan los headers
+      if (!config.headers) {
+         config.headers = new axios.AxiosHeaders();
+      }
+
+      // Usar métodos de AxiosHeaders para establecer valores
+      config.headers.set("Authorization", `Bearer ${token}`);
+      config.headers.set("Content-Type", "multipart/form-data");
+
+      return config;
+   },
+   (error) => {
+      console.error("🚀 ~ error:", error);
+      return Promise.reject(error);
+   }
+);
+
 
 // Define el tipo genérico T para la respuesta
 // Define el tipo genérico T para la respuesta
