@@ -252,7 +252,7 @@ const RequisicionesAdd = () => {
          // filter: true,
          cellRenderer: (params: any) => (
             <>
-               {" "}
+         
                <Actions
                   data={params.data}
                   setReloadTable={setReloadTable}

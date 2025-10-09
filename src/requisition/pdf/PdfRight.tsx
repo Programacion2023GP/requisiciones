@@ -109,14 +109,21 @@ export const PdfRight: React.FC<DataPdf> = ({
 
    return (
       <View style={tw("w-1/2 max-w-1/2")}>
-         {["Uso Exclusivo de Compras", "Provedores"].map((title, idx) => (
-            <View key={idx} style={tw("mx-3")}>
-               <View style={tw(`${styles.pdf.box} flex-row mt-1 w-full`)}>
-                  <Text style={tw(`${styles.pdf.text}`)}>{title}</Text>
+        
+            <View  style={tw("mx-3 flex flex-row")}>
+               <View style={tw(`${styles.pdf.box}  mt-1 w-2/3`)}>
+                  <Text style={tw(`${styles.pdf.text}`)}>Uso Exclusivo de Compras</Text>
+               </View>
+                <View style={tw(`${styles.pdf.box}  mt-1 w-1/3`)}>
+                  <Text style={tw(`${styles.pdf.text}`)}>N° C. {pdfData.Orden_Compra}</Text>
                </View>
             </View>
-         ))}
-
+       
+<View  style={tw("mx-3")}>
+               <View style={tw(`${styles.pdf.box} flex-row mt-1 w-full`)}>
+                  <Text style={tw(`${styles.pdf.text}`)}>Provedores</Text>
+               </View>
+            </View>
          <View
             wrap
             style={tw("flex flex-wrap w-full max-w-full overflow-auto px-2")}>

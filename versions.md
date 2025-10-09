@@ -18,3 +18,6 @@ se agregaron imagenes a la cotizacion y requisiciones
 
 ##### VITE_VERSION = v2.2.0.2 BETA
 me equivoque en buldear con local env
+
+##### VITE_VERSION = v2.2.1.1 BETA
+se agrego el numero de orden de compra al pdf
