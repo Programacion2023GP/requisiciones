@@ -15,3 +15,6 @@ Se estilizo los status de la tabla, se agrego el boton de refrescar tabla y que 
 
 ##### VITE_VERSION = v2.2.0.1 BETA
 se agregaron imagenes a la cotizacion y requisiciones
+
+##### VITE_VERSION = v2.2.0.2 BETA
+me equivoque en buldear con local env
