@@ -298,7 +298,7 @@ const RequisicionesAdd = () => {
                   </div>
                </Tooltip>
                <div className="">
-                  <Button onClick={() => {
+                  <Button id="requisitionrefreshdata" onClick={() => {
                      setReloadTable(false)
                      setTimeout(() => {
                         setFilters(`Ejercicio = '${new Date().getFullYear()}'`);
