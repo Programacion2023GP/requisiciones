@@ -21,3 +21,6 @@ me equivoque en buldear con local env
 
 ##### VITE_VERSION = v2.2.1.1 BETA
 se agrego el numero de orden de compra al pdf
+
+##### VITE_VERSION = v2.2.2.1 BETA
+Se agrego la listTransfer en usuarios para registrar varios departamentos a los usuarios y se quito el permiso de editar a los requisitores
