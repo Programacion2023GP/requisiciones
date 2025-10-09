@@ -32,12 +32,13 @@ import Typography from "../components/typografy/Typografy";
 import { showToast } from "../sweetalert/Sweetalert";
 import { BiEdit } from "react-icons/bi";
 import { MdDelete } from "react-icons/md";
-import { FormikProps } from "formik";
+import { FormikProps, useFormik } from "formik";
 import Spinner from "../loading/Loading";
 import { MdMenu } from "react-icons/md"; // Importar el ícono de menú (hamburger)
 import MenuComponent from "../menus/Menus";
 import { PermissionMenu } from "../extras/menupermisos";
 import TransferList from "../components/transferlist/TransferList";
+import icons from "./../constants/icons";
 
 const ActionButtons = ({
    data,
@@ -187,9 +188,13 @@ const Users = () => {
          // Puedes agregar más peticiones aquí
       ],
    });
+
    const handleEdit = (data: Record<string, any>) => {
       toggleOpen(); // Optionally open the modal if you're editing
       setUsersFormik(data);
+      data?.IDUsuario &&
+         data?.IDUsuario > 0 &&
+         formik.current?.setFieldValue("Usuario", data.Usuario);
    };
    const handleEditPermission = (data: Record<string, any>) => {
       const generateRandomNumber = () => {
@@ -331,7 +336,7 @@ const Users = () => {
                   size="medium"
                   color="blue"
                   variant="solid">
-                  <LuPlus />
+                  <icons.Tb.TbUserPlus />
                </Button>
             </div>
          </Tooltip>
@@ -389,6 +394,34 @@ const Users = () => {
          data: values,
       });
    };
+   // const handleModified = (
+   //    values: Record<string, any>,
+   //    setFieldValue: (
+   //       name: string,
+   //       value: any,
+   //       shouldValidate?: boolean,
+   //    ) => void,
+   // ) => {
+   //    const year = new Date().getFullYear().toString().slice(-2); // últimos 2 dígitos del año
+
+   //    const capitalizeFirst = (str: string) =>
+   //       str ? str.charAt(0).toUpperCase() : "";
+
+   //    const capitalizeFull = (str: string) =>
+   //       str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+   //    // Solo el primer nombre (split por espacio)
+   //    const firstName = values["Nombre"]?.split(" ")[0] || "";
+
+   //    setFieldValue(
+   //       "Usuario",
+   //       capitalizeFull(firstName) +
+   //          capitalizeFirst(values["Paterno"]) +
+   //          capitalizeFirst(values["Materno"]) +
+   //          "-" +
+   //          year,
+   //    );
+   // };
    const handleModified = (
       values: Record<string, any>,
       setFieldValue: (
@@ -396,6 +429,7 @@ const Users = () => {
          value: any,
          shouldValidate?: boolean,
       ) => void,
+      touchedFields?: Record<string, boolean>, // <- nuevo: puedes pasar los campos que el usuario modificó
    ) => {
       const year = new Date().getFullYear().toString().slice(-2); // últimos 2 dígitos del año
 
@@ -405,18 +439,26 @@ const Users = () => {
       const capitalizeFull = (str: string) =>
          str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
 
-      // Solo el primer nombre (split por espacio)
+      const removeAccents = (str: string) =>
+         str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // Si el usuario editó manualmente el campo Usuario, no lo modifiques
+      if (touchedFields?.Usuario) return;
+
       const firstName = values["Nombre"]?.split(" ")[0] || "";
 
-      setFieldValue(
-         "Usuario",
+      const username =
          capitalizeFull(firstName) +
-            capitalizeFirst(values["Paterno"]) +
-            capitalizeFirst(values["Materno"]) +
-            "-" +
-            year,
-      );
+         capitalizeFirst(values["Paterno"]) +
+         capitalizeFirst(values["Materno"]) +
+         "-" +
+         year;
+
+      // Filtrar acentos antes de guardar
+      if (values?.IDUsuario < 1)
+         setFieldValue("Usuario", removeAccents(username));
    };
+
    const departamentosMock = [
       { id: 1, nombre: "Recursos Humanos" },
       { id: 2, nombre: "Sistemas" },
@@ -448,7 +490,7 @@ const Users = () => {
             }}>
             <div className="mt-4"></div>
             <FormikForm
-               // ref={formik}
+               ref={formik}
                onSubmit={onSumbit}
                buttonMessage={
                   usersFormik.IDUsuario > 0 ? "Actualizar" : "Registrar"
@@ -472,14 +514,14 @@ const Users = () => {
                      <FormikInput
                         name="Materno"
                         label="Apellido Materno"
-                        handleModified={handleModified}
                         responsive={responsive}
+                        handleModified={handleModified}
                      />
                      <FormikInput
-                        disabled
                         name="Usuario"
                         label="Usuario con el que va a iniciar sesión"
                         responsive={responsive}
+                        // handleModified={}
                      />
                      <FormikAutocomplete
                         responsive={responsive}
@@ -571,9 +613,10 @@ const Users = () => {
                         </>
                      )}
 
+                     {console.log("gruops", groups.data.data)}
                      <TransferList
-                        departamentos={departamentosMock}
-                        seleccionados={[2]}
+                        departamentos={groups?.data?.data}
+                        seleccionados={[]}
                         onChange={handleChange}
                      />
                   </>

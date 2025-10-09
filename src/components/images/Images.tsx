@@ -2,17 +2,19 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { IoIosClose } from "react-icons/io";
 import { motion, AnimatePresence } from "framer-motion";
+import { createTw } from "react-pdf-tailwind";
 
 interface PhotoZoomProps {
   src: string;
   alt: string;
   description?: string;
   title?: string;
+  className?:string
 }
+const tw = createTw({});
 
-const PhotoZoom: React.FC<PhotoZoomProps> = ({ src, alt, description, title }) => {
+const PhotoZoom: React.FC<PhotoZoomProps> = ({ src, alt, description, title,className='max-w-screen-lg max-h-screen'}) => {
   const [isZoomed, setIsZoomed] = useState(false);
-
   const toggleZoom = () => setIsZoomed((prev) => !prev);
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -53,7 +55,7 @@ const PhotoZoom: React.FC<PhotoZoomProps> = ({ src, alt, description, title }) =
         <AnimatePresence>
           {isZoomed && (
             <motion.div
-              className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50 backdrop-blur-sm"
+              className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-[5000] backdrop-blur-sm"
               onClick={toggleZoom}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -86,7 +88,7 @@ const PhotoZoom: React.FC<PhotoZoomProps> = ({ src, alt, description, title }) =
                 <img
                   src={src}
                   alt={alt}
-                  className="max-w-screen-lg max-h-screen rounded-lg shadow-2xl object-contain"
+                  className={`rounded-lg shadow-2xl object-contain ${className}`}
                 />
 
                 {/* Descripción */}

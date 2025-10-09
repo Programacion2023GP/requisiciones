@@ -8,6 +8,7 @@ import Button from "../../components/form/Button";
 import { formatCurrency } from "../../utils/functions";
 import Observable from "../../extras/observable";
 import { FcMoneyTransfer } from "react-icons/fc";
+import PhotoZoom from "../../components/images/Images";
 
 type CotizacionType = {
    open: boolean;
@@ -23,15 +24,15 @@ type Requisition = {
    Ejercicio: number;
    IDRequisicion: number;
    status: "OC" | "CO";
-   Centro_Costo:number,
-   Nombre_Departamento:string,
-   
+   Centro_Costo: number,
+   Nombre_Departamento: string,
+
 };
 const TablaPresupuestos = ({ ingresos }: { ingresos: any[] }) => {
    return (
-      <div className="overflow-x-auto rounded-2xl shadow-sm border border-gray-200">
+      <div className="overflow-x-auto border border-gray-200 shadow-sm rounded-2xl">
          <table className="min-w-full text-sm text-gray-700">
-            <thead className="bg-gray-600 text-white">
+            <thead className="text-white bg-gray-600">
                <tr>
                   <th className="px-4 py-2 text-left">Partida Específica</th>
                   <th className="px-4 py-2 text-right">Presupuesto Disponible</th>
@@ -109,15 +110,26 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             .map((line) => {
                const obj: Record<string, string> = {};
                line.split("|").forEach((part) => {
-                  const [key, value] = part.split(":").map((p) => p.trim());
-                  obj[key] = value ?? "";
+                  if (part.includes("image")) {
+                     let [key, value] = part.split("image:").map((p) => p.trim());
+                     key = "image"
+                     obj[key] = value ?? "";
+
+                  } else {
+
+                     const [key, value] = part.split(":").map((p) => p.trim());
+                     obj[key] = value ?? "";
+                  }
+
+
                });
                return obj;
             });
-
+         console.log("aquiiiii", productsData)
          let initialFormValues: Record<string, any> = {};
 
          productsData.forEach((it: any, index) => {
+            console.log("🚀 ~ CotizacionComponent ~ it:", it);
             initialFormValues[`IDRequisicion`] = it.IDRequisicion;
             initialFormValues[`Ejercicio`] = it.Ejercicio;
             initialFormValues[`IDproveedor1`] = Number(it.IDproveedor1);
@@ -131,6 +143,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
                initialFormValues[`PrecioUnitarioSinIva${fieldNumber}`] =
                   it[`PrecioUnitarioSinIva${providerNum}`] || 0;
+
                initialFormValues[`PorcentajeIVA${fieldNumber}`] =
                   it[`PorcentajeIVA${providerNum}`] || 0;
                initialFormValues[`ImporteIva${fieldNumber}`] =
@@ -139,10 +152,19 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   it[`PrecioUnitarioConIva${providerNum}`] || 0;
                initialFormValues[`Retenciones${fieldNumber}`] =
                   it[`Retenciones${providerNum}`] || 0;
+
+               initialFormValues[`Importe${fieldNumber}`] =
+                  Number(it[`PrecioUnitarioSinIva${providerNum}`]) *
+                  Number(it.Cantidad) || 0;
             });
          });
 
+         console.log(
+            "🚀 ~ CotizacionComponent ~ initialFormValues:",
+            initialFormValues,
+         );
          setFormValues(initialFormValues);
+         console.log("productsData", productsData)
          setData(productsData);
       },
 
@@ -279,7 +301,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          showToast("Por favor corrija los errores en el formulario", "error");
          return;
       }
-      
+
       if (
          formValues.IDproveedor1 &&
          formValues.IDproveedor2 &&
@@ -291,7 +313,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             data: formValues,
          });
       } else {
-         console.log("valores",formValues)
+         console.log("valores", formValues)
          showConfirmationAlert(
             `Advertencia`,
             "¿La cotización no cuenta con los 3 provedores deseas continuar?.",
@@ -309,7 +331,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }
    };
 
-   const handleInputChange = (name: string, value: any) => {
+   const handleInputChange = (name: string, value: any, cantidad?: number) => {
       setFormValues((prev) => ({
          ...prev,
          [name]: value,
@@ -325,10 +347,16 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       }
 
       // Recalcular IVA si es necesario
-      calculateIVA(name, value);
+      calculateIVA(name, value, cantidad);
    };
 
-   const calculateIVA = (fieldName: string, fieldValue: any) => {
+   const calculateIVA = (
+      fieldName: string,
+      fieldValue: any,
+      cantidad: number = 0,
+   ) => {
+      console.log("🚀 ~ calculateIVA ~ fieldName:", fieldName);
+      console.log("🚀 ~ calculateIVA ~ fieldValue:", fieldValue);
       const calculateIVAHelper = (
          precioSinIva: number,
          porcentajeIVA: number,
@@ -367,11 +395,16 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   precioSinIva,
                   porcentajeIVA,
                );
+               const importe = Number(fieldValue) * cantidad;
 
                setFormValues((prev) => ({
                   ...prev,
                   [`ImporteIva${providerNumber}`]: importeIva,
                   [`PrecioUnitarioConIva${providerNumber}`]: precioConIva,
+                  [`Importe${providerNumber}`]:
+                     fieldName === `PrecioUnitarioSinIva${providerNumber}`
+                        ? importe
+                        : prev[`Importe${providerNumber}`],
                }));
             }
          });
@@ -389,22 +422,29 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       });
    }, []);
 
-   const renderInput = (name: string, disabled: boolean = false) => (
-      <div className="w-full">
-         <input
-            type="text"
-            name={name}
-            value={formValues[name] || ""}
-            onChange={(e) => handleInputChange(name, e.target.value)}
-            disabled={disabled}
-            className={`w-full px-2 py-1 text-sm border rounded ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"
-               } ${errors[name] ? "border-red-500" : "border-gray-300"}`}
-         />
-         {errors[name] && (
-            <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
-         )}
-      </div>
-   );
+   const renderInput = (
+      name: string,
+      disabled: boolean = false,
+      cantidad: number = 0,
+   ) => {
+      return (
+         <div className="w-full">
+            <input
+               type="text"
+               name={name}
+               value={formValues[name] || ""}
+               onChange={(e) =>
+                  handleInputChange(name, e.target.value, cantidad)
+               }
+               disabled={disabled}
+               className={`w-full px-2 py-1 text-sm border rounded ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white"} ${errors[name] ? "border-red-500" : "border-gray-300"}`}
+            />
+            {errors[name] && (
+               <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
+            )}
+         </div>
+      );
+   };
 
    const renderSelect = (
       name: string,
@@ -455,12 +495,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
          title="Detalle de Cotizaciones"
          open={open}
          actions={<Button onClick={() => setOpenPresupuestos(true)} color={"blue"} variant={"text"}>
-            <FcMoneyTransfer  size={20} />
+            <FcMoneyTransfer size={20} />
          </Button>}
          setOpen={() => setOpen(false)}>
          {(suppliers.status === "pending" || spiner) && <Spinner />}
          {openPresupuestos && (
-            <ModalComponent fullScreen={false} zIndex={4000} open={openPresupuestos} setOpen={() => setOpenPresupuestos(false)} title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`} children={<TablaPresupuestos ingresos={ingresos}/>} />
+            <ModalComponent fullScreen={false} zIndex={4000} open={openPresupuestos} setOpen={() => setOpenPresupuestos(false)} title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`} children={<TablaPresupuestos ingresos={ingresos} />} />
          )}
 
 
@@ -537,7 +577,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                  <th
                                     key={offset}
                                     className="px-3 py-2 text-center border"
-                                    colSpan={5}>
+                                    colSpan={6}>
                                     {IdRequisicion?.data?.status == "OC" ? (
                                        <Button
                                           color="blue"
@@ -599,6 +639,9 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        Ret.
                                     </th>
                                     <th className="px-3 py-2 text-center border">
+                                       Imp.
+                                    </th>
+                                    <th className="px-3 py-2 text-center border">
                                        IVA cal.
                                     </th>
                                     <th className="px-3 py-2 text-center border">
@@ -628,11 +671,22 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                              Cantidad: {item.Cantidad}
                                           </div>
                                        )}
+                                       {item.image && (
+                                          // <>{item.image}</>
+                                         <div className="w-20 h-20 m-0">
+                                           <PhotoZoom
+                                             src={item.image}
+                                             alt="preview"
+                                             title={""}
+                                          ></PhotoZoom>
+                                         </div>
+                                       )}
                                     </td>
 
                                     {[1, 2, 3].map((offset) => {
                                        const providerNumber =
                                           index * 3 + offset;
+
                                        return (
                                           <React.Fragment key={offset}>
                                              <td className="px-2 py-1 border">
@@ -640,6 +694,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                    `PrecioUnitarioSinIva${providerNumber}`,
                                                    IdRequisicion?.data
                                                       ?.status === "OC",
+                                                   item.Cantidad,
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
@@ -654,6 +709,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                    `Retenciones${providerNumber}`,
                                                    IdRequisicion?.data
                                                       ?.status === "OC",
+                                                )}
+                                             </td>
+                                             <td className="px-2 py-1 border">
+                                                {renderInput(
+                                                   `Importe${providerNumber}`,
+                                                   true,
                                                 )}
                                              </td>
                                              <td className="px-2 py-1 border">
@@ -741,7 +802,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                     return (
                                        <td
                                           key={providerIdx}
-                                          colSpan={5}
+                                          colSpan={6}
                                           className="px-2 py-1 text-right border">
                                           {formatCurrency(
                                              mapTotals[row.key],

@@ -42,16 +42,16 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
    const totalNeto = totalConIva - retenciones;
 
    return (
-      <View
-         style={tw(
-            `text-sm text-wrap px-1 w-1/3 max-w-1/3 ${
-               producto.Proveedor != null &&
-               producto.Proveedor == producto?.[`Proveedor${index}`] &&
-               "bg-slate-400 rounded-md"
-            } `,
-         )}>
+      <View style={tw(`text-sm text-wrap px-1 w-1/3 max-w-1/3`)}>
          {idxProducto === 0 && (
-            <Text style={tw("text-wrap h-16 overflow-hidden")}>
+            <Text
+               style={tw(
+                  `text-wrap h-16 overflow-hidden  ${
+                     producto.Proveedor != null &&
+                     producto.Proveedor == producto?.[`Proveedor${index}`] &&
+                     "bg-slate-200 rounded-md"
+                  } `,
+               )}>
                {producto?.[`Proveedor${index}`] || ""}
             </Text>
          )}
@@ -104,6 +104,8 @@ export const PdfRight: React.FC<DataPdf> = ({
    // console.log("🚀 ~ ProvedorInfo ~ isLastChunk:", isLastChunk);
    // console.log("🚀 ~ ProvedorInfo ~ totalPorProveedor:", totalPorProveedor);
    const observaciones = pdfData?.ObservacionesCot || "";
+   const proveedorSeleccionado = products[0].Proveedor;
+   // console.log("🚀 ~ proveedorSeleccionado:", proveedorSeleccionado);
 
    return (
       <View style={tw("w-1/2 max-w-1/2")}>
@@ -137,9 +139,12 @@ export const PdfRight: React.FC<DataPdf> = ({
 
             {/* TOTAL POR PROVEEDOR */}
             {isLastChunk && (
-               <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
-                  {totalPorProveedor.map((total) => (
-                     <>
+               <View style={tw(`w-full flex flex-row -mt-1.5 gap-1 mb-2`)}>
+                  {totalPorProveedor.map((total, i) => (
+                     <View
+                        style={tw(
+                           `w-full flex flex-row -mt-1.5 gap-1 mb-2 ${total.proveedor === proveedorSeleccionado && "bg-slate-200 rounded-md"}`,
+                        )}>
                         <View style={tw(`w-1/2`)}>
                            <Text
                               style={tw(
@@ -161,7 +166,7 @@ export const PdfRight: React.FC<DataPdf> = ({
                               ) || ""}
                            </Text>
                         </View>
-                     </>
+                     </View>
                   ))}
                </View>
             )}
