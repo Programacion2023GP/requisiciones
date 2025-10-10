@@ -685,6 +685,10 @@ const Actions: React.FC<{
                                                                data.IDRequisicion,
                                                             Ejercicio:
                                                                data.Ejercicio,
+                                                            Nombre_Departamento:
+                                                               data?.Nombre_Departamento,
+                                                            Centro_Costo:
+                                                               data?.Centro_Costo,
 
                                                             status: "OC",
                                                          },

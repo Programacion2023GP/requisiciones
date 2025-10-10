@@ -24,9 +24,8 @@ type Requisition = {
    Ejercicio: number;
    IDRequisicion: number;
    status: "OC" | "CO";
-   Centro_Costo: number,
-   Nombre_Departamento: string,
-
+   Centro_Costo: number;
+   Nombre_Departamento: string;
 };
 const TablaPresupuestos = ({ ingresos }: { ingresos: any[] }) => {
    return (
@@ -35,23 +34,21 @@ const TablaPresupuestos = ({ ingresos }: { ingresos: any[] }) => {
             <thead className="text-white bg-gray-600">
                <tr>
                   <th className="px-4 py-2 text-left">Partida Específica</th>
-                  <th className="px-4 py-2 text-right">Presupuesto Disponible</th>
+                  <th className="px-4 py-2 text-right">
+                     Presupuesto Disponible
+                  </th>
                </tr>
             </thead>
             <tbody>
                {ingresos.map((it, index) => (
                   <tr
                      key={index}
-                     className={
-                        index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                     }
-                  >
+                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                      <td className="px-4 py-2 font-medium">
                         {it.PartidaEspecifica}
                      </td>
                      <td className="px-4 py-2 text-right">
-                        {formatCurrency(it.PresupuestoDisponible, true, true)
-                        }
+                        {formatCurrency(it.PresupuestoDisponible, true, true)}
                      </td>
                   </tr>
                ))}
@@ -72,20 +69,21 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
    const [errors, setErrors] = useState<Record<string, string>>({});
    const [spiner, setSpiner] = useState<boolean>(true);
    const [data, setData] = useState<Array<Record<string, any>>>([]);
-   const [ingresos, setIngresos] = useState([])
-   const [openPresupuestos, setOpenPresupuestos] = useState<boolean>(false)
+   const [ingresos, setIngresos] = useState([]);
+   const [openPresupuestos, setOpenPresupuestos] = useState<boolean>(false);
    const init = async () => {
-      const response = await fetch(`https://predial.gomezpalacio.gob.mx:4433/api/presupuestos/${IdRequisicion.data.Centro_Costo}`)
+      const response = await fetch(
+         `https://predial.gomezpalacio.gob.mx:4433/api/presupuestos/${IdRequisicion.data.Centro_Costo}`,
+      );
       const data = await response.json();
       if (response.ok) {
-         setIngresos(data)
+         setIngresos(data);
       }
-   }
+   };
    useEffect(() => {
-
       init();
-      // return 
-   }, [])
+      // return
+   }, []);
 
    const mutationCotized = useMutation({
       mutationFn: ({
@@ -111,25 +109,23 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                const obj: Record<string, string> = {};
                line.split("|").forEach((part) => {
                   if (part.includes("image")) {
-                     let [key, value] = part.split("image:").map((p) => p.trim());
-                     key = "image"
+                     let [key, value] = part
+                        .split("image:")
+                        .map((p) => p.trim());
+                     key = "image";
                      obj[key] = value ?? "";
-
                   } else {
-
                      const [key, value] = part.split(":").map((p) => p.trim());
                      obj[key] = value ?? "";
                   }
-
-
                });
                return obj;
             });
-         console.log("aquiiiii", productsData)
+         // console.log("aquiiiii", productsData);
          let initialFormValues: Record<string, any> = {};
 
          productsData.forEach((it: any, index) => {
-            console.log("🚀 ~ CotizacionComponent ~ it:", it);
+            // console.log("🚀 ~ CotizacionComponent ~ it:", it);
             initialFormValues[`IDRequisicion`] = it.IDRequisicion;
             initialFormValues[`Ejercicio`] = it.Ejercicio;
             initialFormValues[`IDproveedor1`] = Number(it.IDproveedor1);
@@ -155,16 +151,16 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
                initialFormValues[`Importe${fieldNumber}`] =
                   Number(it[`PrecioUnitarioSinIva${providerNum}`]) *
-                  Number(it.Cantidad) || 0;
+                     Number(it.Cantidad) || 0;
             });
          });
 
-         console.log(
-            "🚀 ~ CotizacionComponent ~ initialFormValues:",
-            initialFormValues,
-         );
+         // console.log(
+         //    "🚀 ~ CotizacionComponent ~ initialFormValues:",
+         //    initialFormValues,
+         // );
          setFormValues(initialFormValues);
-         console.log("productsData", productsData)
+         // console.log("productsData", productsData);
          setData(productsData);
       },
 
@@ -313,7 +309,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             data: formValues,
          });
       } else {
-         console.log("valores", formValues)
+         console.log("valores", formValues);
          showConfirmationAlert(
             `Advertencia`,
             "¿La cotización no cuenta con los 3 provedores deseas continuar?.",
@@ -384,8 +380,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                const precioSinIva = isPrecioField
                   ? Number(fieldValue) || 0
                   : Number(
-                     formValues[`PrecioUnitarioSinIva${providerNumber}`],
-                  ) || 0;
+                       formValues[`PrecioUnitarioSinIva${providerNumber}`],
+                    ) || 0;
 
                const porcentajeIVA = isPorcentajeField
                   ? Number(fieldValue) || 0
@@ -474,8 +470,9 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                name={name}
                value={selectedValue}
                onChange={(e) => handleInputChange(name, Number(e.target.value))}
-               className={`w-full px-3 py-2 border rounded ${errors[name] ? "border-red-500" : "border-gray-300"
-                  }`}>
+               className={`w-full px-3 py-2 border rounded ${
+                  errors[name] ? "border-red-500" : "border-gray-300"
+               }`}>
                <option value="">Seleccione...</option>
                {filteredOptions.map((opt) => (
                   <option key={opt[idKey]} value={opt[idKey]}>
@@ -494,15 +491,26 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
       <ModalComponent
          title="Detalle de Cotizaciones"
          open={open}
-         actions={<Button onClick={() => setOpenPresupuestos(true)} color={"blue"} variant={"text"}>
-            <FcMoneyTransfer size={20} />
-         </Button>}
+         actions={
+            <Button
+               onClick={() => setOpenPresupuestos(true)}
+               color={"blue"}
+               variant={"text"}>
+               <FcMoneyTransfer size={20} />
+            </Button>
+         }
          setOpen={() => setOpen(false)}>
          {(suppliers.status === "pending" || spiner) && <Spinner />}
          {openPresupuestos && (
-            <ModalComponent fullScreen={false} zIndex={4000} open={openPresupuestos} setOpen={() => setOpenPresupuestos(false)} title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`} children={<TablaPresupuestos ingresos={ingresos} />} />
+            <ModalComponent
+               fullScreen={false}
+               zIndex={4000}
+               open={openPresupuestos}
+               setOpen={() => setOpenPresupuestos(false)}
+               title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`}
+               children={<TablaPresupuestos ingresos={ingresos} />}
+            />
          )}
-
 
          {Array.isArray(data) && data.length > 0 && (
             <form onSubmit={handleSubmit}>
@@ -534,11 +542,9 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                      </div>
                   </div>
 
-
-
                   {/* Selección de Proveedores */}
-                  {IdRequisicion?.data?.status == "CO" && (
-                     <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
+                  {/* {IdRequisicion?.data?.status == "CO" && (
+                     <div className="hidden p-4 bg-white border border-gray-200 rounded-lg shadow">
                         <h3 className="mb-4 text-lg font-semibold text-gray-900">
                            Seleccione los 3 Proveedores
                         </h3>
@@ -563,12 +569,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                            )}
                         </div>
                      </div>
-                  )}
+                  )} */}
 
                   {/* Tabla estilo Excel */}
-                  <div className="overflow-x-auto">
-                     <table className="min-w-full text-sm border border-gray-300">
-                        <thead className="bg-gray-100">
+                  <div className="w-full max-h-[60vh] overflow-y-auto border border-gray-800 rounded-md">
+                     <table className="w-full text-sm border-collapse border-gray-300">
+                        <thead className="sticky top-0 bg-gray-100">
                            <tr>
                               <th className="px-3 py-2 text-left border">
                                  Producto
@@ -583,7 +589,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                           color="blue"
                                           variant={
                                              data?.[0]["Proveedor"] ==
-                                                formValues[`IDproveedor${offset}`]
+                                             formValues[`IDproveedor${offset}`]
                                                 ? "solid"
                                                 : "outline"
                                           }
@@ -600,7 +606,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                                          ?.IDRequisicion,
                                                    Proveedor:
                                                       formValues[
-                                                      `IDproveedor${offset}`
+                                                         `IDproveedor${offset}`
                                                       ],
                                                 },
                                              });
@@ -609,23 +615,30 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                              (prov) =>
                                                 prov.IDProveedor ==
                                                 formValues[
-                                                `IDproveedor${offset}`
+                                                   `IDproveedor${offset}`
                                                 ],
                                           )?.NombreCompleto ||
                                              `Proveedor ${offset}`}
                                        </Button>
                                     ) : (
-                                       suppliers?.data?.data.find(
-                                          (prov) =>
-                                             prov.IDProveedor ==
-                                             formValues[`IDproveedor${offset}`],
-                                       )?.NombreCompleto ||
-                                       `Proveedor ${offset}`
+                                       renderSelect(
+                                          `IDproveedor${offset}`,
+                                          suppliers?.data?.data || [],
+                                          "NombreCompleto",
+                                          "IDProveedor",
+                                       )
+
+                                       // suppliers?.data?.data.find(
+                                       //    (prov) =>
+                                       //       prov.IDProveedor ==
+                                       //       formValues[`IDproveedor${offset}`],
+                                       // )?.NombreCompleto ||
+                                       // `Proveedor ${offset}`
                                     )}
                                  </th>
                               ))}
                            </tr>
-                           <tr>
+                           <tr className="">
                               <th className="px-3 py-2 border"></th>
                               {[1, 2, 3].map((offset) => (
                                  <React.Fragment key={offset}>
@@ -651,12 +664,14 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                               ))}
                            </tr>
                         </thead>
-                        <tbody className="">
+                        <tbody
+                           className="w-full overflow-y-auto"
+                           style={{ maxHeight: "100px" }}>
                            {data?.length > 0 &&
                               data.map((item: any, index) => (
                                  <tr
                                     key={index}
-                                    className="odd:bg-white even:bg-gray-50">
+                                    className="flex-1 w-full h-5 odd:bg-white even:bg-gray-50">
                                     <td className="px-3 py-2 align-top border">
                                        <div className="font-semibold">
                                           {item.Descripcion}
@@ -673,13 +688,12 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        )}
                                        {item.image && (
                                           // <>{item.image}</>
-                                         <div className="w-20 h-20 m-0">
-                                           <PhotoZoom
-                                             src={item.image}
-                                             alt="preview"
-                                             title={""}
-                                          ></PhotoZoom>
-                                         </div>
+                                          <div className="w-20 h-20 m-0">
+                                             <PhotoZoom
+                                                src={item.image}
+                                                alt="preview"
+                                                title={""}></PhotoZoom>
+                                          </div>
                                        )}
                                     </td>
 
@@ -735,7 +749,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                  </tr>
                               ))}
                         </tbody>
-                        <tfoot>
+                        <tfoot className="sticky bottom-0 bg-gray-100">
                            {/* Totales con leyendas */}
                            {[
                               { key: "subtotal", label: "Subtotal" },
@@ -763,19 +777,19 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        const precioSinIva =
                                           Number(
                                              formValues[
-                                             `PrecioUnitarioSinIva${providerNumber}`
+                                                `PrecioUnitarioSinIva${providerNumber}`
                                              ],
                                           ) || 0;
                                        const ivaPct =
                                           Number(
                                              formValues[
-                                             `PorcentajeIVA${providerNumber}`
+                                                `PorcentajeIVA${providerNumber}`
                                              ],
                                           ) || 0;
                                        const ret =
                                           Number(
                                              formValues[
-                                             `Retenciones${providerNumber}`
+                                                `Retenciones${providerNumber}`
                                              ],
                                           ) || 0;
 
