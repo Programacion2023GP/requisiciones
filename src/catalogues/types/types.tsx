@@ -61,6 +61,7 @@ const CatTypes = () => {
     });
 
     const [detailsTypes, types] = queries;
+    
     const mutation = useMutation({
         mutationFn: ({ url, method, data }: { url: string; method: "POST" | "PUT" | "DELETE"; data?: any }) =>
             AxiosRequest(url, method, data),
@@ -156,8 +157,8 @@ const CatTypes = () => {
 
     return (
         <>
-            <div className="container mx-auto shadow-lg p-6 border mt-12">
-                <div className="ag-theme-alpine w-full mx-auto container p-6"></div>
+            <div className="container p-6 mx-auto mt-12 border shadow-lg">
+                <div className="container w-full p-6 mx-auto ag-theme-alpine"></div>
                 <Agtable
                     permissionsUserTable={{
                         buttonElement: "CatTipos",

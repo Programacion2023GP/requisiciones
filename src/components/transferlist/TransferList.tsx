@@ -16,12 +16,16 @@ interface Departamento {
 }
 
 interface TransferListProps {
+   name: string;
+   error?: string | null;
    departamentos: Departamento[];
    seleccionados?: number[];
    onChange?: (seleccionados: number[]) => void;
 }
 
 const TransferList: React.FC<TransferListProps> = ({
+   name,
+   error,
    departamentos,
    seleccionados = [],
    onChange,
@@ -87,7 +91,11 @@ const TransferList: React.FC<TransferListProps> = ({
    ) => (
       <div className="flex flex-col w-1/2 p-3 bg-white border rounded-lg shadow-sm">
          <h2 className="mb-2 text-lg font-semibold text-center">{title}</h2>
+         <small className="mb-1 -mt-3 text-sm font-semibold text-center text-red-600">
+            {error}
+         </small>
          <input
+            name={name}
             type="search"
             placeholder="Buscar..."
             className="w-full px-2 py-1 mb-2 text-sm border rounded"

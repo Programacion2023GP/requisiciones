@@ -143,7 +143,9 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                      {producto.Cantidad}
                   </Text>
                   <Text
-                     style={tw(`w-4/5 ${styles.pdf.text} text-end text-wrap`)}>
+                     style={tw(
+                        `w-4/5 ${styles.pdf.text} text-end text-wrap break-words`,
+                     )}>
                      {producto.Descripcion}
                   </Text>
                   {/* <Text
@@ -157,7 +159,7 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
          {/* DESCRIPCIÓN */}
          <View
             style={tw(
-               `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap`,
+               `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap break-words`,
             )}>
             <Text style={tw(`text-sm font-bold`)}>Descripción:</Text>
             <Text style={tw(`text-sm`)}>{pdfData?.Observaciones}</Text>

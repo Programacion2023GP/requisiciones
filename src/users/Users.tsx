@@ -354,6 +354,27 @@ const Users = () => {
       IDDepartamento: Yup.number()
          .min(1, "El departamento es obligatorio")
          .required("El departamento es obligatorio"),
+      IDDepartamentos: Yup.array()
+         .of(Yup.number())
+         .min(
+            1,
+            "Es necesario asignar mínimo su departamento principal en el listado",
+         )
+         .test(
+            "validateRelUsuarioDepartamentos",
+            "Debes de ingresar minimo el mismo departamento que seleccionaste en 'Departamento principal'",
+            (departamentos, context) => {
+               console.log(
+                  "formik.current.values",
+                  formik?.current?.values.IDDepartamento,
+               );
+               console.log("validateRelUsuarioDepartamentos", departamentos);
+               const { IDDepartamento } = context.parent; // accede a otros campos del form
+               if (!IDDepartamento || !Array.isArray(departamentos))
+                  return false;
+               return departamentos.includes(IDDepartamento);
+            },
+         ),
       Rol: Yup.string()
          .oneOf(
             [
@@ -465,7 +486,7 @@ const Users = () => {
    };
 
    const handleChange = (ids: number[]) => {
-      formik.current?.setFieldValue("IdsDepartamentos", ids);
+      formik.current?.setFieldValue("IDDepartamentos", ids);
    };
 
    const handlePermissions = () => {};
@@ -495,7 +516,13 @@ const Users = () => {
                }
                validationSchema={validationSchema}
                initialValues={usersFormik}
-               children={(values) => (
+               children={(
+                  values,
+                  setFieldValue,
+                  setTouched,
+                  errors,
+                  touched,
+               ) => (
                   <>
                      <FormikInput
                         name="Nombre"
@@ -612,13 +639,23 @@ const Users = () => {
                      )}
 
                      <TransferList
+                        name={"IDDepartamentos"}
+                        error={
+                           touched?.["IDDepartamentos"] &&
+                           typeof errors?.["IDDepartamentos"] === "string"
+                              ? (errors?.["IDDepartamentos"] as string)
+                              : null
+                        }
                         departamentos={groups?.data?.data}
                         seleccionados={
-                           values?.IDDepartamentos === null
-                              ? []
-                              : values?.IDDepartamentos.split(",").map(
-                                   (it: number) => Number(it) ?? [],
-                                )
+                           Array.isArray(values?.IDDepartamentos)
+                              ? values.IDDepartamentos.map(Number)
+                              : typeof values?.IDDepartamentos === "string" &&
+                                  values.IDDepartamentos.length > 0
+                                ? values.IDDepartamentos.split(",").map((it) =>
+                                     Number(it),
+                                  )
+                                : []
                         }
                         onChange={handleChange}
                      />

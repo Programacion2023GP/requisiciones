@@ -436,13 +436,8 @@ const Actions: React.FC<{
                      <div className="w-fit">
                         <Tooltip
                            content={`${
-                              (data.Status == "CP" &&
-                                 userGroups.includes(data?.IDDepartamento)) ||
-                              [
-                                 "SISTEMAS",
-                                 "DIRECTORCOMPRAS",
-                                 // "REQUISITOR",
-                              ].includes(localStorage.getItem("role") ?? "")
+                              data.Status == "CP" &&
+                              userGroups.includes(data?.IDDepartamento)
                                  ? "Editar"
                                  : "Vista"
                            }`}>
@@ -463,24 +458,13 @@ const Actions: React.FC<{
                                           (data.Status == "CP" &&
                                              userGroups.includes(
                                                 data?.IDDepartamento,
-                                             )) ||
-                                          [
-                                             "SISTEMAS",
-                                             "DIRECTORCOMPRAS",
-                                             "REQUISITOR",
-                                          ].includes(
-                                             localStorage.getItem("role") ?? "",
-                                          ),
+                                             )) 
                                     },
                                  });
                               }}>
                               {(data.Status == "CP" &&
-                                 userGroups.includes(data?.IDDepartamento)) ||
-                              [
-                                 "SISTEMAS",
-                                 "DIRECTORCOMPRAS",
-                                 "REQUISITOR",
-                              ].includes(localStorage.getItem("role") ?? "") ? (
+                                 userGroups.includes(data?.IDDepartamento)) 
+                              ? (
                                  <MdEdit />
                               ) : (
                                  <GrFormView />
@@ -488,7 +472,31 @@ const Actions: React.FC<{
                            </Button>
                         </Tooltip>
                      </div>
+                     <PermissionMenu IdMenu={"EditRequisition"}>
+                        <div className="w-fit">
+                           <Tooltip content={`${"Editar"}`}>
+                              <Button
+                                 id="formRequisition_edit"
+                                 color="yellow"
+                                 variant="solid"
+                                 size="small"
+                                 onClick={() => {
+                                    ObservableDelete("FormRequisicion");
 
+                                    mutationEdit.mutate({
+                                       method: "POST",
+                                       url: "/requisiciones/showRequisicion",
+                                       data: {
+                                          Id: data.Id,
+                                          edicion: true,
+                                       },
+                                    });
+                                 }}>
+                                 <MdEdit />
+                              </Button>
+                           </Tooltip>
+                        </div>
+                     </PermissionMenu>
                      {data.Status != "CP" && (
                         <div className="w-fit">
                            <Tooltip content="Cancelar">

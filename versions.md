@@ -24,3 +24,6 @@ se agrego el numero de orden de compra al pdf
 
 ##### VITE_VERSION = v2.2.2.1 BETA
 Se agrego la listTransfer en usuarios para registrar varios departamentos a los usuarios y se quito el permiso de editar a los requisitores
+
+##### VITE_VERSION = v2.3.0.1 BETA
+se agrego la funcion de asignar varios departamentos a un usuario, se agrando la tabla del cotizador, se rompieron textos, se cambio el editar a permiso y desloguear por token

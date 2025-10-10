@@ -126,12 +126,15 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
          productsData.forEach((it: any, index) => {
             // console.log("🚀 ~ CotizacionComponent ~ it:", it);
-            initialFormValues[`IDRequisicion`] = it.IDRequisicion;
-            initialFormValues[`Ejercicio`] = it.Ejercicio;
-            initialFormValues[`IDproveedor1`] = Number(it.IDproveedor1);
-            initialFormValues[`IDproveedor2`] = Number(it.IDproveedor2);
-            initialFormValues[`IDproveedor3`] = Number(it.IDproveedor3);
-            initialFormValues[`ObservacionesCot`] = it.ObservacionesCot;
+            if (index ==0) {
+               initialFormValues[`IDRequisicion`] = it.IDRequisicion;
+               initialFormValues[`Ejercicio`] = it.Ejercicio;
+               initialFormValues[`IDproveedor1`] = Number(it.IDproveedor1);
+               initialFormValues[`IDproveedor2`] = Number(it.IDproveedor2);
+               initialFormValues[`IDproveedor3`] = Number(it.IDproveedor3);
+               initialFormValues[`ObservacionesCot`] = it.ObservacionesCot;
+               
+            }
 
             initialFormValues[`IDDetalle${index + 1}`] = it.IDDetalle;
             [1, 2, 3].forEach((providerNum) => {
@@ -155,10 +158,10 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             });
          });
 
-         // console.log(
-         //    "🚀 ~ CotizacionComponent ~ initialFormValues:",
-         //    initialFormValues,
-         // );
+         console.log(
+            "🚀 ~ CotizacionComponent ~ initialFormValues:",
+            initialFormValues,
+         );
          setFormValues(initialFormValues);
          // console.log("productsData", productsData);
          setData(productsData);
@@ -489,7 +492,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
 
    return (
       <ModalComponent
-         title="Detalle de Cotizaciones"
+         title={`Folio: ${IdRequisicion?.data?.IDRequisicion} / Ejercicio: ${IdRequisicion?.data?.Ejercicio} / Status: ${IdRequisicion?.data?.status}`}
          open={open}
          actions={
             <Button
@@ -516,7 +519,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
             <form onSubmit={handleSubmit}>
                <div className="space-y-6 max-h-[80vh] overflow-y-auto">
                   {/* Header informativo */}
-                  <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                  {/* <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                            <h3 className="text-lg font-semibold text-blue-800">
@@ -540,7 +543,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                            </p>
                         </div>
                      </div>
-                  </div>
+                  </div> */}
 
                   {/* Selección de Proveedores */}
                   {/* {IdRequisicion?.data?.status == "CO" && (
@@ -572,7 +575,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                   )} */}
 
                   {/* Tabla estilo Excel */}
-                  <div className="w-full max-h-[60vh] overflow-y-auto border border-gray-800 rounded-md">
+                  <div className="w-full max-h-[80vh] overflow-y-auto border border-gray-800 rounded-md">
                      <table className="w-full text-sm border-collapse border-gray-300">
                         <thead className="sticky top-0 bg-gray-100">
                            <tr>
@@ -672,7 +675,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                  <tr
                                     key={index}
                                     className="flex-1 w-full h-5 odd:bg-white even:bg-gray-50">
-                                    <td className="px-3 py-2 align-top border">
+                                    <td className="px-3 py-2 align-top border max-w-[250px] text-wrap break-words">
+                                      
                                        <div className="font-semibold">
                                           {item.Descripcion}
                                        </div>
@@ -688,7 +692,7 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                                        )}
                                        {item.image && (
                                           // <>{item.image}</>
-                                          <div className="w-20 h-20 m-0">
+                                          <div className="w-10 h-10 m-0">
                                              <PhotoZoom
                                                 src={item.image}
                                                 alt="preview"

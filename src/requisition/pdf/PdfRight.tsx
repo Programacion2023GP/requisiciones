@@ -42,11 +42,11 @@ export const ProvedorInfo: React.FC<TypeProvedor> = ({
    const totalNeto = totalConIva - retenciones;
 
    return (
-      <View style={tw(`text-sm text-wrap px-1 w-1/3 max-w-1/3`)}>
+      <View style={tw(`text-sm text-wrap break-words px-1 w-1/3 max-w-1/3`)}>
          {idxProducto === 0 && (
             <Text
                style={tw(
-                  `text-wrap h-16 overflow-hidden  ${
+                  `text-wrap break-words h-16 overflow-hidden  ${
                      producto.Proveedor != null &&
                      producto.Proveedor == producto?.[`Proveedor${index}`] &&
                      "bg-slate-200 rounded-md"
@@ -109,21 +109,24 @@ export const PdfRight: React.FC<DataPdf> = ({
 
    return (
       <View style={tw("w-1/2 max-w-1/2")}>
-        
-            <View  style={tw("mx-3 flex flex-row")}>
-               <View style={tw(`${styles.pdf.box}  mt-1 w-2/3`)}>
-                  <Text style={tw(`${styles.pdf.text}`)}>Uso Exclusivo de Compras</Text>
-               </View>
-                <View style={tw(`${styles.pdf.box}  mt-1 w-1/3`)}>
-                  <Text style={tw(`${styles.pdf.text}`)}>N° C. {pdfData.Orden_Compra}</Text>
-               </View>
+         <View style={tw("mx-3 flex flex-row")}>
+            <View style={tw(`${styles.pdf.box}  mt-1 w-2/3`)}>
+               <Text style={tw(`${styles.pdf.text}`)}>
+                  Uso Exclusivo de Compras
+               </Text>
             </View>
-       
-<View  style={tw("mx-3")}>
-               <View style={tw(`${styles.pdf.box} flex-row mt-1 w-full`)}>
-                  <Text style={tw(`${styles.pdf.text}`)}>Provedores</Text>
-               </View>
+            <View style={tw(`${styles.pdf.box}  mt-1 w-1/3`)}>
+               <Text style={tw(`${styles.pdf.text}`)}>
+                  N° C. {pdfData.Orden_Compra}
+               </Text>
             </View>
+         </View>
+
+         <View style={tw("mx-3")}>
+            <View style={tw(`${styles.pdf.box} flex-row mt-1 w-full`)}>
+               <Text style={tw(`${styles.pdf.text}`)}>Provedores</Text>
+            </View>
+         </View>
          <View
             wrap
             style={tw("flex flex-wrap w-full max-w-full overflow-auto px-2")}>
