@@ -1,7 +1,7 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Agtable } from "../../components/table/Agtable";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ColDef } from "ag-grid-community";
 import Tooltip from "../../components/toltip/Toltip";
 import Button from "../../components/form/Button";
@@ -13,6 +13,7 @@ import * as Yup from "yup";
 import {
   FormikAutocomplete,
   FormikImageInput,
+  FormikInput,
   FormikNumberInput,
 } from "../../components/formik/FormikInputs/FormikInput";
 import { showToast } from "../../sweetalert/Sweetalert";
@@ -20,6 +21,8 @@ import Spinner from "../../loading/Loading";
 import { FaUserClock, FaUserEdit } from "react-icons/fa";
 import Typography from "../../components/typografy/Typografy";
 import CardComponent from "../../components/card/Card";
+import TransferList from "../../components/transferlist/TransferList";
+import { FormikProps } from "formik";
 
 type PropsTable = {
   IdDetDirectores: number;
@@ -58,7 +61,7 @@ const ActionButtons = ({
 }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [openDirectores, setOpenDirectores] = useState<boolean>(false)
-
+  const [openName,setOpenName] = useState<boolean>(false);
   const mutation = useMutation({
     mutationFn: ({
       url,
@@ -87,6 +90,10 @@ const ActionButtons = ({
     IDDepartamento: data.IDDepartamento,
     Centro_Costo: data.Centro_Costo,
   };
+  const initialValuesName = {
+    IDDepartamento: data.IDDepartamento,
+    Nombre_Departamento: data.Nombre_Departamento,
+  };
   const validationSchema = Yup.object({
     IDDepartamento: Yup.number()
       .min(1, "El departamento es requerido")
@@ -104,21 +111,17 @@ const ActionButtons = ({
       data: values,
     });
   };
+   const onSubmitName = (values: Record<string, any>) => {
+    mutation.mutate({
+      method: "POST",
+      url: "departaments/changename",
+      data: values,
+    });
+  };
   return (
     <>
       <div className="flex gap-2">
-        <Tooltip content="asignar nuevo director">
-          <Button
-            color="yellow"
-            size="small"
-            variant="solid"
-            onClick={() => {
-              handleEdit(data as PropsTable);
-            }}
-          >
-            <FaUserEdit />
-          </Button>
-        </Tooltip>
+        
         <Tooltip content="Editar centro de costo">
           <Button
             color="yellow"
@@ -126,6 +129,18 @@ const ActionButtons = ({
             variant="solid"
             onClick={() => {
               setOpen(true);
+            }}
+          >
+            <BiEdit />
+          </Button>
+        </Tooltip>
+          <Tooltip content="Editar Nombre del departamento">
+          <Button
+            color="presidencia"
+            size="small"
+            variant="solid"
+            onClick={() => {
+              setOpenName(true);
             }}
           >
             <BiEdit />
@@ -175,6 +190,25 @@ const ActionButtons = ({
         <ModalComponent title={`Historial de directores del departamento`} open={openDirectores} setOpen={() => { setOpenDirectores(false) }}>
         <Directores data={data}/>
         </ModalComponent>
+        
+        <ModalComponent title={`Cambio de nombre del departamento ${data.Nombre_Departamento}`} open={openName} setOpen={() => { setOpenName(false) }}>
+         <FormikForm
+            initialValues={initialValuesName}
+            // validationSchema={validationSchema}
+            buttonMessage="Actualizar"
+            onSubmit={onSubmitName}
+            children={(values, setValue, setTouched, errors) => (
+              <>
+                <div className="mb-2"></div>
+                <FormikInput
+                  label="Nombre del departamento"
+                  name="Nombre_Departamento"
+                  // decimals={false}
+                />
+              </>
+            )}
+          />
+        </ModalComponent>
       </div>
     </>
   );
@@ -191,6 +225,7 @@ const Picture = ({ data }: { data: PropsTable }) => {
 
 
 const Directores = ({ data }: { data: PropsTable }) => {
+  
   const [columnDefs] = useState<ColDef<PropsTable>[]>([
     {
       headerName: "Director",
@@ -254,6 +289,8 @@ const Directores = ({ data }: { data: PropsTable }) => {
 };
 
 const CatDepartaments = () => {
+     const formik = useRef<FormikProps<Record<string, any>> | null>(null);
+
   const [open, setOpen] = useState<boolean>(false);
   const [spiner, setSpiner] = useState<boolean>(false);
   const [modal, setModal] = useState<boolean>(false)
@@ -280,6 +317,11 @@ const CatDepartaments = () => {
         queryFn: () => GetAxios("users/index"),
         refetchOnWindowFocus: true,
       },
+       {
+            queryKey: ["departamentos/index"],
+            queryFn: () => GetAxios("departamentos/index"),
+            refetchOnWindowFocus: true,
+         }
       // Puedes agregar más peticiones aquí
     ],
   });
@@ -324,7 +366,7 @@ const CatDepartaments = () => {
       ),
     },
   ]);
-  const [departaments, users] = queries;
+  const [departaments, users,groups] = queries;
   const onSubmit = async (values: Record<string, any>) => {
     setSpiner(true);
     console.log(values)
@@ -393,64 +435,17 @@ const CatDepartaments = () => {
       ),
   });
   const queryClient = useQueryClient(); // Inicializa el query client
+const handleChange = (ids: number[]) => {
 
+      formik.current?.setFieldValue("IDDepartamentos", ids);
+   };
   return (
     <div className="container mx-auto shadow-lg p-6 border mt-12">
       {spiner && <Spinner />}
 
       <div className="ag-theme-alpine w-full mx-auto container p-6">
-        <ModalComponent
-          open={open}
-          // title={`${initialValues?.IDProveedor && initialValues.IDProveedor > 0 ? "Actualizar" : "Registrar"} proveedor`}
-          setOpen={() => {
-            setOpen(false);
-          }}
-        >
-          <FormikForm
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            buttonMessage="Registrar"
-            onSubmit={onSubmit}
-            children={(values, setValue, setTouched, errors) => (
-              <>
-                <div className="mb-2"></div>
-
-                <FormikImageInput
-                  label="Subir la firma del director"
-                  name="Firma_Director"
-                  disabled={false}
-                  acceptedFileTypes="png,jpg,jpeg"
-                />
-                <FormikAutocomplete
-                  labelKey="NombreCompleto"
-                  idKey="IDUsuario"
-                  label={"Selecciona al nuevo director"}
-                  name={"IDUsuario"}
-                  loading={false}
-                  options={users.data.data
-                    ? users.data.data.filter(it => it?.Rol === 'DIRECTOR' ||it?.Rol === 'DIRECTORCOMPRAS')
-                    : []
-                  }
-
-                />
-                {errors?.NombreCompleto && (
-                  <span
-                    className="text-sm font-semibold text-red-600"
-                    id={`${errors?.NombreCompleto}-error`}
-                  >
-                    {errors?.NombreCompleto}
-                  </span>
-                )}
-              </>
-            )}
-          />
-        </ModalComponent>
-        {/* <ModalComponent  open={openDirectores}   setOpen={() => {
-            setOpenDirectores(false);
-          }}>
-            <Directores data={d}/>
-
-          </ModalComponent> */}
+      
+     
         <Agtable
           permissionsUserTable={{
             buttonElement: "CatDepartamentos",

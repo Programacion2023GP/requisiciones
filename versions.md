@@ -27,3 +27,6 @@ Se agrego la listTransfer en usuarios para registrar varios departamentos a los 
 
 ##### VITE_VERSION = v2.3.0.1 BETA
 se agrego la funcion de asignar varios departamentos a un usuario, se agrando la tabla del cotizador, se rompieron textos, se cambio el editar a permiso y desloguear por token
+
+##### VITE_VERSION = v3.0.0.1 BETA
+provedores con banderas directores de varios departamentos cambios de usuarios
