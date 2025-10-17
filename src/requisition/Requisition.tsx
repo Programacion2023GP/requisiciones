@@ -252,7 +252,6 @@ const RequisicionesAdd = () => {
          // filter: true,
          cellRenderer: (params: any) => (
             <>
-         
                <Actions
                   data={params.data}
                   setReloadTable={setReloadTable}
@@ -265,8 +264,7 @@ const RequisicionesAdd = () => {
    const buttonElement = useMemo(
       () => (
          <>
-            <div className="flex flex-row  space-x-2 w-full">
-
+            <div className="flex flex-row w-full space-x-2">
                <Tooltip content="Agregar Requisición">
                   <div className="mb-4">
                      <Button
@@ -275,12 +273,15 @@ const RequisicionesAdd = () => {
                            ObservableDelete("FormRequisicion");
 
                            try {
-                              const result = await ObservablePost("FormRequisicion", {
-                                 data: {
-                                    data: null,
-                                    edicion: true,
+                              const result = await ObservablePost(
+                                 "FormRequisicion",
+                                 {
+                                    data: {
+                                       data: null,
+                                       edicion: true,
+                                    },
                                  },
-                              });
+                              );
                               console.log(result);
                            } catch (e) {
                               console.error(e);
@@ -290,28 +291,33 @@ const RequisicionesAdd = () => {
                         }}
                         size="medium"
                         color="blue"
-                        variant="solid"
-                     >
+                        variant="solid">
                         <icons.Tb.TbFileTextSpark size={20} />
                      </Button>
-
                   </div>
                </Tooltip>
-               <div className="">
-                  <Button id="requisitionrefreshdata" onClick={() => {
-                     setReloadTable(false)
-                     setTimeout(() => {
-                        setFilters(`Ejercicio = '${new Date().getFullYear()}'`);
+               <Tooltip content="Refrescar Tabla">
+                  <div className="">
+                     <Button
+                        id="requisitionrefreshdata"
+                        onClick={() => {
+                           setReloadTable(false);
+                           setTimeout(() => {
+                              setFilters(
+                                 `Ejercicio = '${new Date().getFullYear()}'`,
+                              );
 
-                        setReloadTable(true)
-
-                     }, 300);
-                     // setReloadTable(!reloadTable)
-                     // setReloadTable(true)
-                  }} color="yellow" variant="solid" >
-                     <IoRefresh size={20} />
-                  </Button>
-               </div>
+                              setReloadTable(true);
+                           }, 300);
+                           // setReloadTable(!reloadTable)
+                           // setReloadTable(true)
+                        }}
+                        color="yellow"
+                        variant="solid">
+                        <IoRefresh size={20} />
+                     </Button>
+                  </div>
+               </Tooltip>
             </div>
             {/* agregar boton de refrescar */}
          </>
@@ -440,43 +446,43 @@ const RequisicionesAdd = () => {
                                  chipsOpen.rechazada ||
                                  chipsOpen.todos ||
                                  chipsOpen.surtida) && (
-                                    <YearSelect
-                                       onChange={(value) => {
-                                          console.log(sql);
-                                          if (
-                                             sql == "" &&
-                                             (value == null || value == undefined)
-                                          ) {
-                                             showToast(
-                                                "Demasiada información por favor pon almenos un filtro",
-                                                "info",
-                                             );
-                                             return;
-                                          }
-                                          const whereSql = `${sql ? `status = '${sql}'` : ""} ${value == null || value == undefined ? "" : sql != "" ? " and " + value : value}`;
+                                 <YearSelect
+                                    onChange={(value) => {
+                                       console.log(sql);
+                                       if (
+                                          sql == "" &&
+                                          (value == null || value == undefined)
+                                       ) {
+                                          showToast(
+                                             "Demasiada información por favor pon almenos un filtro",
+                                             "info",
+                                          );
+                                          return;
+                                       }
+                                       const whereSql = `${sql ? `status = '${sql}'` : ""} ${value == null || value == undefined ? "" : sql != "" ? " and " + value : value}`;
 
-                                          setFilters(whereSql);
-                                          setReloadTable(true);
-                                          // setFilters(value)
-                                       }}
-                                       setClosed={() => {
-                                          setChipsOpen({
-                                             rechazada: false,
-                                             captura: false,
-                                             autorizada: false,
-                                             asignado: false,
-                                             cotizado: false,
-                                             ordenDeCompra: false,
-                                             surtida: false,
-                                             realizada: false,
-                                             todos: false,
-                                          });
-                                       }}
-                                    />
-                                 )}
+                                       setFilters(whereSql);
+                                       setReloadTable(true);
+                                       // setFilters(value)
+                                    }}
+                                    setClosed={() => {
+                                       setChipsOpen({
+                                          rechazada: false,
+                                          captura: false,
+                                          autorizada: false,
+                                          asignado: false,
+                                          cotizado: false,
+                                          ordenDeCompra: false,
+                                          surtida: false,
+                                          realizada: false,
+                                          todos: false,
+                                       });
+                                    }}
+                                 />
+                              )}
                            </>
                         )}
-                     // onhandleClick={() => console.log("el onhandle")}
+                        // onhandleClick={() => console.log("el onhandle")}
                      />
                   ))}
                </div>
@@ -485,7 +491,6 @@ const RequisicionesAdd = () => {
                      table: "Listado",
                      buttonElement: "RequisicionesAdd",
                   }}
-
                   // getRowClass={getRowClass}
                   backUrl={{
                      pathName: "requisiciones/index",
@@ -505,7 +510,6 @@ const RequisicionesAdd = () => {
             </div>
             {open && (
                <RequisitionForm
-
                   open={open}
                   setOpen={() => {
                      setOpen(false);

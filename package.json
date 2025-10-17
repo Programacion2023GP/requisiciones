@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-     "bump": "node bump-version.js",
+    "bump": "node bump-version.js",
     "build": "npm run bump && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -23,6 +23,8 @@
     "ag-grid-community": "^32.3.3",
     "ag-grid-react": "^32.3.3",
     "axios": "^1.7.7",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "formik": "^2.4.6",
     "framer-motion": "^11.13.1",
     "jspdf": "^2.5.2",
