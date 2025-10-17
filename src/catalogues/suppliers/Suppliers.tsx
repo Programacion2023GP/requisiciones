@@ -111,6 +111,7 @@ const SuppliersComponent = () => {
     ],
   });
   const [suppliers] = queries;
+  // suppliers.refetch()
   const validationSchema = Yup.object({
     Nombre_RazonSocial: Yup.string()
       .required("El nombre o razón social es obligatorio")
@@ -331,11 +332,11 @@ const isRFCUnique = (rfc, currentSupplierId = 0) => {
     }
   };
   return (
-    <div className="container mx-auto shadow-lg p-6 border mt-12">
+    <div className="container p-6 mx-auto mt-12 border shadow-lg">
       {mutation.status == "pending" && <Spinner />}
 
-      <div className="ag-theme-alpine w-full mx-auto container p-6">
-        {/* <div className="w-full justify-center flex flex-row flex-wrap gap-4 mb-2">
+      <div className="container w-full p-6 mx-auto ag-theme-alpine">
+        {/* <div className="flex flex-row flex-wrap justify-center w-full gap-4 mb-2">
           {[
             { title: "Certificado vencido", bg: "#f8d7da" },
             { title: "Certificado Aprobado", bg: "#d4f4dd" },
@@ -352,13 +353,13 @@ const isRFCUnique = (rfc, currentSupplierId = 0) => {
                 <Tooltip content={item.tooltip}>
                   <div
                     key={index}
-                    className=" cursor-pointer relative shadow-lg w-64 h-fit p-4 border border-gray-300 rounded-lg"
+                    className="relative w-64 p-4 border border-gray-300 rounded-lg shadow-lg cursor-pointer h-fit"
                   >
                     <div
-                      className="flex justify-center items-center h-16 w-full rounded-md"
+                      className="flex items-center justify-center w-full h-16 rounded-md"
                       style={{ backgroundColor: item.bg }}
                     >
-                      <span className="text-center font-semibold text-gray-800 text-lg">
+                      <span className="text-lg font-semibold text-center text-gray-800">
                         {item.title}
                       </span>
                     </div>
@@ -371,13 +372,13 @@ const isRFCUnique = (rfc, currentSupplierId = 0) => {
               return (
                 <div
                 key={index}
-                className="relative shadow-lg w-64 h-fit p-4 border border-gray-300 rounded-lg"
+                className="relative w-64 p-4 border border-gray-300 rounded-lg shadow-lg h-fit"
               >
                 <div
-                  className="flex justify-center items-center h-16 w-full rounded-md"
+                  className="flex items-center justify-center w-full h-16 rounded-md"
                   style={{ backgroundColor: item.bg }}
                 >
-                  <span className="text-center font-semibold text-gray-800 text-lg">
+                  <span className="text-lg font-semibold text-center text-gray-800">
                     {item.title}
                   </span>
                 </div>

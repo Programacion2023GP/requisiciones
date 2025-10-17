@@ -4,6 +4,18 @@
 
 ---
 
+## 🔧 **v3.2.0.2** · *🧱 RC*
+📅 **Fecha:** 17 de octubre de 2025, 9:48 a.m.  
+👤 **Autor:** CETIC-NP  
+🧭 **Tipo:** Build
+
+**⚙️ Optimizaciones**
+- Se hizo merge con los cambios de luisao
+
+
+
+---
+
 ## ✨ **v3.2.0.1** · *🧪 Beta*
 📅 **Fecha:** 17 de octubre de 2025, 9:33 a.m.  
 👤 **Autor:** Cetic-NP  
