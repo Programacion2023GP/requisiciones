@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import ModalComponent from "../../components/modal/Modal";
 import FormikForm from "../../components/formik/Formik";
 import * as Yup from "yup";
-import { FormikInput } from "../../components/formik/FormikInputs/FormikInput";
+import { FormikInput, FormikSwitch } from "../../components/formik/FormikInputs/FormikInput";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { Agtable } from "../../components/table/Agtable";
@@ -35,6 +35,7 @@ const TypeVigencia = ({
 const ActionButtons = ({
   data,
   handleEdit,
+  handleDesabilited,
   // mutation,
   // setOpen,
   // handleEdit,
@@ -44,6 +45,8 @@ const ActionButtons = ({
   // setOpen: Dispatch<SetStateAction<boolean>>;
   // handleEdit: (data: Record<string, any>) => void;
   handleEdit: (provedor: ProvedorType) => void;
+  handleDesabilited: (provedor: ProvedorType) => void;
+
 }) => {
   const handleDelete = () => {
     //   mutation.mutate({
@@ -67,17 +70,19 @@ const ActionButtons = ({
             <BiEdit />
           </Button>
         </Tooltip>
-        {/* 
-        <Tooltip content="eliminar al usuario">
+        
+        <Tooltip content="desabilitar provedor">
           <Button
             color="red"
             size="small"
             variant="solid"
-            onClick={handleDelete}
+            onClick={()=>{
+              handleDesabilited(data as ProvedorType)
+            }}
           >
             <MdDelete />
           </Button>
-        </Tooltip> */}
+        </Tooltip>
       </div>
     </>
   );
@@ -121,11 +126,11 @@ const SuppliersComponent = () => {
       .matches(
         /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/,
         "Debe ser un RFC válido con formato correcto"
-      )   .test(
-      "unique-rfc",
-      "Este RFC ya existe",
-      (value) => !suppliers?.data?.data.some(item => item.RFC === value)
-    ),
+      )    .test(
+        "unique-rfc",
+        "Este RFC ya existe",
+        (value) => isRFCUnique(value, initialValues.IDProveedor)
+      ),
     Telefono1: Yup.string()
       .required("El teléfono principal es obligatorio")
       .matches(
@@ -142,11 +147,27 @@ const SuppliersComponent = () => {
       .required("El correo electrónico es obligatorio")
       .email("Debe ser un correo electrónico válido"),
   });
-
+const isRFCUnique = (rfc, currentSupplierId = 0) => {
+  console.log(rfc,currentSupplierId)
+    if (!rfc) return true;
+    if (Number(currentSupplierId)>0) return true;
+    
+    return !suppliers?.data?.data.some(item => item.RFC === rfc)
+  };
   const handleEdit = (provedor: ProvedorType): void => {
     setInitialValues(provedor);
     setOpen(true);
   };
+  const handleDesabilited = (provedor: ProvedorType): void => {
+    mutation.mutate({
+      method:"POST",
+      url:"provedores/destroy",
+      data:{
+       "IDProveedor" :provedor.IDProveedor
+      }
+    })
+  };
+
   const onSubmit = (values: Record<string, any>) => {
     suppliers.refetch();
     mutation.mutate({
@@ -283,6 +304,7 @@ const SuppliersComponent = () => {
       cellRenderer: (params: any) => (
         <ActionButtons
           handleEdit={handleEdit}
+          handleDesabilited={handleDesabilited}
           data={params.data}
           //   mutation={mutation}
           //   setOpen={setOpen}
@@ -429,6 +451,12 @@ const SuppliersComponent = () => {
               <FormikInput
                 label="Correo Electronico"
                 name="EMail"
+                responsive={{ ...responsive, "2xl": 12, lg: 12 }}
+              />
+                 <FormikSwitch
+            
+                label="¿Es de relleno?"
+                name="DeRelleno"
                 responsive={{ ...responsive, "2xl": 12, lg: 12 }}
               />
             </div>

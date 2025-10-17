@@ -120,7 +120,7 @@ const TransferList: React.FC<TransferListProps> = ({
                      className={`${checked.includes(d.IDDepartamento) && "font-bold"}`}>
                      {d.Nombre_CC}
                   </span>
-                  <button className="font-bold transition">
+                  <button type="button"   className="font-bold transition">
                      {checked.includes(d.IDDepartamento) ? (
                         <icons.Lu.LuBookmarkCheck
                            size={25}
@@ -159,7 +159,8 @@ const TransferList: React.FC<TransferListProps> = ({
          {/* Botones centrales */}
          <div className="flex flex-col items-center justify-center gap-2">
             <Tooltip content="Asignar seleccionados">
-               <button
+               <button type="button"
+
                   onClick={moveRight}
                   disabled={leftChecked.length === 0}
                   className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
@@ -167,7 +168,7 @@ const TransferList: React.FC<TransferListProps> = ({
                </button>
             </Tooltip>
             <Tooltip content="Asignar todos">
-               <button
+               <button type="button" 
                   onClick={moveAllRight}
                   disabled={disponibles.length === 0}
                   className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
@@ -175,7 +176,7 @@ const TransferList: React.FC<TransferListProps> = ({
                </button>
             </Tooltip>
             <Tooltip content="Remover seleccionados">
-               <button
+               <button type="button" 
                   onClick={moveLeft}
                   disabled={rightChecked.length === 0}
                   className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">
@@ -183,7 +184,7 @@ const TransferList: React.FC<TransferListProps> = ({
                </button>
             </Tooltip>
             <Tooltip content="Remover todos">
-               <button
+               <button type="button" 
                   onClick={moveAllLeft}
                   disabled={elegidos.length === 0}
                   className="px-3 py-1 text-white rounded bg-presidencia disabled:opacity-40">

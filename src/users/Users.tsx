@@ -25,6 +25,7 @@ import * as Yup from "yup";
 import {
    FormikAutocomplete,
    FormikCheckbox,
+   FormikImageInput,
    FormikInput,
    FormikSwitch,
 } from "../components/formik/FormikInputs/FormikInput";
@@ -172,6 +173,8 @@ const Users = () => {
       Permiso_Cotizar: false,
       Permiso_Surtir: false,
       Permiso_Orden_Compra: false,
+      accept_Director:false,
+      firma_Director:""
    });
    // Realizas las consultas
    const queries = useQueries({
@@ -193,7 +196,10 @@ const Users = () => {
 
    const handleEdit = (data: Record<string, any>) => {
       toggleOpen(); // Optionally open the modal if you're editing
-      setUsersFormik(data);
+      let item = data
+     item.IDDepartamentos = data?.IDDepartamentos?.split(",").map(it=>Number(it));
+     console.log("aqui",item)
+      setUsersFormik(item);
       data?.IDUsuario &&
          data?.IDUsuario > 0 &&
          formik.current?.setFieldValue("Usuario", data.Usuario);
@@ -396,58 +402,60 @@ const Users = () => {
       sm: 12,
    };
 
-   const onSumbit = (values: Record<string, any>) => {
-      values.Password = `${values.Usuario}*`;
-      if (values.Rol == "DIRECTORCOMPRAS") {
-         values.Permiso_Asignar = true;
-         values.Permiso_Autorizar = true;
-         values.Permiso_Cotizar = true;
-         values.Permiso_Orden_Compra = true;
-         values.Permiso_Surtir = true;
+  const onSumbit = (values: Record<string, any>) => {
+   values.Password = `${values.Usuario}*`;
+
+   if (values.Rol == "DIRECTORCOMPRAS") {
+      values.Permiso_Asignar = true;
+      values.Permiso_Autorizar = true;
+      values.Permiso_Cotizar = true;
+      values.Permiso_Orden_Compra = true;
+      values.Permiso_Surtir = true;
+   }
+   if (values.Rol == "DIRECTOR") {
+      values.Permiso_Autorizar = true;
+   }
+   if (values.Rol == "REQUISITOR") {
+      values.Permiso_Cotizar = true;
+   }
+
+   // Crear FormData para incluir imagen
+   const formData = new FormData();
+
+   // Recorremos todas las keys del objeto
+   Object.entries(values).forEach(([key, value]) => {
+      // Si es null o undefined, lo enviamos como vacío
+      if (value === null || value === undefined) {
+         formData.append(key, "");
+         return;
       }
-      if (values.Rol == "DIRECTOR") {
-         values.Permiso_Autorizar = true;
+
+      // Si es un array (por ejemplo, IDDepartamentos)
+      if (Array.isArray(value)) {
+         value.forEach((val) => {
+            formData.append(`${key}[]`, String(val));
+         });
+         return;
       }
-      if (values.Rol == "REQUISITOR") {
-         values.Permiso_Cotizar = true;
+
+      // Si es un archivo (firma del director)
+      if (key === "firma_Director" && value instanceof File) {
+         formData.append(key, value);
+         return;
       }
-      // console.log("🚀 ~ onSumbit ~ values:", values);
 
-      // Llamar a la función mutate para ejecutar la solicitud POST
-      mutation.mutate({
-         url: "/users/createOrUpdate",
-         method: "POST",
-         data: values,
-      });
-   };
-   // const handleModified = (
-   //    values: Record<string, any>,
-   //    setFieldValue: (
-   //       name: string,
-   //       value: any,
-   //       shouldValidate?: boolean,
-   //    ) => void,
-   // ) => {
-   //    const year = new Date().getFullYear().toString().slice(-2); // últimos 2 dígitos del año
+      // Para cualquier otro tipo de dato
+      formData.append(key, String(value));
+   });
 
-   //    const capitalizeFirst = (str: string) =>
-   //       str ? str.charAt(0).toUpperCase() : "";
+   // Mutación usando FormData
+   mutation.mutate({
+      url: "/users/createOrUpdate",
+      method: "POST",
+      data: formData,
+   });
+};
 
-   //    const capitalizeFull = (str: string) =>
-   //       str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
-
-   //    // Solo el primer nombre (split por espacio)
-   //    const firstName = values["Nombre"]?.split(" ")[0] || "";
-
-   //    setFieldValue(
-   //       "Usuario",
-   //       capitalizeFull(firstName) +
-   //          capitalizeFirst(values["Paterno"]) +
-   //          capitalizeFirst(values["Materno"]) +
-   //          "-" +
-   //          year,
-   //    );
-   // };
    const handleModified = (
       values: Record<string, any>,
       setFieldValue: (
@@ -489,7 +497,7 @@ const Users = () => {
       formik.current?.setFieldValue("IDDepartamentos", ids);
    };
 
-   const handlePermissions = () => {};
+   const handlePermissions = () => { };
    return (
       <div className="container p-6 mx-auto mt-12 border shadow-lg">
          {mutation.status == "pending" && <Spinner />}
@@ -546,7 +554,7 @@ const Users = () => {
                         name="Usuario"
                         label="Usuario con el que va a iniciar sesión"
                         responsive={responsive}
-                        // handleModified={}
+                     // handleModified={}
                      />
                      <FormikAutocomplete
                         responsive={responsive}
@@ -569,64 +577,107 @@ const Users = () => {
                      />
                      {(values.Rol == "AUTORIZADOR" ||
                         values.Rol == "CAPTURA") && (
-                        <>
-                           <div className="w-full mb-2 ml-3 text-start">
-                              <Typography
-                                 variant="h2"
-                                 size="base"
-                                 weight="normal"
-                                 color="gray">
-                                 Selecciona los permisos que se le otorgaran :
-                              </Typography>
-                           </div>
-                           <FormikSwitch
-                              name="Permiso_Autorizar"
-                              label="Autorizar"
-                              responsive={{
-                                 "2xl": 4,
-                                 xl: 12,
-                                 lg: 12,
-                                 md: 12,
-                                 sm: 12,
-                              }}
-                           />
-                           <FormikSwitch
-                              name="Permiso_Asignar"
-                              label="Asignar"
-                              responsive={{
-                                 "2xl": 4,
-                                 xl: 12,
-                                 lg: 12,
-                                 md: 12,
-                                 sm: 12,
-                              }}
-                           />
-                           <FormikSwitch
-                              name="Permiso_Cotizar"
-                              label="Cotizar"
-                              responsive={{
-                                 "2xl": 4,
-                                 xl: 12,
-                                 lg: 12,
-                                 md: 12,
-                                 sm: 12,
-                              }}
-                           />
+                           <>
+                              <div className="w-full mb-2 ml-3 text-start">
+                                 <Typography
+                                    variant="h2"
+                                    size="base"
+                                    weight="normal"
+                                    color="gray">
+                                    Selecciona los permisos que se le otorgaran :
+                                 </Typography>
+                              </div>
+                              <FormikSwitch
+                                 name="Permiso_Autorizar"
+                                 label="Autorizar"
+                                 responsive={{
+                                    "2xl": 4,
+                                    xl: 12,
+                                    lg: 12,
+                                    md: 12,
+                                    sm: 12,
+                                 }}
+                              />
+                              <FormikSwitch
+                                 name="Permiso_Asignar"
+                                 label="Asignar"
+                                 responsive={{
+                                    "2xl": 4,
+                                    xl: 12,
+                                    lg: 12,
+                                    md: 12,
+                                    sm: 12,
+                                 }}
+                              />
+                              <FormikSwitch
+                                 name="Permiso_Cotizar"
+                                 label="Cotizar"
+                                 responsive={{
+                                    "2xl": 4,
+                                    xl: 12,
+                                    lg: 12,
+                                    md: 12,
+                                    sm: 12,
+                                 }}
+                              />
 
+                              <FormikSwitch
+                                 name="Permiso_Orden_Compra"
+                                 label="Orden de compra"
+                                 responsive={{
+                                    "2xl": 4,
+                                    xl: 12,
+                                    lg: 12,
+                                    md: 12,
+                                    sm: 12,
+                                 }}
+                              />
+                              <FormikSwitch
+                                 name="Permiso_Surtir"
+                                 label="Surtir"
+                                 responsive={{
+                                    "2xl": 4,
+                                    xl: 12,
+                                    lg: 12,
+                                    md: 12,
+                                    sm: 12,
+                                 }}
+                              />
+                           </>
+                        )}
+             
+                     <TransferList
+                        name={"IDDepartamentos"}
+                        error={
+                           touched?.["IDDepartamentos"] &&
+                              typeof errors?.["IDDepartamentos"] === "string"
+                              ? (errors?.["IDDepartamentos"] as string)
+                              : null
+                        }
+                        departamentos={groups?.data?.data}
+                        seleccionados={
+                           Array.isArray(values?.IDDepartamentos)
+                              ? values.IDDepartamentos.map(Number)
+                              : typeof values?.IDDepartamentos === "string" &&
+                                 values.IDDepartamentos.length > 0
+                                 ? values.IDDepartamentos.split(",").map((it) =>
+                                    Number(it),
+                                 )
+                                 : []
+                        }
+                        onChange={handleChange}
+                     />
+                             {values.Rol == "DIRECTOR" && (
+                        <>
+                              <FormikImageInput
+                                 label="Subir la firma del director"
+                                 name="firma_Director"
+                                 disabled={false}
+                                 acceptedFileTypes="png,jpg,jpeg"
+                              />
                            <FormikSwitch
-                              name="Permiso_Orden_Compra"
-                              label="Orden de compra"
-                              responsive={{
-                                 "2xl": 4,
-                                 xl: 12,
-                                 lg: 12,
-                                 md: 12,
-                                 sm: 12,
-                              }}
-                           />
-                           <FormikSwitch
-                              name="Permiso_Surtir"
-                              label="Surtir"
+                              name="accept_Director"
+                              label="Aprobar a director oficial de los departamentos"
                               responsive={{
                                  "2xl": 4,
                                  xl: 12,
@@ -637,30 +688,9 @@ const Users = () => {
                            />
                         </>
                      )}
-
-                     <TransferList
-                        name={"IDDepartamentos"}
-                        error={
-                           touched?.["IDDepartamentos"] &&
-                           typeof errors?.["IDDepartamentos"] === "string"
-                              ? (errors?.["IDDepartamentos"] as string)
-                              : null
-                        }
-                        departamentos={groups?.data?.data}
-                        seleccionados={
-                           Array.isArray(values?.IDDepartamentos)
-                              ? values.IDDepartamentos.map(Number)
-                              : typeof values?.IDDepartamentos === "string" &&
-                                  values.IDDepartamentos.length > 0
-                                ? values.IDDepartamentos.split(",").map((it) =>
-                                     Number(it),
-                                  )
-                                : []
-                        }
-                        onChange={handleChange}
-                     />
                   </>
                )}
+               
             />
          </ModalComponent>
 
@@ -680,7 +710,7 @@ const Users = () => {
                isLoading={users.isLoading}
                columnDefs={columnDefs}
                buttonElement={buttonElement}
-               // data={users.data?.data}
+            // data={users.data?.data}
             />
          </div>
       </div>
