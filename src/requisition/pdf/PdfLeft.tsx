@@ -30,14 +30,11 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                         "ml-2 text-wrap flex  items-center justify-center",
                      )}>
                      <Text style={tw(`${styles.pdf.textVal} text-wrap`)}>
-                        {new Date(pdfData?.FechaCaptura).toLocaleDateString(
-                           "es-ES",
-                           {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                           },
-                        )}
+                        {new Date().toLocaleDateString("es-ES", {
+                           day: "2-digit",
+                           month: "long",
+                           year: "numeric",
+                        })}
                      </Text>
                   </View>
                </View>
@@ -75,9 +72,9 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                         "text-wrap flex w-full items-center justify-center",
                      )}>
                      <Text style={tw(`${styles.pdf.textVal} text-wrap`)}>
-                        {pdfData?.FechaCaptura
+                        {pdfData?.FechaAsignacion
                            ? `${new Date(
-                                pdfData.FechaCaptura,
+                                pdfData.FechaAsignacion,
                              ).toLocaleDateString("es-ES", {
                                 day: "2-digit",
                                 month: "long",
