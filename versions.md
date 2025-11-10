@@ -46,6 +46,18 @@
 
 ---
 
+## 🧩 **v3.0.1.1** · *🏁 Producción*
+📅 **Fecha:** 10 de noviembre de 2025, 2:00 p.m.  
+👤 **Autor:** Ness  
+🧭 **Tipo:** Patch
+
+**✨ Mejoras**
+- Se modifico la fecha de impresion por la actual, y la de asignación por la correcta
+
+
+
+---
+
 ## 🔧 **v3.0.0.2** · *🧪 Beta*
 📅 **Fecha:** 10 de octubre de 2025, 4:07 p.m.  
 👤 **Autor:** angel  
