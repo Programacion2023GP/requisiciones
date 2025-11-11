@@ -4,6 +4,20 @@
 
 ---
 
+## 🔧 **v3.2.0.3** · *🧱 RC*
+📅 **Fecha:** 11 de noviembre de 2025, 2:42 p.m.  
+👤 **Autor:** Nes  
+🧭 **Tipo:** Build
+
+**✨ Mejoras**
+- Se agrego alerta para que no envie la requi sin productos
+- Se agrego un disabled mientras se envia el formualrio
+- Se quito el campo de fecha
+
+
+
+---
+
 ## 🔧 **v3.2.0.2** · *🧱 RC*
 📅 **Fecha:** 17 de octubre de 2025, 9:48 a.m.  
 👤 **Autor:** CETIC-NP  
