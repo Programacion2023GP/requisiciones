@@ -26,6 +26,7 @@ type InputWithLabelProps = {
    disabled?: boolean;
    padding?: boolean;
    value?: any;
+   hidden?: boolean;
 
    handleModified?: (
       values: Record<string, any>,
@@ -102,6 +103,7 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
    disabled = false,
    handleModified,
    padding = true,
+   hidden = false,
 }) => {
    const [field, meta] = useField(name);
    const formik = useFormikContext();
@@ -164,6 +166,7 @@ export const FormikInput: React.FC<InputWithLabelProps> = ({
                               placeholder=" "
                               autoComplete="off"
                               className={`peer pt-4 pb-2 block w-full px-0 mt-0 bg-transparent border-0 border-b-2 appearance-none focus:outline-none focus:ring-0 focus:border-black border-gray-200 `}
+                              hidden={hidden}
                            />
                            <label
                               htmlFor={name}

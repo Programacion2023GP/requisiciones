@@ -12,11 +12,12 @@ import { AxiosRequest, GetAxios } from "../../axios/Axios";
 import { FormikProps } from "formik";
 import Button from "../../components/form/Button";
 import Spinner from "../../loading/Loading";
-import { showToast } from "../../sweetalert/Sweetalert";
+import { showConfirmationAlert, showToast } from "../../sweetalert/Sweetalert";
 import Observable from "../../extras/observable";
 import { IoMdClose, IoMdCopy } from "react-icons/io";
 import Tooltip from "../../components/toltip/Toltip";
 import PhotoZoom from "../../components/images/Images";
+import { formatDatetimeToSQL } from "../../utils/functions";
 
 type PropsRequisition = {
    open: boolean;
@@ -83,7 +84,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
          .min(1, "El centro de costo es requerido")
          .required(),
       IDTipo: Yup.number().min(1, "El tipo es requerido").required(),
-      FechaCaptura: Yup.string().required("La fecha es requerida"),
+      // FechaCaptura: Yup.string().required("La fecha es requerida"),
       Observaciones: Yup.string().required("Las descripción es requerida"),
    });
 
@@ -166,7 +167,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
             IDDepartamento: departamentoId,
             Centro_Costo: centroCosto,
             IDTipo: 0,
-            FechaCaptura: "",
+            FechaCaptura: formatDatetimeToSQL(new Date(), "mysql"),
             Observaciones: "",
             Productos: Array.from({ length: 200 }, () => ({
                Cantidad: "",
@@ -195,7 +196,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       formData.append("IDDepartamento", formValues.IDDepartamento.toString());
       formData.append("Centro_Costo", formValues.Centro_Costo.toString());
       formData.append("IDTipo", formValues.IDTipo.toString());
-      formData.append("FechaCaptura", formValues.FechaCaptura);
+      formData.append("FechaCaptura", formatDatetimeToSQL(new Date(), "mysql"));
       formData.append("Observaciones", formValues.Observaciones);
 
       // 🔥 CORRECCIÓN: Usar productosLlenos filtrados
@@ -235,7 +236,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       formData.append("IDDepartamento", String(formValues.IDDepartamento));
       formData.append("Centro_Costo", String(formValues.Centro_Costo));
       formData.append("IDTipo", String(formValues.IDTipo));
-      formData.append("FechaCaptura", formValues.FechaCaptura);
+      formData.append("FechaCaptura", formatDatetimeToSQL(new Date(), "mysql"));
       formData.append("Observaciones", formValues.Observaciones);
 
       // 🔥 CORRECCIÓN: Usar productosLlenos en lugar de formValues.Productos
@@ -256,6 +257,17 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       // Para debug - ver qué se está enviando
       console.log("Productos llenos:", productosLlenos);
       console.log("Total productos:", formValues.Productos.length);
+
+      if (productosLlenos.length < 1)
+         return showConfirmationAlert(
+            "FALTA INFORMACIÓN",
+            "Es necesario agregar mínimo un producto en el listado.",
+            "center",
+         ).then((isConfirmed) => {
+            if (isConfirmed) {
+            } else {
+            }
+         });
 
       mutation.mutate({
          method: "POST",
@@ -374,12 +386,13 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                            name="Solicitante"
                            label="Solicitante"
                         />
-                        <FormikInput
+                        {/* <FormikInput
                            name="FechaCaptura"
                            label="Fecha"
                            type="date"
                            id="requisition-fecha"
-                        />
+                           hidden={true}
+                        /> */}
                         {v.IDTipo > 0 && (
                            <div className="w-full mb-2">
                               <span className="w-full font-semibold text-gray-700">

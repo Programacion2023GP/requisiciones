@@ -57,6 +57,7 @@ const FormikForm = forwardRef<FormikProps<Record<string, any>>, FormikType>(
                               id={id}
                               type="submit"
                               className="px-6 py-2 text-sm text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 active:bg-blue-800 focus:outline-none focus:ring focus:ring-blue-300"
+                              disabled={isSubmitting}
                               onClick={(e) => {
                                  e.preventDefault(); // Evita el envío inmediato
 
