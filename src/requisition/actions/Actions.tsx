@@ -690,7 +690,7 @@ const Actions: React.FC<{
                                                       {
                                                          data: {
                                                             IDRequisicion:
-                                                               data.IDRequisicion,
+                                                               data.Id,
                                                             Ejercicio:
                                                                data.Ejercicio,
                                                             Nombre_Departamento:
@@ -730,23 +730,21 @@ const Actions: React.FC<{
                                              // customLog(`${JSON.stringify(data)}`, "green");
                                              console.log("aqui", data);
                                              const result =
-                                                await ObservablePost(
-                                                   "IdRequisicion",
-                                                   {
-                                                      data: {
-                                                         Nombre_Departamento:
-                                                            data?.Nombre_Departamento,
-                                                         Centro_Costo:
-                                                            data?.Centro_Costo,
-                                                         IDRequisicion:
-                                                            data.IDRequisicion,
-                                                         Ejercicio:
-                                                            data.Ejercicio,
+                                               await ObservablePost(
+                                                 "IdRequisicion",
+                                                 {
+                                                   data: {
+                                                     Nombre_Departamento:
+                                                       data?.Nombre_Departamento,
+                                                     Centro_Costo:
+                                                       data?.Centro_Costo,
+                                                     IDRequisicion: data.Id,
+                                                     Ejercicio: data.Ejercicio,
 
-                                                         status: "CO",
-                                                      },
+                                                     status: "CO",
                                                    },
-                                                );
+                                                 }
+                                               );
                                           } catch (e) {
                                           } finally {
                                              setOpen((prev) => ({
