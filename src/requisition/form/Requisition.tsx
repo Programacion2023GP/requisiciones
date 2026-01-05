@@ -167,7 +167,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
             IDDepartamento: departamentoId,
             Centro_Costo: centroCosto,
             IDTipo: 0,
-            FechaCaptura: formatDatetimeToSQL(new Date(), "mysql"),
+            FechaCaptura:formatDatetimeToSQL(new Date(), "mysql"),
             Observaciones: "",
             Productos: Array.from({ length: 200 }, () => ({
                Cantidad: "",
@@ -196,7 +196,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       formData.append("IDDepartamento", formValues.IDDepartamento.toString());
       formData.append("Centro_Costo", formValues.Centro_Costo.toString());
       formData.append("IDTipo", formValues.IDTipo.toString());
-      formData.append("FechaCaptura", formatDatetimeToSQL(new Date(), "mysql"));
+      formData.append("FechaCaptura", formValues.FechaCaptura);
       formData.append("Observaciones", formValues.Observaciones);
 
       // 🔥 CORRECCIÓN: Usar productosLlenos filtrados
@@ -226,9 +226,10 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       );
 
       const formData = new FormData();
-
       // Solo agregar IDRequisicion si existe y es mayor a 0
       if (formValues?.IDRequisicion && formValues?.IDRequisicion > 0) {
+                  formData.append("Id", formValues.Id);
+
          formData.append("IDRequisicion", formValues.IDRequisicion);
       }
 
@@ -236,7 +237,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       formData.append("IDDepartamento", String(formValues.IDDepartamento));
       formData.append("Centro_Costo", String(formValues.Centro_Costo));
       formData.append("IDTipo", String(formValues.IDTipo));
-      formData.append("FechaCaptura", formatDatetimeToSQL(new Date(), "mysql"));
+      formData.append("FechaCaptura",  formatDatetimeToSQL(new Date(), "mysql"));
       formData.append("Observaciones", formValues.Observaciones);
 
       // 🔥 CORRECCIÓN: Usar productosLlenos en lugar de formValues.Productos
@@ -325,249 +326,247 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
                   );
 
                   return (
-                     <>
-                        {/* --- DEPARTAMENTOS --- */}
-                        {localStorage.getItem("role") === "SISTEMAS" ? (
-                           <FormikAutocomplete
-                              responsive={responsive}
-                              loading={groups.isLoading}
-                              name="IDDepartamento"
-                              label={"Selecciona el departamento"}
-                              options={groups.data?.data}
-                              idKey={"IDDepartamento"}
-                              labelKey={"Nombre_Departamento"}
-                              handleModified={handleModified}
-                              handleModifiedOptions={{ name: "IDDepartamento" }}
-                           />
-                        ) : (
-                           <FormikAutocomplete
-                              disabled={userGroups.length === 1}
-                              responsive={responsive}
-                              loading={groups.isLoading}
-                              name="IDDepartamento"
-                              label="Selecciona el departamento"
-                              options={groups.data?.data?.filter((it) =>
-                                 userGroups.includes(it.IDDepartamento),
-                              )}
-                              idKey="IDDepartamento"
-                              labelKey="Nombre_Departamento"
-                              handleModified={handleModified}
-                              handleModifiedOptions={{ name: "IDDepartamento" }}
-                           />
-                        )}
-
-                        {/* CENTRO DE COSTO */}
+                    <>
+                      {/* --- DEPARTAMENTOS --- */}
+                      {localStorage.getItem("role") === "SISTEMAS" ? (
                         <FormikAutocomplete
-                           disabled={
-                              localStorage.getItem("role") !== "SISTEMAS"
-                           }
-                           responsive={responsive}
-                           loading={groups.isLoading}
-                           name="Centro_Costo"
-                           label={"Selecciona el centro de costo"}
-                           options={groups.data?.data}
-                           idKey={"Centro_Costo"}
-                           labelKey={"Centro_Costo"}
+                          responsive={responsive}
+                          loading={groups.isLoading}
+                          name="IDDepartamento"
+                          label={"Selecciona el departamento"}
+                          options={groups.data?.data}
+                          idKey={"IDDepartamento"}
+                          labelKey={"Nombre_Departamento"}
+                          handleModified={handleModified}
+                          handleModifiedOptions={{ name: "IDDepartamento" }}
                         />
-
-                        {/* TIPO */}
+                      ) : (
                         <FormikAutocomplete
-                           responsive={responsive}
-                           id="requisition-type"
-                           name="IDTipo"
-                           label="Tipo"
-                           options={types.data?.data}
-                           idKey="IDTipo"
-                           labelKey="Descripcion"
+                          disabled={userGroups.length === 1}
+                          responsive={responsive}
+                          loading={groups.isLoading}
+                          name="IDDepartamento"
+                          label="Selecciona el departamento"
+                          options={groups.data?.data?.filter((it) =>
+                            userGroups.includes(it.IDDepartamento)
+                          )}
+                          idKey="IDDepartamento"
+                          labelKey="Nombre_Departamento"
+                          handleModified={handleModified}
+                          handleModifiedOptions={{ name: "IDDepartamento" }}
                         />
+                      )}
 
-                        <FormikInput
-                           responsive={responsive}
-                           name="Solicitante"
-                           label="Solicitante"
-                        />
-                        {/* <FormikInput
-                           name="FechaCaptura"
-                           label="Fecha"
-                           type="date"
-                           id="requisition-fecha"
-                           hidden={true}
-                        /> */}
-                        {v.IDTipo > 0 && (
-                           <div className="w-full mb-2">
-                              <span className="w-full font-semibold text-gray-700">
-                                 Estos son los tipos de productos que se pueden
-                                 agregar:
-                              </span>
+                      {/* CENTRO DE COSTO */}
+                      <FormikAutocomplete
+                        disabled={localStorage.getItem("role") !== "SISTEMAS"}
+                        responsive={responsive}
+                        loading={groups.isLoading}
+                        name="Centro_Costo"
+                        label={"Selecciona el centro de costo"}
+                        options={groups.data?.data}
+                        idKey={"Centro_Costo"}
+                        labelKey={"Centro_Costo"}
+                      />
 
-                              <div
-                                 id="requisition-informative"
-                                 className="mt-1 overflow-y-auto max-h-24">
-                                 <div className="flex flex-wrap gap-1">
-                                    {detailstypes?.data?.data
-                                       ?.filter((it) => it.IDTipo === v.IDTipo)
-                                       ?.map((it) => (
-                                          <span
-                                             key={it.IDDetalleTipo}
-                                             className="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-800 border border-purple-200 rounded-md shadow-sm bg-gradient-to-r from-purple-100 to-pink-100">
-                                             {it.Nombre}
-                                          </span>
-                                       ))}
-                                 </div>
-                              </div>
-                           </div>
-                        )}
+                      {/* TIPO */}
+                      <FormikAutocomplete
+                        responsive={responsive}
+                        id="requisition-type"
+                        name="IDTipo"
+                        label="Tipo"
+                        options={types.data?.data}
+                        idKey="IDTipo"
+                        labelKey="Descripcion"
+                      />
 
-                        <FormikTextArea
-                           name="Observaciones"
-                           label="Descripción general de la requisición (¿Para que? ¿Para cuando?)"
-                           id="requisition-observation"
-                        />
+                      <FormikInput
+                        responsive={responsive}
+                        name="Solicitante"
+                        label="Solicitante"
+                      />
+                      {localStorage.getItem("role") === "SISTEMAS" ||
+                        localStorage.getItem("role") === "DIRECTORCOMPRAS" &&
+                        
+                        (
 
-                        {/* --- PRODUCTOS --- */}
-                        <div className="w-full mt-6">
-                           <div className="w-full">
-                              <h3 className="text-lg font-semibold">
-                                 Productos
-                              </h3>
-                              <input
-                                 type="text"
-                                 placeholder="Buscar descripción..."
-                                 value={search}
-                                 onChange={(e) => setSearch(e.target.value)}
-                                 className="w-full px-3 py-1 my-4 text-sm border rounded-md focus:ring focus:ring-blue-200"
-                              />
-                           </div>
+                           <FormikInput
+                             name="FechaCaptura"
+                             label="Fecha"
+                             type="date"
+                             id="requisition-fecha"
+                           //   hidden={true}
+                           />
+                        )
+                        }
+                      {v.IDTipo > 0 && (
+                        <div className="w-full mb-2">
+                          <span className="w-full font-semibold text-gray-700">
+                            Estos son los tipos de productos que se pueden
+                            agregar:
+                          </span>
 
-                           <div className="border rounded-md overflow-y-auto max-h-[400px] shadow-sm">
-                              <table className="w-full text-sm border-collapse">
-                                 <thead className="sticky top-0 bg-gray-100">
-                                    <tr>
-                                       <th className="w-12 p-2 text-center border">
-                                          #
-                                       </th>
-                                       <th className="p-2 text-center border w-28">
-                                          Imagen
-                                       </th>
-                                       <th className="p-2 text-center border w-28">
-                                          Cantidad
-                                       </th>
-                                       <th className="p-2 text-left border">
-                                          Descripción
-                                       </th>
-                                       <th className="p-2 text-center border w-14">
-                                          Eliminar
-                                       </th>
-                                    </tr>
-                                 </thead>
-                                 <tbody>
-                                    {filteredProducts.map(
-                                       (prod: any, idx: number) => (
-                                          <tr
-                                             key={idx}
-                                             className="odd:bg-gray-50">
-                                             {/* Número */}
-                                             <td className="p-1 text-center text-gray-600 border">
-                                                {idx + 1}
-                                             </td>
-
-                                             {/* image */}
-                                             <td className="p-1 text-center border">
-                                                <div className="flex flex-col items-center">
-                                                   {prod.image && (
-                                                      <PhotoZoom
-                                                         src={
-                                                            prod.image instanceof
-                                                            File
-                                                               ? URL.createObjectURL(
-                                                                    prod.image,
-                                                                 )
-                                                               : prod.image
-                                                         }
-                                                         alt="preview"
-                                                         title={""}></PhotoZoom>
-                                                   )}
-                                                   <input
-                                                      type="file"
-                                                      accept="image/*"
-                                                      onChange={(e) => {
-                                                         const file =
-                                                            e.target.files?.[0];
-                                                         if (file) {
-                                                            setValue(
-                                                               `Productos[${idx}].image`,
-                                                               file,
-                                                            );
-                                                         }
-                                                      }}
-                                                      className="text-xs"
-                                                   />
-                                                </div>
-                                             </td>
-
-                                             {/* Cantidad */}
-                                             <td className="p-1 text-center border">
-                                                <input
-                                                   type="number"
-                                                   name={`Productos[${idx}].Cantidad`}
-                                                   value={prod.Cantidad}
-                                                   onChange={(e) =>
-                                                      setValue(
-                                                         `Productos[${idx}].Cantidad`,
-                                                         e.target.value,
-                                                      )
-                                                   }
-                                                   className="w-full px-2 py-1 text-center border-none focus:ring-0 focus:outline-none"
-                                                   placeholder="0"
-                                                />
-                                             </td>
-
-                                             {/* Descripción */}
-                                             <td className="p-1 border">
-                                                <input
-                                                   type="text"
-                                                   name={`Productos[${idx}].Descripcion`}
-                                                   value={prod.Descripcion}
-                                                   onChange={(e) =>
-                                                      setValue(
-                                                         `Productos[${idx}].Descripcion`,
-                                                         e.target.value,
-                                                      )
-                                                   }
-                                                   className="w-full px-2 py-1 border-none focus:ring-0 focus:outline-none"
-                                                   placeholder="Descripción del producto"
-                                                />
-                                             </td>
-
-                                             {/* Eliminar */}
-                                             <td className="p-1 text-center border">
-                                                <Button
-                                                   onClick={() =>
-                                                      setValue(
-                                                         `Productos[${idx}]`,
-                                                         {
-                                                            Cantidad: "",
-                                                            Descripcion: "",
-                                                            IDDetalle:
-                                                               prod.IDDetalle ||
-                                                               0,
-                                                            image: null,
-                                                         },
-                                                      )
-                                                   }
-                                                   color={"red"}
-                                                   variant={"outline"}>
-                                                   <IoMdClose />
-                                                </Button>
-                                             </td>
-                                          </tr>
-                                       ),
-                                    )}
-                                 </tbody>
-                              </table>
-                           </div>
+                          <div
+                            id="requisition-informative"
+                            className="mt-1 overflow-y-auto max-h-24"
+                          >
+                            <div className="flex flex-wrap gap-1">
+                              {detailstypes?.data?.data
+                                ?.filter((it) => it.IDTipo === v.IDTipo)
+                                ?.map((it) => (
+                                  <span
+                                    key={it.IDDetalleTipo}
+                                    className="inline-flex items-center px-2 py-1 text-xs font-medium text-purple-800 border border-purple-200 rounded-md shadow-sm bg-gradient-to-r from-purple-100 to-pink-100"
+                                  >
+                                    {it.Nombre}
+                                  </span>
+                                ))}
+                            </div>
+                          </div>
                         </div>
-                     </>
+                      )}
+
+                      <FormikTextArea
+                        name="Observaciones"
+                        label="Descripción general de la requisición (¿Para que? ¿Para cuando?)"
+                        id="requisition-observation"
+                      />
+
+                      {/* --- PRODUCTOS --- */}
+                      <div className="w-full mt-6">
+                        <div className="w-full">
+                          <h3 className="text-lg font-semibold">Productos</h3>
+                          <input
+                            type="text"
+                            placeholder="Buscar descripción..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full px-3 py-1 my-4 text-sm border rounded-md focus:ring focus:ring-blue-200"
+                          />
+                        </div>
+
+                        <div className="border rounded-md overflow-y-auto max-h-[400px] shadow-sm">
+                          <table className="w-full text-sm border-collapse">
+                            <thead className="sticky top-0 bg-gray-100">
+                              <tr>
+                                <th className="w-12 p-2 text-center border">
+                                  #
+                                </th>
+                                <th className="p-2 text-center border w-28">
+                                  Imagen
+                                </th>
+                                <th className="p-2 text-center border w-28">
+                                  Cantidad
+                                </th>
+                                <th className="p-2 text-left border">
+                                  Descripción
+                                </th>
+                                <th className="p-2 text-center border w-14">
+                                  Eliminar
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredProducts.map(
+                                (prod: any, idx: number) => (
+                                  <tr key={idx} className="odd:bg-gray-50">
+                                    {/* Número */}
+                                    <td className="p-1 text-center text-gray-600 border">
+                                      {idx + 1}
+                                    </td>
+
+                                    {/* image */}
+                                    <td className="p-1 text-center border">
+                                      <div className="flex flex-col items-center">
+                                        {prod.image && (
+                                          <PhotoZoom
+                                            src={
+                                              prod.image instanceof File
+                                                ? URL.createObjectURL(
+                                                    prod.image
+                                                  )
+                                                : prod.image
+                                            }
+                                            alt="preview"
+                                            title={""}
+                                          ></PhotoZoom>
+                                        )}
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              setValue(
+                                                `Productos[${idx}].image`,
+                                                file
+                                              );
+                                            }
+                                          }}
+                                          className="text-xs"
+                                        />
+                                      </div>
+                                    </td>
+
+                                    {/* Cantidad */}
+                                    <td className="p-1 text-center border">
+                                      <input
+                                        type="number"
+                                        name={`Productos[${idx}].Cantidad`}
+                                        value={prod.Cantidad}
+                                        onChange={(e) =>
+                                          setValue(
+                                            `Productos[${idx}].Cantidad`,
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full px-2 py-1 text-center border-none focus:ring-0 focus:outline-none"
+                                        placeholder="0"
+                                      />
+                                    </td>
+
+                                    {/* Descripción */}
+                                    <td className="p-1 border">
+                                      <input
+                                        type="text"
+                                        name={`Productos[${idx}].Descripcion`}
+                                        value={prod.Descripcion}
+                                        onChange={(e) =>
+                                          setValue(
+                                            `Productos[${idx}].Descripcion`,
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full px-2 py-1 border-none focus:ring-0 focus:outline-none"
+                                        placeholder="Descripción del producto"
+                                      />
+                                    </td>
+
+                                    {/* Eliminar */}
+                                    <td className="p-1 text-center border">
+                                      <Button
+                                        onClick={() =>
+                                          setValue(`Productos[${idx}]`, {
+                                            Cantidad: "",
+                                            Descripcion: "",
+                                            IDDetalle: prod.IDDetalle || 0,
+                                            image: null,
+                                          })
+                                        }
+                                        color={"red"}
+                                        variant={"outline"}
+                                      >
+                                        <IoMdClose />
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </>
                   );
                }}
             />

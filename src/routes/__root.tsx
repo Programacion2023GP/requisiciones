@@ -17,6 +17,7 @@ import SuppliersComponent from "../catalogues/suppliers/Suppliers";
 import CatDepartaments from "../catalogues/departaments/Departaments";
 import NotFoundPage from "../error/Error";
 import CatTypes from "../catalogues/types/types";
+import AcessDenied from "../accessdenied/accessdenied";
 const LazyLayout = React.lazy(() => import("../layout/Layout"));
 const LoginComponent = React.lazy(() => import("../auth/login"));
 const RequisicionesAdd = React.lazy(() => import("../requisition/Requisition"));
@@ -100,6 +101,12 @@ const LoginRoute = createRoute({
   getParentRoute: () => Route,
   component: () => <LoginComponent />,
 });
+const Denied = createRoute({
+  path: "/access-denied",
+
+  getParentRoute: () => Route,
+  component: () => <AcessDenied />,
+});
 const MnuSeguridadRoute = createRoute({
   path: "/MnuSeguridad",
 
@@ -131,7 +138,7 @@ const CatTipos = createRoute({
   getParentRoute: () => Layout,
   component: () => <CatTypes />, // Implement this component
 });
-Route.addChildren([Layout, LoginRoute]);
+Route.addChildren([Layout, LoginRoute, Denied]);
 Layout.addChildren([
   MnuSeguridadRoute,
   RequisitionRoute,

@@ -41,6 +41,12 @@ const LoginComponent = () => {
         return;
       }
       if (data?.data) {
+        if (!data?.data?.continue) {
+        window.location.href = data.data.redirect;
+
+          return
+        }
+        // console.log("aqui es 2",data?.data)
         localStorage.setItem("permisos", JSON.stringify(data.data.permisos));
         localStorage.setItem(
           "menuPermiso",

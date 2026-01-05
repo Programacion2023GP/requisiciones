@@ -4,6 +4,33 @@
 
 ---
 
+## 🔧 **v3.2.0.6** · *🧱 RC*
+📅 **Fecha:** 2 de enero de 2026, 2:01 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.0.5** · *🧱 RC*
+📅 **Fecha:** 2 de enero de 2026, 1:58 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.0.4** · *🧱 RC*
+📅 **Fecha:** 11 de diciembre de 2025, 10:31 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
 ## 🔧 **v3.2.0.3** · *🧱 RC*
 📅 **Fecha:** 11 de noviembre de 2025, 2:42 p.m.  
 👤 **Autor:** Nes  
