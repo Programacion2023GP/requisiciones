@@ -77,19 +77,24 @@ const SidebarComponent = () => {
   const groupMenuByParent = (data: any[]): MenuItem[] => {
     const menuMap: { [key: string]: any } = {};
 
-    data.forEach((item) => {
-      menuMap[item.Id] = { ...item, children: [] };
-    });
+   (data ?? []).forEach((item) => {
+     menuMap[item.Id] = { ...item, children: [] };
+   });
+
 
     const result: any[] = [];
+if (!Array.isArray(data)) {
+  console.warn("data no es un array:", data);
+  return [];
+}
+data.forEach((item) => {
+  if (item.MenuPadre && menuMap[item.MenuPadre]) {
+    menuMap[item.MenuPadre].children.push(menuMap[item.Id]);
+  } else if (!item.MenuPadre) {
+    result.push(menuMap[item.Id]);
+  }
+});
 
-    data.forEach((item) => {
-      if (item.MenuPadre && menuMap[item.MenuPadre]) {
-        menuMap[item.MenuPadre].children.push(menuMap[item.Id]);
-      } else if (!item.MenuPadre) {
-        result.push(menuMap[item.Id]);
-      }
-    });
     return result;
   };
 

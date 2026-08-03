@@ -128,7 +128,7 @@ const MaintenancePage: React.FC = () => {
         names.forEach((name) => caches.delete(name));
       });
     }
-    window.location.reload();
+    window.location.href ="/";
   };
 
   // Formatear fecha de reanudación de forma segura

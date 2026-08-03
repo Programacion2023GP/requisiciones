@@ -22,7 +22,7 @@ type InputWithLabelProps = {
       xl?: number;
       "2xl"?: number;
    };
-   type?: "number" | "text" | "date" | "checkbox";
+   type?: "number" | "text" | "date" | "checkbox" |"datetime-local";
    disabled?: boolean;
    padding?: boolean;
    value?: any;

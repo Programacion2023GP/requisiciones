@@ -675,17 +675,7 @@ const Users = () => {
                                  disabled={false}
                                  acceptedFileTypes="png,jpg,jpeg"
                               />
-                           <FormikSwitch
-                              name="accept_Director"
-                              label="Aprobar a director oficial de los departamentos"
-                              responsive={{
-                                 "2xl": 4,
-                                 xl: 12,
-                                 lg: 12,
-                                 md: 12,
-                                 sm: 12,
-                              }}
-                           />
+                         
                         </>
                      )}
                   </>

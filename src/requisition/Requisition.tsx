@@ -262,67 +262,66 @@ const RequisicionesAdd = () => {
       },
    ]);
    const buttonElement = useMemo(
-      () => (
-         <>
-            <div className="flex flex-row w-full space-x-2">
-               <Tooltip content="Agregar Requisición">
-                  <div className="mb-4">
-                     <Button
-                        id="btn-add-requisition"
-                        onClick={async () => {
-                           ObservableDelete("FormRequisicion");
+     () => (
+       <>
+         <div className="flex flex-row w-full space-x-2">
+           <Tooltip content="Agregar Requisición">
+             <div className="mb-4">
+               <PermissionMenu IdMenu={"RequisicionesAdd"}>
+                 <Button
+                   id="btn-add-requisition"
+                   onClick={async () => {
+                     ObservableDelete("FormRequisicion");
 
-                           try {
-                              const result = await ObservablePost(
-                                 "FormRequisicion",
-                                 {
-                                    data: {
-                                       data: null,
-                                       edicion: true,
-                                    },
-                                 },
-                              );
-                              console.log(result);
-                           } catch (e) {
-                              console.error(e);
-                           } finally {
-                              setOpen(true);
-                           }
-                        }}
-                        size="medium"
-                        color="blue"
-                        variant="solid">
-                        <icons.Tb.TbFileTextSpark size={20} />
-                     </Button>
-                  </div>
-               </Tooltip>
-               <Tooltip content="Refrescar Tabla">
-                  <div className="">
-                     <Button
-                        id="requisitionrefreshdata"
-                        onClick={() => {
-                           setReloadTable(false);
-                           setTimeout(() => {
-                              setFilters(
-                                 `Ejercicio = '${new Date().getFullYear()}'`,
-                              );
+                     try {
+                       const result = await ObservablePost("FormRequisicion", {
+                         data: {
+                           data: null,
+                           edicion: true,
+                         },
+                       });
+                       console.log(result);
+                     } catch (e) {
+                       console.error(e);
+                     } finally {
+                       setOpen(true);
+                     }
+                   }}
+                   size="medium"
+                   color="blue"
+                   variant="solid"
+                 >
+                   <icons.Tb.TbFileTextSpark size={20} />
+                 </Button>
+               </PermissionMenu>
+             </div>
+           </Tooltip>
+           <Tooltip content="Refrescar Tabla">
+             <div className="">
+               <Button
+                 id="requisitionrefreshdata"
+                 onClick={() => {
+                   setReloadTable(false);
+                   setTimeout(() => {
+                     setFilters(`Ejercicio = '${new Date().getFullYear()}'`);
 
-                              setReloadTable(true);
-                           }, 300);
-                           // setReloadTable(!reloadTable)
-                           // setReloadTable(true)
-                        }}
-                        color="yellow"
-                        variant="solid">
-                        <IoRefresh size={20} />
-                     </Button>
-                  </div>
-               </Tooltip>
-            </div>
-            {/* agregar boton de refrescar */}
-         </>
-      ),
-      [],
+                     setReloadTable(true);
+                   }, 300);
+                   // setReloadTable(!reloadTable)
+                   // setReloadTable(true)
+                 }}
+                 color="yellow"
+                 variant="solid"
+               >
+                 <IoRefresh size={20} />
+               </Button>
+             </div>
+           </Tooltip>
+         </div>
+         {/* agregar boton de refrescar */}
+       </>
+     ),
+     []
    );
 
    // const year =2024
@@ -380,145 +379,148 @@ const RequisicionesAdd = () => {
    ];
 
    return (
-      <>
-         {spiner && <Spinner />}
+     <>
+       {spiner && <Spinner />}
 
-         <PermissionMenu
-            IdMenu={["Listado", "SeguimientoRequis", "RequisicionesAdd"]}>
-            <div className="container relative p-6 mx-auto mt-12 border shadow-lg">
-               <Typography
-                  className="w-full py-2 text-center"
-                  variant="h2"
-                  color="black"
-                  size="3xl">
-                  la tabla empieza consultando el ejercicio del año actual
-                  {" " + new Date().getFullYear()}
-               </Typography>
-               <div className="flex flex-row flex-wrap justify-center w-full mb-6 ">
-                  {chipData.map(({ message, className, key, sql }) => (
-                     <Chip
-                        key={key}
-                        message={message}
-                        className={className}
-                        open={chipsOpen[key]} // Check if this specific chip is open
-                        setOpen={() => {
-                           console.log(key);
-                           setReloadTable(false);
-                           if (key == "todos") {
-                              // <---- aquí está el fix
-                              // Cierra todos los chips
-                              setChipsOpen({
-                                 rechazada: false,
-                                 captura: false,
-                                 autorizada: false,
-                                 asignado: false,
-                                 cotizado: false,
-                                 ordenDeCompra: false,
-                                 surtida: false,
-                                 realizada: false,
-                                 todos: true,
-                              });
-                           } else {
-                              // Toggle el chip específico
-                              setChipsOpen((prev) => ({
-                                 rechazada: false,
-                                 captura: false,
-                                 autorizada: false,
-                                 asignado: false,
-                                 cotizado: false,
-                                 ordenDeCompra: false,
-                                 surtida: false,
-                                 realizada: false,
-                                 todos: false,
+       <PermissionMenu
+         IdMenu={["Listado", "SeguimientoRequis", "RequisicionesAdd"]}
+       >
+         <div className="container relative p-6 mx-auto mt-12 border shadow-lg">
+           <Typography
+             className="w-full py-2 text-center"
+             variant="h2"
+             color="black"
+             size="3xl"
+           >
+             la tabla empieza consultando el ejercicio del año actual
+             {" " + new Date().getFullYear()}
+           </Typography>
+           <div className="flex flex-row flex-wrap justify-center w-full mb-6 ">
+             {chipData.map(({ message, className, key, sql }) => (
+               <Chip
+                 key={key}
+                 message={message}
+                 className={className}
+                 open={chipsOpen[key]} // Check if this specific chip is open
+                 setOpen={() => {
+                   console.log(key);
+                   setReloadTable(false);
+                   if (key == "todos") {
+                     // <---- aquí está el fix
+                     // Cierra todos los chips
+                     setChipsOpen({
+                       rechazada: false,
+                       captura: false,
+                       autorizada: false,
+                       asignado: false,
+                       cotizado: false,
+                       ordenDeCompra: false,
+                       surtida: false,
+                       realizada: false,
+                       todos: true,
+                     });
+                   } else {
+                     // Toggle el chip específico
+                     setChipsOpen((prev) => ({
+                       rechazada: false,
+                       captura: false,
+                       autorizada: false,
+                       asignado: false,
+                       cotizado: false,
+                       ordenDeCompra: false,
+                       surtida: false,
+                       realizada: false,
+                       todos: false,
 
-                                 [key]: !prev[key],
-                              }));
+                       [key]: !prev[key],
+                     }));
+                   }
+                 }}
+                 children={() => (
+                   <>
+                     {(chipsOpen.asignado ||
+                       chipsOpen.autorizada ||
+                       chipsOpen.captura ||
+                       chipsOpen.cotizado ||
+                       chipsOpen.ordenDeCompra ||
+                       chipsOpen.realizada ||
+                       chipsOpen.rechazada ||
+                       chipsOpen.todos ||
+                       chipsOpen.surtida) && (
+                       <YearSelect
+                         onChange={(value) => {
+                           console.log(sql);
+                           if (
+                             sql == "" &&
+                             (value == null || value == undefined)
+                           ) {
+                             showToast(
+                               "Demasiada información por favor pon almenos un filtro",
+                               "info"
+                             );
+                             return;
                            }
-                        }}
-                        children={() => (
-                           <>
-                              {(chipsOpen.asignado ||
-                                 chipsOpen.autorizada ||
-                                 chipsOpen.captura ||
-                                 chipsOpen.cotizado ||
-                                 chipsOpen.ordenDeCompra ||
-                                 chipsOpen.realizada ||
-                                 chipsOpen.rechazada ||
-                                 chipsOpen.todos ||
-                                 chipsOpen.surtida) && (
-                                 <YearSelect
-                                    onChange={(value) => {
-                                       console.log(sql);
-                                       if (
-                                          sql == "" &&
-                                          (value == null || value == undefined)
-                                       ) {
-                                          showToast(
-                                             "Demasiada información por favor pon almenos un filtro",
-                                             "info",
-                                          );
-                                          return;
-                                       }
-                                       const whereSql = `${sql ? `status = '${sql}'` : ""} ${value == null || value == undefined ? "" : sql != "" ? " and " + value : value}`;
+                           const whereSql = `${sql ? `status = '${sql}'` : ""} ${value == null || value == undefined ? "" : sql != "" ? " and " + value : value}`;
 
-                                       setFilters(whereSql);
-                                       setReloadTable(true);
-                                       // setFilters(value)
-                                    }}
-                                    setClosed={() => {
-                                       setChipsOpen({
-                                          rechazada: false,
-                                          captura: false,
-                                          autorizada: false,
-                                          asignado: false,
-                                          cotizado: false,
-                                          ordenDeCompra: false,
-                                          surtida: false,
-                                          realizada: false,
-                                          todos: false,
-                                       });
-                                    }}
-                                 />
-                              )}
-                           </>
-                        )}
-                        // onhandleClick={() => console.log("el onhandle")}
-                     />
-                  ))}
-               </div>
-               <Agtable
-                  permissionsUserTable={{
-                     table: "Listado",
-                     buttonElement: "RequisicionesAdd",
-                  }}
-                  // getRowClass={getRowClass}
-                  backUrl={{
-                     pathName: "requisiciones/index",
-                     startSearchFilter: {
-                        where: filters,
-                        // where: `Ejercicio = '2024'`,
-                     },
-                     restart: reloadTable,
-                  }}
-                  filtersActive={{
-                     Ejercicio: "2025",
-                  }}
-                  columnDefs={columnDefs}
-                  buttonElement={buttonElement}
-                  colapseFilters
+                           setFilters(whereSql);
+                           setReloadTable(true);
+                           // setFilters(value)
+                         }}
+                         setClosed={() => {
+                           setChipsOpen({
+                             rechazada: false,
+                             captura: false,
+                             autorizada: false,
+                             asignado: false,
+                             cotizado: false,
+                             ordenDeCompra: false,
+                             surtida: false,
+                             realizada: false,
+                             todos: false,
+                           });
+                         }}
+                       />
+                     )}
+                   </>
+                 )}
+                 // onhandleClick={() => console.log("el onhandle")}
                />
-            </div>
-            {open && (
-               <RequisitionForm
-                  open={open}
-                  setOpen={() => {
-                     setOpen(false);
-                  }}
-                  setReloadTable={setReloadTable}
-                  title="Requisicion"></RequisitionForm>
-            )}
-         </PermissionMenu>
-      </>
+             ))}
+           </div>
+           <Agtable
+             permissionsUserTable={{
+               table: ["Listado"],
+               buttonElement: ["Listado", "RequisicionesAdd"],
+             }}
+             // getRowClass={getRowClass}
+             backUrl={{
+               pathName: "requisiciones/index",
+               startSearchFilter: {
+                 where: filters,
+                 // where: `Ejercicio = '2024'`,
+               },
+               restart: reloadTable,
+             }}
+             filtersActive={{
+               Ejercicio: "2025",
+             }}
+             columnDefs={columnDefs}
+             buttonElement={buttonElement}
+             colapseFilters
+           />
+         </div>
+         {open && (
+           <RequisitionForm
+             open={open}
+             setOpen={() => {
+               setOpen(false);
+             }}
+             setReloadTable={setReloadTable}
+             title="Requisicion"
+           ></RequisitionForm>
+         )}
+       </PermissionMenu>
+     </>
    );
 };
 export default RequisicionesAdd;

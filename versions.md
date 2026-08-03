@@ -4,6 +4,108 @@
 
 ---
 
+## 🔧 **v3.2.1.8** · *🧱 RC*
+📅 **Fecha:** 30 de marzo de 2026, 1:58 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.1.7** · *🧱 RC*
+📅 **Fecha:** 27 de marzo de 2026, 2:18 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.1.6** · *🧱 RC*
+📅 **Fecha:** 20 de febrero de 2026, 10:36 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.1.5** · *🧱 RC*
+📅 **Fecha:** 18 de febrero de 2026, 10:52 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.1.4** · *🧱 RC*
+📅 **Fecha:** 12 de febrero de 2026, 12:26 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.1.3** · *🧱 RC*
+📅 **Fecha:** 3 de febrero de 2026, 3:53 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.1.2** · *🧱 RC*
+📅 **Fecha:** 29 de enero de 2026, 12:47 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🧩 **v3.2.1.1** · *🧱 RC*
+📅 **Fecha:** 29 de enero de 2026, 12:45 p.m.  
+👤 **Autor:** luis  
+🧭 **Tipo:** Patch
+
+**✨ Mejoras**
+- cambio de login
+
+
+
+---
+
+## 🔧 **v3.2.0.11** · *🧱 RC*
+📅 **Fecha:** 12 de enero de 2026, 3:31 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.0.10** · *🧱 RC*
+📅 **Fecha:** 9 de enero de 2026, 10:16 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## 🔧 **v3.2.0.9** · *🧱 RC*
+📅 **Fecha:** 5 de enero de 2026, 3:01 p.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
 ## 🔧 **v3.2.0.8** · *🧱 RC*
 📅 **Fecha:** 5 de enero de 2026, 1:03 p.m.  
 👤 **Autor:**   

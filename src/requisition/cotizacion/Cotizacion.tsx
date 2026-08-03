@@ -21,11 +21,12 @@ type RequisitionType = {
 };
 
 type Requisition = {
-   Ejercicio: number;
-   IDRequisicion: number;
-   status: "OC" | "CO";
-   Centro_Costo: number;
-   Nombre_Departamento: string;
+  Ejercicio: number;
+  IDRequisicion: number;
+  status: "OC" | "CO";
+  Centro_Costo: number;
+  Nombre_Departamento: string;
+  Idvisual:number;
 };
 const TablaPresupuestos = ({ ingresos }: { ingresos: any[] }) => {
    return (
@@ -491,35 +492,37 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
    };
 
    return (
-      <ModalComponent
-         title={`Folio: ${IdRequisicion?.data?.IDRequisicion} / Ejercicio: ${IdRequisicion?.data?.Ejercicio} / Status: ${IdRequisicion?.data?.status}`}
-         open={open}
-         actions={
-            <Button
-               onClick={() => setOpenPresupuestos(true)}
-               color={"blue"}
-               variant={"text"}>
-               <FcMoneyTransfer size={20} />
-            </Button>
-         }
-         setOpen={() => setOpen(false)}>
-         {(suppliers.status === "pending" || spiner) && <Spinner />}
-         {openPresupuestos && (
-            <ModalComponent
-               fullScreen={false}
-               zIndex={4000}
-               open={openPresupuestos}
-               setOpen={() => setOpenPresupuestos(false)}
-               title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`}
-               children={<TablaPresupuestos ingresos={ingresos} />}
-            />
-         )}
+     <ModalComponent
+       title={`Folio: ${IdRequisicion?.data?.Idvisual} / Ejercicio: ${IdRequisicion?.data?.Ejercicio} / Status: ${IdRequisicion?.data?.status}`}
+       open={open}
+       actions={
+         <Button
+           onClick={() => setOpenPresupuestos(true)}
+           color={"blue"}
+           variant={"text"}
+         >
+           <FcMoneyTransfer size={20} />
+         </Button>
+       }
+       setOpen={() => setOpen(false)}
+     >
+       {(suppliers.status === "pending" || spiner) && <Spinner />}
+       {openPresupuestos && (
+         <ModalComponent
+           fullScreen={false}
+           zIndex={4000}
+           open={openPresupuestos}
+           setOpen={() => setOpenPresupuestos(false)}
+           title={`Presupuestos de ${IdRequisicion.data.Nombre_Departamento}`}
+           children={<TablaPresupuestos ingresos={ingresos} />}
+         />
+       )}
 
-         {Array.isArray(data) && data.length > 0 && (
-            <form onSubmit={handleSubmit}>
-               <div className="space-y-6 max-h-[80vh] overflow-y-auto">
-                  {/* Header informativo */}
-                  {/* <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+       {Array.isArray(data) && data.length > 0 && (
+         <form onSubmit={handleSubmit}>
+           <div className="space-y-6 max-h-[80vh] overflow-y-auto">
+             {/* Header informativo */}
+             {/* <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                            <h3 className="text-lg font-semibold text-blue-800">
@@ -545,8 +548,8 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                      </div>
                   </div> */}
 
-                  {/* Selección de Proveedores */}
-                  {/* {IdRequisicion?.data?.status == "CO" && (
+             {/* Selección de Proveedores */}
+             {/* {IdRequisicion?.data?.status == "CO" && (
                      <div className="hidden p-4 bg-white border border-gray-200 rounded-lg shadow">
                         <h3 className="mb-4 text-lg font-semibold text-gray-900">
                            Seleccione los 3 Proveedores
@@ -574,299 +577,274 @@ const CotizacionComponent: React.FC<CotizacionType> = ({
                      </div>
                   )} */}
 
-                  {/* Tabla estilo Excel */}
-                  <div className="w-full max-h-[80vh] overflow-y-auto border border-gray-800 rounded-md">
-                     <table className="w-full text-sm border-collapse border-gray-300">
-                        <thead className="sticky top-0 bg-gray-100">
-                           <tr>
-                              <th className="px-3 py-2 text-left border">
-                                 Producto
-                              </th>
-                              {[1, 2, 3].map((offset) => (
-                                 <th
-                                    key={offset}
-                                    className="px-3 py-2 text-center border"
-                                    colSpan={6}>
-                                    {IdRequisicion?.data?.status == "OC" ? (
-                                       <Button
-                                          color="blue"
-                                          variant={
-                                             data?.[0]["Proveedor"] ==
-                                             formValues[`IDproveedor${offset}`]
-                                                ? "solid"
-                                                : "outline"
-                                          }
-                                          onClick={() => {
-                                             mutationOC.mutate({
-                                                method: "POST",
-                                                url: "requisicionesdetails/ordencompra",
-                                                data: {
-                                                   Ejercicio:
-                                                      IdRequisicion?.data
-                                                         ?.Ejercicio,
-                                                   IDRequisicion:
-                                                      IdRequisicion?.data
-                                                         ?.IDRequisicion,
-                                                   Proveedor:
-                                                      formValues[
-                                                         `IDproveedor${offset}`
-                                                      ],
-                                                },
-                                             });
-                                          }}>
-                                          {suppliers?.data?.data.find(
-                                             (prov) =>
-                                                prov.IDProveedor ==
-                                                formValues[
-                                                   `IDproveedor${offset}`
-                                                ],
-                                          )?.NombreCompleto ||
-                                             `Proveedor ${offset}`}
-                                       </Button>
-                                    ) : (
-                                       renderSelect(
-                                          `IDproveedor${offset}`,
-                                          suppliers?.data?.data || [],
-                                          "NombreCompleto",
-                                          "IDProveedor",
-                                       )
+             {/* Tabla estilo Excel */}
+             <div className="w-full max-h-[80vh] overflow-y-auto border border-gray-800 rounded-md">
+               <table className="w-full text-sm border-collapse border-gray-300">
+                 <thead className="sticky top-0 bg-gray-100">
+                   <tr>
+                     <th className="px-3 py-2 text-left border">Producto</th>
+                     {[1, 2, 3].map((offset) => (
+                       <th
+                         key={offset}
+                         className="px-3 py-2 text-center border"
+                         colSpan={6}
+                       >
+                         {IdRequisicion?.data?.status == "OC" ? (
+                           <Button
+                             color="blue"
+                             variant={
+                               data?.[0]["Proveedor"] ==
+                               formValues[`IDproveedor${offset}`]
+                                 ? "solid"
+                                 : "outline"
+                             }
+                             onClick={() => {
+                               mutationOC.mutate({
+                                 method: "POST",
+                                 url: "requisicionesdetails/ordencompra",
+                                 data: {
+                                   Ejercicio: IdRequisicion?.data?.Ejercicio,
+                                   IDRequisicion:
+                                     IdRequisicion?.data?.IDRequisicion,
+                                   Proveedor:
+                                     formValues[`IDproveedor${offset}`],
+                                 },
+                               });
+                             }}
+                           >
+                             {suppliers?.data?.data.find(
+                               (prov) =>
+                                 prov.IDProveedor ==
+                                 formValues[`IDproveedor${offset}`]
+                             )?.NombreCompleto || `Proveedor ${offset}`}
+                           </Button>
+                         ) : (
+                           renderSelect(
+                             `IDproveedor${offset}`,
+                             suppliers?.data?.data || [],
+                             "NombreCompleto",
+                             "IDProveedor"
+                           )
 
-                                       // suppliers?.data?.data.find(
-                                       //    (prov) =>
-                                       //       prov.IDProveedor ==
-                                       //       formValues[`IDproveedor${offset}`],
-                                       // )?.NombreCompleto ||
-                                       // `Proveedor ${offset}`
-                                    )}
-                                 </th>
-                              ))}
-                           </tr>
-                           <tr className="">
-                              <th className="px-3 py-2 border"></th>
-                              {[1, 2, 3].map((offset) => (
-                                 <React.Fragment key={offset}>
-                                    <th className="px-3 py-2 text-center border">
-                                       P.U.
-                                    </th>
-                                    <th className="px-3 py-2 text-center border">
-                                       % IVA
-                                    </th>
-                                    <th className="px-3 py-2 text-center border">
-                                       Ret.
-                                    </th>
-                                    <th className="px-3 py-2 text-center border">
-                                       Imp.
-                                    </th>
-                                    <th className="px-3 py-2 text-center border">
-                                       IVA cal.
-                                    </th>
-                                    <th className="px-3 py-2 text-center border">
-                                       P. c/IVA
-                                    </th>
-                                 </React.Fragment>
-                              ))}
-                           </tr>
-                        </thead>
-                        <tbody
-                           className="w-full overflow-y-auto"
-                           style={{ maxHeight: "100px" }}>
-                           {data?.length > 0 &&
-                              data.map((item: any, index) => (
-                                 <tr
-                                    key={index}
-                                    className="flex-1 w-full h-5 odd:bg-white even:bg-gray-50">
-                                    <td className="px-3 py-2 align-top border max-w-[250px] text-wrap break-words">
-                                      
-                                       <div className="font-semibold">
-                                          {item.Descripcion}
-                                       </div>
-                                       {item.Codigo && (
-                                          <div className="text-xs text-gray-600">
-                                             Código: {item.Codigo}
-                                          </div>
-                                       )}
-                                       {item.Cantidad && (
-                                          <div className="text-xs font-bold text-blue-700">
-                                             Cantidad: {item.Cantidad}
-                                          </div>
-                                       )}
-                                       {item.image && (
-                                          // <>{item.image}</>
-                                          <div className="w-10 h-10 m-0">
-                                             <PhotoZoom
-                                                src={item.image}
-                                                alt="preview"
-                                                title={""}></PhotoZoom>
-                                          </div>
-                                       )}
-                                    </td>
+                           // suppliers?.data?.data.find(
+                           //    (prov) =>
+                           //       prov.IDProveedor ==
+                           //       formValues[`IDproveedor${offset}`],
+                           // )?.NombreCompleto ||
+                           // `Proveedor ${offset}`
+                         )}
+                       </th>
+                     ))}
+                   </tr>
+                   <tr className="">
+                     <th className="px-3 py-2 border"></th>
+                     {[1, 2, 3].map((offset) => (
+                       <React.Fragment key={offset}>
+                         <th className="px-3 py-2 text-center border">P.U.</th>
+                         <th className="px-3 py-2 text-center border">% IVA</th>
+                         <th className="px-3 py-2 text-center border">Ret.</th>
+                         <th className="px-3 py-2 text-center border">Imp.</th>
+                         <th className="px-3 py-2 text-center border">
+                           IVA cal.
+                         </th>
+                         <th className="px-3 py-2 text-center border">
+                           P. c/IVA
+                         </th>
+                       </React.Fragment>
+                     ))}
+                   </tr>
+                 </thead>
+                 <tbody
+                   className="w-full overflow-y-auto"
+                   style={{ maxHeight: "100px" }}
+                 >
+                   {data?.length > 0 &&
+                     data.map((item: any, index) => (
+                       <tr
+                         key={index}
+                         className="flex-1 w-full h-5 odd:bg-white even:bg-gray-50"
+                       >
+                         <td className="px-3 py-2 align-top border max-w-[250px] text-wrap break-words">
+                           <div className="font-semibold">
+                             {item.Descripcion}
+                           </div>
+                           {item.Codigo && (
+                             <div className="text-xs text-gray-600">
+                               Código: {item.Codigo}
+                             </div>
+                           )}
+                           {item.Cantidad && (
+                             <div className="text-xs font-bold text-blue-700">
+                               Cantidad: {item.Cantidad}
+                             </div>
+                           )}
+                           {item.image && (
+                             // <>{item.image}</>
+                             <div className="w-10 h-10 m-0">
+                               <PhotoZoom
+                                 src={item.image}
+                                 alt="preview"
+                                 title={""}
+                               ></PhotoZoom>
+                             </div>
+                           )}
+                         </td>
 
-                                    {[1, 2, 3].map((offset) => {
-                                       const providerNumber =
-                                          index * 3 + offset;
+                         {[1, 2, 3].map((offset) => {
+                           const providerNumber = index * 3 + offset;
 
-                                       return (
-                                          <React.Fragment key={offset}>
-                                             <td className="px-2 py-1 border">
-                                                {renderInput(
-                                                   `PrecioUnitarioSinIva${providerNumber}`,
-                                                   IdRequisicion?.data
-                                                      ?.status === "OC",
-                                                   item.Cantidad,
-                                                )}
-                                             </td>
-                                             <td className="px-2 py-1 border">
-                                                {renderInput(
-                                                   `PorcentajeIVA${providerNumber}`,
-                                                   IdRequisicion?.data
-                                                      ?.status === "OC",
-                                                )}
-                                             </td>
-                                             <td className="px-2 py-1 border">
-                                                {renderInput(
-                                                   `Retenciones${providerNumber}`,
-                                                   IdRequisicion?.data
-                                                      ?.status === "OC",
-                                                )}
-                                             </td>
-                                             <td className="px-2 py-1 border">
-                                                {renderInput(
-                                                   `Importe${providerNumber}`,
-                                                   true,
-                                                )}
-                                             </td>
-                                             <td className="px-2 py-1 border">
-                                                {renderInput(
-                                                   `ImporteIva${providerNumber}`,
-                                                   true,
-                                                )}
-                                             </td>
-                                             <td className="px-2 py-1 border">
-                                                {renderInput(
-                                                   `PrecioUnitarioConIva${providerNumber}`,
-                                                   true,
-                                                )}
-                                             </td>
-                                          </React.Fragment>
-                                       );
-                                    })}
-                                 </tr>
-                              ))}
-                        </tbody>
-                        <tfoot className="sticky bottom-0 bg-gray-100">
-                           {/* Totales con leyendas */}
-                           {[
-                              { key: "subtotal", label: "Subtotal" },
-                              { key: "iva", label: "IVA Calculado" },
-                              { key: "totalConIva", label: "Total con IVA" },
-                              { key: "retencion", label: "Retenciones" },
-                              { key: "totalNeto", label: "Total Neto" },
-                           ].map((row, i) => (
-                              <tr key={i} className="font-medium bg-gray-100">
-                                 <td className="px-3 py-2 text-right border">
-                                    {row.label}
-                                 </td>
-                                 {[1, 2, 3].map((providerIdx) => {
-                                    let subtotal = 0;
-                                    let ivaCalculado = 0;
-                                    let totalConIva = 0;
-                                    let retencionCalculada = 0;
-                                    let totalNeto = 0;
+                           return (
+                             <React.Fragment key={offset}>
+                               <td className="px-2 py-1 border">
+                                 {renderInput(
+                                   `PrecioUnitarioSinIva${providerNumber}`,
+                                   IdRequisicion?.data?.status === "OC",
+                                   item.Cantidad
+                                 )}
+                               </td>
+                               <td className="px-2 py-1 border">
+                                 {renderInput(
+                                   `PorcentajeIVA${providerNumber}`,
+                                   IdRequisicion?.data?.status === "OC"
+                                 )}
+                               </td>
+                               <td className="px-2 py-1 border">
+                                 {renderInput(
+                                   `Retenciones${providerNumber}`,
+                                   IdRequisicion?.data?.status === "OC"
+                                 )}
+                               </td>
+                               <td className="px-2 py-1 border">
+                                 {renderInput(`Importe${providerNumber}`, true)}
+                               </td>
+                               <td className="px-2 py-1 border">
+                                 {renderInput(
+                                   `ImporteIva${providerNumber}`,
+                                   true
+                                 )}
+                               </td>
+                               <td className="px-2 py-1 border">
+                                 {renderInput(
+                                   `PrecioUnitarioConIva${providerNumber}`,
+                                   true
+                                 )}
+                               </td>
+                             </React.Fragment>
+                           );
+                         })}
+                       </tr>
+                     ))}
+                 </tbody>
+                 <tfoot className="sticky bottom-0 bg-gray-100">
+                   {/* Totales con leyendas */}
+                   {[
+                     { key: "subtotal", label: "Subtotal" },
+                     { key: "iva", label: "IVA Calculado" },
+                     { key: "totalConIva", label: "Total con IVA" },
+                     { key: "retencion", label: "Retenciones" },
+                     { key: "totalNeto", label: "Total Neto" },
+                   ].map((row, i) => (
+                     <tr key={i} className="font-medium bg-gray-100">
+                       <td className="px-3 py-2 text-right border">
+                         {row.label}
+                       </td>
+                       {[1, 2, 3].map((providerIdx) => {
+                         let subtotal = 0;
+                         let ivaCalculado = 0;
+                         let totalConIva = 0;
+                         let retencionCalculada = 0;
+                         let totalNeto = 0;
 
-                                    data.forEach((item, index) => {
-                                       const providerNumber =
-                                          index * 3 + providerIdx;
-                                       const cantidad =
-                                          Number(item.Cantidad) || 0;
-                                       const precioSinIva =
-                                          Number(
-                                             formValues[
-                                                `PrecioUnitarioSinIva${providerNumber}`
-                                             ],
-                                          ) || 0;
-                                       const ivaPct =
-                                          Number(
-                                             formValues[
-                                                `PorcentajeIVA${providerNumber}`
-                                             ],
-                                          ) || 0;
-                                       const ret =
-                                          Number(
-                                             formValues[
-                                                `Retenciones${providerNumber}`
-                                             ],
-                                          ) || 0;
+                         data.forEach((item, index) => {
+                           const providerNumber = index * 3 + providerIdx;
+                           const cantidad = Number(item.Cantidad) || 0;
+                           const precioSinIva =
+                             Number(
+                               formValues[
+                                 `PrecioUnitarioSinIva${providerNumber}`
+                               ]
+                             ) || 0;
+                           const ivaPct =
+                             Number(
+                               formValues[`PorcentajeIVA${providerNumber}`]
+                             ) || 0;
+                           const ret =
+                             Number(
+                               formValues[`Retenciones${providerNumber}`]
+                             ) || 0;
 
-                                       const st = precioSinIva * cantidad;
-                                       const iva = st * (ivaPct / 100);
-                                       const tcIva = st + iva;
-                                       const neto = tcIva - ret;
+                           const st = precioSinIva * cantidad;
+                           const iva = st * (ivaPct / 100);
+                           const tcIva = st + iva;
+                           const neto = tcIva - ret;
 
-                                       subtotal += st;
-                                       ivaCalculado += iva;
-                                       totalConIva += tcIva;
-                                       retencionCalculada += ret;
-                                       totalNeto += neto;
-                                    });
+                           subtotal += st;
+                           ivaCalculado += iva;
+                           totalConIva += tcIva;
+                           retencionCalculada += ret;
+                           totalNeto += neto;
+                         });
 
-                                    const mapTotals: any = {
-                                       subtotal,
-                                       iva: ivaCalculado,
-                                       totalConIva,
-                                       retencion: retencionCalculada,
-                                       totalNeto,
-                                    };
+                         const mapTotals: any = {
+                           subtotal,
+                           iva: ivaCalculado,
+                           totalConIva,
+                           retencion: retencionCalculada,
+                           totalNeto,
+                         };
 
-                                    return (
-                                       <td
-                                          key={providerIdx}
-                                          colSpan={6}
-                                          className="px-2 py-1 text-right border">
-                                          {formatCurrency(
-                                             mapTotals[row.key],
-                                             true,
-                                             false,
-                                             2,
-                                          )}
-                                       </td>
-                                    );
-                                 })}
-                              </tr>
-                           ))}
-                        </tfoot>
-                     </table>
-                  </div>
+                         return (
+                           <td
+                             key={providerIdx}
+                             colSpan={6}
+                             className="px-2 py-1 text-right border"
+                           >
+                             {formatCurrency(
+                               mapTotals[row.key],
+                               true,
+                               false,
+                               2
+                             )}
+                           </td>
+                         );
+                       })}
+                     </tr>
+                   ))}
+                 </tfoot>
+               </table>
+             </div>
 
-                  {/* Observaciones */}
-                  <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
-                     <label className="block mb-2 text-sm font-medium text-gray-700">
-                        Observaciones de la Cotización
-                     </label>
-                     <textarea
-                        name="ObservacionesCot"
-                        value={formValues.ObservacionesCot || ""}
-                        onChange={(e) =>
-                           handleInputChange("ObservacionesCot", e.target.value)
-                        }
-                        rows={4}
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
-                     />
-                  </div>
+             {/* Observaciones */}
+             <div className="p-4 bg-white border border-gray-200 rounded-lg shadow">
+               <label className="block mb-2 text-sm font-medium text-gray-700">
+                 Observaciones de la Cotización
+               </label>
+               <textarea
+                 name="ObservacionesCot"
+                 value={formValues.ObservacionesCot || ""}
+                 onChange={(e) =>
+                   handleInputChange("ObservacionesCot", e.target.value)
+                 }
+                 rows={4}
+                 className="w-full px-3 py-2 border border-gray-300 rounded"
+               />
+             </div>
 
-                  {/* Botón Submit */}
-                  {IdRequisicion?.data?.status !== "OC" && (
-                     <div className="flex justify-end">
-                        <button
-                           type="submit"
-                           className="px-6 py-2 text-white bg-blue-600 rounded hover:bg-blue-700">
-                           Guardar las cotizaciones
-                        </button>
-                     </div>
-                  )}
+             {/* Botón Submit */}
+             {IdRequisicion?.data?.status !== "OC" && (
+               <div className="flex justify-end">
+                 <button
+                   type="submit"
+                   className="px-6 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
+                 >
+                   Guardar las cotizaciones
+                 </button>
                </div>
-            </form>
-         )}
-      </ModalComponent>
+             )}
+           </div>
+         </form>
+       )}
+     </ModalComponent>
    );
 };
 

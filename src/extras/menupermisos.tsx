@@ -26,10 +26,9 @@ export const PermissionMenu: React.FC<ReactPermissionsMenu> = ({
     ? permisos.some(
         (permiso) => IdMenu.includes(permiso.IdMenu) && permiso.EstadoPermiso
       )
-    : permisos.some(
+    : permisos.some(  
         (permiso) => permiso.IdMenu === IdMenu && permiso.EstadoPermiso
       );
-    
   return (
     <>
       {hasPermission && children}

@@ -14,7 +14,8 @@ const timelineIcons = {
 };
 
 export type Requisition = {
-  IDRequisicion:number,
+  Id: number;
+  IDRequisicion: number;
   UsuarioCaptura: string | null;
   FechaCaptura: string | null;
   UsuarioAU: string | null;
@@ -26,7 +27,8 @@ export type Requisition = {
   UsuarioOC: string | null;
   FechaOrdenCompra: string | null;
   Status: string | null;
-  Motivo_Cancelacion?:string,
+  Motivo_Cancelacion?: string;
+  Ejercicio?:number
 };
 
 type DataT = {
@@ -66,16 +68,39 @@ const d = new Date(date).toLocaleDateString("es-ES", { day: "2-digit", month: "l
 
 const TracingComponent: React.FC<PdfRequisitionType> = ({ open, setOpen }) => {
   const item = Observable().ObservableGet("tracingRequisition") as DataTracing;
+  
   const { data } = item;
-
   const timeline = [
-    { title: "Captura", autor: data.data.UsuarioCaptura, date: data.data.FechaCaptura },
-    { title: "Autorización", autor: data.data.UsuarioAU, date: data.data.FechaAutorizacion },
-    { title: "Asignación", autor: data.data.UsuarioAS, date: data.data.FechaAsignacion },
-    { title: "Cotización", autor: data.data.UsuarioCO, date: data.data.FechaCotizacion },
-    { title: "Orden de compra", autor: data.data.UsuarioOC, date: data.data.FechaOrdenCompra },
-    { title: "Motivo de cancelacion", autor: "", date: data.data.Motivo_Cancelacion },
-
+    {
+      title: "Captura",
+      autor: data.data.UsuarioCaptura,
+      date: data.data.FechaCaptura,
+    },
+    {
+      title: "Autorización",
+      autor: data.data.UsuarioAU,
+      date: data.data.FechaAutorizacion,
+    },
+    {
+      title: "Asignación",
+      autor: data.data.UsuarioAS,
+      date: data.data.FechaAsignacion,
+    },
+    {
+      title: "Cotización",
+      autor: data.data.UsuarioCO,
+      date: data.data.FechaCotizacion,
+    },
+    {
+      title: "Orden de compra",
+      autor: data.data.UsuarioOC,
+      date: data.data.FechaOrdenCompra,
+    },
+    {
+      title: "Cancelacion",
+      autor: data.data?.['UsuarioCA'],
+      date: data.data?.["FechaCancelacion"],
+    },
   ];
 
   return (

@@ -62,7 +62,8 @@ const ChangeStatusRequisition = ({ open, setOpen, setReloadTable }: {
             {spiner && <Spinner />}
 
             <ModalComponent title={`Cambio de estatus del folio`} open={open} setOpen={setOpen}>
-                <FormikForm initialValues={{ status: item.data?.data?.Status, id: item.data?.data?.IDRequisicion }} onSubmit={(values) => {
+                <FormikForm initialValues={{ status: item.data?.data?.Status, id: item.data?.data?.Id }} onSubmit={(values) => {
+                    console.log("valores",values)
                     mutation.mutate({
                         method: "POST",
                         url: "/requisiciones/changeStatus",

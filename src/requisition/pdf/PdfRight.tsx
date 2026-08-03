@@ -256,7 +256,7 @@ export const PdfRight: React.FC<DataPdf> = ({
 
          {/* FIRMA */}
          <View style={tw(styles.pdf.firmContainer)}>
-            {pdfData?.UsuarioOC && (
+            {pdfData?.UsuarioOC && (   
                <Image
                   style={tw(styles.pdf.firma)}
                   src={images.firmaDirectorCompras}
