@@ -101,87 +101,91 @@ export const PdfRight: React.FC<DataPdf> = ({
    totalPorProveedor,
    isLastChunk = false,
 }) => {
+   console.log("🚀 ~ PdfRight ~ pdfData:", pdfData)
+   console.log("🚀 ~ PdfRight ~ products:", products)
    // console.log("🚀 ~ ProvedorInfo ~ isLastChunk:", isLastChunk);
    // console.log("🚀 ~ ProvedorInfo ~ totalPorProveedor:", totalPorProveedor);
    const observaciones = pdfData?.ObservacionesCot || "";
    const proveedorSeleccionado = products[0].Proveedor;
+   const Firma_Director = products[0].Firma_Director_compras;
+   console.log("🚀 ~ PdfRight ~ Firma_Director:", Firma_Director)
+   const Nombre_Director = products[0].director_compras;
+
    // console.log("🚀 ~ proveedorSeleccionado:", proveedorSeleccionado);
 
+         console.log("🚀 ~ PdfRight ~ pdfData:", pdfData)
+         console.log("🚀 ~ PdfRight ~ pdfData?.UsuarioOC:", pdfData?.UsuarioOC)
    return (
-      <View style={tw("w-1/2 max-w-1/2")}>
-         <View style={tw("mx-3 flex flex-row")}>
-            <View style={tw(`${styles.pdf.box}  mt-1 w-2/3`)}>
-               <Text style={tw(`${styles.pdf.text}`)}>
-                  Uso Exclusivo de Compras
-               </Text>
-            </View>
-            <View style={tw(`${styles.pdf.box}  mt-1 w-1/3`)}>
-               <Text style={tw(`${styles.pdf.text}`)}>
-                  N° C. {pdfData.Orden_Compra}
-               </Text>
-            </View>
+     <View style={tw("w-1/2 max-w-1/2")}>
+       <View style={tw("mx-3 flex flex-row")}>
+         <View style={tw(`${styles.pdf.box}  mt-1 w-2/3`)}>
+           <Text style={tw(`${styles.pdf.text}`)}>
+             Uso Exclusivo de Compras
+           </Text>
          </View>
+         <View style={tw(`${styles.pdf.box}  mt-1 w-1/3`)}>
+           <Text style={tw(`${styles.pdf.text}`)}>
+             N° C. {pdfData.Orden_Compra}
+           </Text>
+         </View>
+       </View>
 
-         <View style={tw("mx-3")}>
-            <View style={tw(`${styles.pdf.box} flex-row mt-1 w-full`)}>
-               <Text style={tw(`${styles.pdf.text}`)}>Provedores</Text>
-            </View>
+       <View style={tw("mx-3")}>
+         <View style={tw(`${styles.pdf.box} flex-row mt-1 w-full`)}>
+           <Text style={tw(`${styles.pdf.text}`)}>Provedores</Text>
          </View>
-         <View
-            wrap
-            style={tw("flex flex-wrap w-full max-w-full overflow-auto px-2")}>
-            {products.map((producto, idx) => (
+       </View>
+       <View
+         wrap
+         style={tw("flex flex-wrap w-full max-w-full overflow-auto px-2")}
+       >
+         {products.map((producto, idx) => (
+           <View
+             key={idx}
+             style={tw(
+               "w-full flex flex-row mb-4 border-b-2 border-dashed border-black pb-1",
+             )}
+           >
+             {[1, 2, 3].map((index) => (
+               <ProvedorInfo
+                 key={index}
+                 idxProducto={idx}
+                 producto={producto}
+                 index={index}
+               />
+             ))}
+           </View>
+         ))}
+
+         {/* TOTAL POR PROVEEDOR */}
+         {isLastChunk && (
+           <View style={tw(`w-full flex flex-row -mt-1.5 gap-1 mb-2`)}>
+             {totalPorProveedor.map((total, i) => (
                <View
-                  key={idx}
-                  style={tw(
-                     "w-full flex flex-row mb-4 border-b-2 border-dashed border-black pb-1",
-                  )}>
-                  {[1, 2, 3].map((index) => (
-                     <ProvedorInfo
-                        key={index}
-                        idxProducto={idx}
-                        producto={producto}
-                        index={index}
-                     />
-                  ))}
+                 style={tw(
+                   `w-full flex flex-row -mt-1.5 gap-1 mb-2 ${total.proveedor === proveedorSeleccionado && "bg-slate-200 rounded-md"}`,
+                 )}
+               >
+                 <View style={tw(`w-1/2`)}>
+                   <Text
+                     style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}
+                   >
+                     T. Prov{total.opcion}:
+                   </Text>
+                 </View>
+                 <View style={tw(`w-1/2`)}>
+                   <Text
+                     style={tw(`${styles.pdf.textVal} text-wrap max-w-full`)}
+                   >
+                     {formatCurrency(total.totalNeto, true, false, 2) || ""}
+                   </Text>
+                 </View>
                </View>
-            ))}
+             ))}
+           </View>
+         )}
 
-            {/* TOTAL POR PROVEEDOR */}
-            {isLastChunk && (
-               <View style={tw(`w-full flex flex-row -mt-1.5 gap-1 mb-2`)}>
-                  {totalPorProveedor.map((total, i) => (
-                     <View
-                        style={tw(
-                           `w-full flex flex-row -mt-1.5 gap-1 mb-2 ${total.proveedor === proveedorSeleccionado && "bg-slate-200 rounded-md"}`,
-                        )}>
-                        <View style={tw(`w-1/2`)}>
-                           <Text
-                              style={tw(
-                                 `${styles.pdf.textKey} text-wrap max-w-full`,
-                              )}>
-                              T. Prov{total.opcion}:
-                           </Text>
-                        </View>
-                        <View style={tw(`w-1/2`)}>
-                           <Text
-                              style={tw(
-                                 `${styles.pdf.textVal} text-wrap max-w-full`,
-                              )}>
-                              {formatCurrency(
-                                 total.totalNeto,
-                                 true,
-                                 false,
-                                 2,
-                              ) || ""}
-                           </Text>
-                        </View>
-                     </View>
-                  ))}
-               </View>
-            )}
-
-            {/* <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
+         {/* <View style={tw("w-full flex flex-row -mt-1.5 gap-1 mb-2")}>
                {[1, 2, 3].map((i) => (
                   <>
                      <View style={tw(`w-1/2`)}>
@@ -231,8 +235,8 @@ export const PdfRight: React.FC<DataPdf> = ({
                ))}
             </View> */}
 
-            {/* TOTAL DE PRODUCTOS SELECCIONADOS */}
-            {/* <View style={tw(`${styles.pdf.box} w-full flex flex-row gap-1`)}>
+         {/* TOTAL DE PRODUCTOS SELECCIONADOS */}
+         {/* <View style={tw(`${styles.pdf.box} w-full flex flex-row gap-1`)}>
                <>
                   <Text
                      style={tw(`${styles.pdf.textKey} text-wrap max-w-full`)}>
@@ -244,25 +248,26 @@ export const PdfRight: React.FC<DataPdf> = ({
                   </Text>
                </>
             </View> */}
-         </View>
+       </View>
 
-         <View
-            style={tw(
-               `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap`,
-            )}>
-            <Text style={tw("text-sm font-bold")}>Observaciones:</Text>
-            <Text style={tw("text-sm text-wrap")}>{observaciones}</Text>
-         </View>
+       <View
+         style={tw(
+           `${styles.pdf.box} mt-auto mx-3 mb-20 pt-2 justify-start text-wrap`,
+         )}
+       >
+         <Text style={tw("text-sm font-bold")}>Observaciones:</Text>
+         <Text style={tw("text-sm text-wrap")}>{observaciones}</Text>
+       </View>
 
-         {/* FIRMA */}
-         <View style={tw(styles.pdf.firmContainer)}>
-            {pdfData?.UsuarioOC && (   
-               <Image
-                  style={tw(styles.pdf.firma)}
-                  src={images.firmaDirectorCompras}
-               />
-            )}
-         </View>
-      </View>
+       {/* FIRMA */}
+       <View style={tw(styles.pdf.firmContainer)}>
+         {/* {pdfData?.UsuarioOC && ( */}
+           <Image
+             style={tw(styles.pdf.firma)}
+             src={Firma_Director}
+           />
+         {/* )} */}
+       </View>
+     </View>
    );
 };

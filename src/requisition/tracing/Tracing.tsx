@@ -28,7 +28,8 @@ export type Requisition = {
   FechaOrdenCompra: string | null;
   Status: string | null;
   Motivo_Cancelacion?: string;
-  Ejercicio?:number
+  Ejercicio?:number;
+  FechaCapturaOriginal?: string | null;
 };
 
 type DataT = {

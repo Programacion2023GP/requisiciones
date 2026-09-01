@@ -136,70 +136,68 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
    });
 
    return (
-      <ModalComponent
-         title="Requisición"
-         open={open}
-         setOpen={setOpen}
-         fullScreen>
-         {loading && <Spinner />}
-         <PDFViewer width="100%" height="100%">
-            <Document>
-               {myData.map((item: any, indexData) => (
-                  <Page size="LETTER" orientation="landscape">
-                     {/* {watermarkText && (
+     <ModalComponent
+       title="Requisición"
+       open={open}
+       setOpen={setOpen}
+       fullScreen
+     >
+       {loading && <Spinner />}
+       <PDFViewer width="100%" height="100%">
+         <Document>
+           {myData.map((item: any, indexData) => (
+             <Page size="LETTER" orientation="landscape">
+               {/* {watermarkText && (
                         <View fixed style={{ width: "100%", height: "100%" }}>
                            <Text style={styles.watermark}>{watermarkText}</Text>
                         </View>
                      )} */}
-                     <View style={tw("p-4")}>
-                        {watermarkText && (
-                           <View
-                              fixed
-                              style={{
-                                 position: "absolute",
-                                 width: "100%",
-                                 height: "100%",
-                              }}>
-                              <Text style={styles.watermark}>
-                                 {watermarkText}
-                              </Text>
-                           </View>
-                        )}
+               <View style={tw("p-4")}>
+                 {watermarkText && (
+                   <View
+                     fixed
+                     style={{
+                       position: "absolute",
+                       width: "100%",
+                       height: "100%",
+                     }}
+                   >
+                     <Text style={styles.watermark}>{watermarkText}</Text>
+                   </View>
+                 )}
 
-                        <PdfHeader />
+                 <PdfHeader />
 
-                        <View
-                           style={tw(
-                              "border-2 rounded-xl border-black flex flex-row w-full h-full text-black",
-                           )}>
-                           <PdfLeft
-                              products={item}
-                              pdfData={data?.data?.pdfData}
-                           />
+                 <View
+                   style={tw(
+                     "border-2 rounded-xl border-black flex flex-row w-full h-full text-black",
+                   )}
+                 >
+                   <PdfLeft products={item} pdfData={data?.data?.pdfData} />
 
-                           {[
-                              "SISTEMAS",
-                              "DIRECTORCOMPRAS",
-                              "AUTORIZADOR",
-                              "REQUISITOR",
-                           ].includes(localStorage.getItem("role") ?? "") && (
-                              <PdfRight
-                                 products={item}
-                                 pdfData={data?.data?.pdfData}
-                                 totalPorProveedor={totalPorProveedor}
-                                 isLastChunk={indexData === myData.length - 1}
-                              />
-                           )}
-                        </View>
+                   {[
+                     "SISTEMAS",
+                     "DIRECTORCOMPRAS",
+                     "AUTORIZADOR",
+                     "REQUISITOR",
+                   ].includes(localStorage.getItem("role") ?? "") && (
+                     <PdfRight
+                       products={item}
+                       pdfData={data?.data?.pdfData}
+                       totalPorProveedor={totalPorProveedor}
+                       isLastChunk={indexData === myData.length - 1}
+                     />
+                   )}
+                 </View>
 
-                        <PdfFooter data={data} />
-                     </View>
-                  </Page>
-               ))}
-            </Document>
-         </PDFViewer>
-         {children}
-      </ModalComponent>
+                 <PdfFooter data={data} pdfData={item} />
+               </View>
+             </Page>
+           ))}
+         </Document>
+       </PDFViewer>
+       {children}
+     </ModalComponent>
    );
 };
 

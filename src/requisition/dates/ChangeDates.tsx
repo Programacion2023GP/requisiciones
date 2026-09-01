@@ -5,7 +5,7 @@ import ModalComponent from "../../components/modal/Modal"
 import Observable from "../../extras/observable";
 import { Requisition } from "../tracing/Tracing";
 import { AxiosRequest } from "../../axios/Axios";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { showToast } from "../../sweetalert/Sweetalert";
 import Spinner from "../../loading/Loading";
 import * as Yup from "yup";
@@ -106,10 +106,30 @@ const safeSequentialDate = (
 
 const ejercicio = item.data?.Ejercicio ||0;
 
+const fechaCapturaOriginal = item.data?.FechaCapturaOriginal ? new Date(item.data.FechaCapturaOriginal) : null;
+
+
 const validationSchema = Yup.object().shape({
   FechaCaptura: parseDate(ejercicio)
     .required("La fecha de captura es obligatoria")
-    .max(new Date(), "La fecha de captura no puede ser futura"),
+    .test(
+      "rango-15-dias",
+      "La fecha de captura solo puede retroceder hasta 15 días desde su valor original",
+      function (value) {
+        if (!value || !fechaCapturaOriginal) return true;
+        const diffMs = fechaCapturaOriginal.getTime() - value.getTime();
+        const diffDias = diffMs / (1000 * 60 * 60 * 24);
+        return diffDias >= 0 && diffDias <= 15;
+      },
+    )
+    .test(
+      "no-avanzar",
+      "La fecha de captura no puede ser mayor a su valor original",
+      function (value) {
+        if (!value || !fechaCapturaOriginal) return true;
+        return value <= fechaCapturaOriginal;
+      },
+    ),
 
   FechaAutorizacion: parseDate(ejercicio).test(
     "valid-autorizacion",

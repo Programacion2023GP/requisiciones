@@ -667,7 +667,7 @@ const Users = () => {
                         }
                         onChange={handleChange}
                      />
-                             {values.Rol == "DIRECTOR" && (
+                             {(values.Rol == "DIRECTOR" || values.Rol == "DIRECTORCOMPRAS"  ) && (
                         <>
                               <FormikImageInput
                                  label="Subir la firma del director"

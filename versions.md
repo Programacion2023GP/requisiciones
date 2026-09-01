@@ -4,6 +4,24 @@
 
 ---
 
+## 🔧 **v3.3.0.2** · *🧱 RC*
+📅 **Fecha:** 4 de agosto de 2026, 9:48 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## ✨ **v3.3.0.1** · *🧱 RC*
+📅 **Fecha:** 3 de agosto de 2026, 10:11 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Minor
+
+_Sin cambios registrados._
+
+---
+
 ## 🔧 **v3.2.1.8** · *🧱 RC*
 📅 **Fecha:** 30 de marzo de 2026, 1:58 p.m.  
 👤 **Autor:**   

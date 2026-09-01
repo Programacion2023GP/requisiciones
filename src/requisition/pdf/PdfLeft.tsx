@@ -22,7 +22,7 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                <View style={tw("flex flex-row w-2/3")}>
                   <View style={tw(`${styles.pdf.box} `)}>
                      <Text style={tw(`${styles.pdf.textKey}`)}>
-                        Fecha Impresión
+                        Fecha Captura
                      </Text>
                   </View>
                   <View
@@ -30,7 +30,7 @@ const PdfLeft: React.FC<DataPdf> = ({ products, pdfData }) => {
                         "ml-2 text-wrap flex  items-center justify-center",
                      )}>
                      <Text style={tw(`${styles.pdf.textVal} text-wrap`)}>
-                        {new Date().toLocaleDateString("es-ES", {
+                        {new Date(pdfData.FechaCaptura).toLocaleDateString("es-ES", {
                            day: "2-digit",
                            month: "long",
                            year: "numeric",

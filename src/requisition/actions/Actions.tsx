@@ -638,7 +638,6 @@ const Actions: React.FC<{
                    onClick={async () => {
                      try {
                        // customLog(`${JSON.stringify(data)}`, "green");
-                       console.log("aqui", data);
                        const result = await ObservablePost(
                          "RequisitionChangeDates",
                          {
