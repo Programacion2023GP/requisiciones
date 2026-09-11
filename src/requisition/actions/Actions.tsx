@@ -97,6 +97,8 @@ const Actions: React.FC<{
    )
       ? JSON.parse(localStorage.getItem("group") || "[]").map(Number)
       : [Number(JSON.parse(localStorage.getItem("group") || "0"))];
+   const isAuditor =
+      localStorage.getItem("role") === "AUDITOR"; // El rol Auditor es solo lectura: ve, PDF y seguimiento, no edita ni cancela
 
    // Convertir IDDepartamento a número para la comparación
    const isUserGroup = userGroups.includes(Number(data?.IDDepartamento ?? -1));
@@ -473,13 +475,15 @@ const Actions: React.FC<{
                          data: {
                            Id: data.Id,
                            edicion:
+                             !isAuditor && // el auditor siempre abre en modo vista
                              data.Status == "CP" &&
                              userGroups.includes(data?.IDDepartamento),
                          },
                        });
                      }}
                    >
-                     {data.Status == "CP" &&
+                     {!isAuditor &&
+                     data.Status == "CP" &&
                      userGroups.includes(data?.IDDepartamento) ? (
                        <MdEdit />
                      ) : (
@@ -514,7 +518,7 @@ const Actions: React.FC<{
                    </Tooltip>
                  </div>
                </PermissionMenu>
-               {data.Status != "CP" && (
+               {data.Status != "CP" && !isAuditor && (
                  <div className="w-fit">
                    <Tooltip content="Cancelar">
                      <Button
@@ -544,13 +548,14 @@ const Actions: React.FC<{
                    </Tooltip>
                  </div>
                )}
-               {((data.Status == "AU" &&
-                 data.AutEspecial == 1 &&
-                 !data.UsuarioVoBo &&
-                 buttonVobo(data.IDTipo)) ||
-                 (localStorage.getItem("role") == "SISTEMAS" &&
+               {!isAuditor &&
+                 ((data.Status == "AU" &&
                    data.AutEspecial == 1 &&
-                   !data.UsuarioVoBo)) && (
+                   !data.UsuarioVoBo &&
+                   buttonVobo(data.IDTipo)) ||
+                   (localStorage.getItem("role") == "SISTEMAS" &&
+                     data.AutEspecial == 1 &&
+                     !data.UsuarioVoBo)) && (
                  <PermissionMenu IdMenu={"VoBo"}>
                    <Tooltip content="Visto bueno">
                      <Button
@@ -840,12 +845,15 @@ const Actions: React.FC<{
                    </div>
                  </>
                )}
-               {((userGroups.includes(data?.IDDepartamento) &&
+               {((!isAuditor &&
+                 userGroups.includes(data?.IDDepartamento) &&
                  newStatus(data.Status) == "AU") ||
-                 ["AUTORIZADOR", "SISTEMAS", "REQUISITOR"].includes(
-                   localStorage.getItem("role") ?? "",
-                 ) ||
-                 (newStatus(data.Status) != "CP" &&
+                 (!isAuditor &&
+                   ["AUTORIZADOR", "SISTEMAS", "REQUISITOR"].includes(
+                     localStorage.getItem("role") ?? "",
+                   )) ||
+                 (!isAuditor &&
+                   newStatus(data.Status) != "CP" &&
                    newStatus(data.Status) != "AU" &&
                    // && newStatus(data.Status) !== "SU"
                    newStatus(data.Status) != "AS" &&

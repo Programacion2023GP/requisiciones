@@ -125,6 +125,10 @@ const TypeRolUser = (data: Record<string, any>) => {
       case "DIRECTOR":
          classNames = "border-gray-500 text-gray-500 border-2 p-2 rounded-md"; // Borde y texto gris para 'DIRECTOR'
          break;
+      case "AUDITOR":
+         classNames =
+            "border-cyan-500 text-cyan-500 border-2 p-2 rounded-md"; // Borde y texto cian para 'AUDITOR'
+         break;
       case "COMPRAS":
          classNames =
             "border-purple-500 text-purple-500 border-2 p-2 rounded-md"; // Borde y texto morado para 'COMPRAS'
@@ -276,6 +280,10 @@ const Users = () => {
          id: "AUTORIZADOR",
          value: "AUTORIZADOR",
       },
+      {
+         id: "AUDITOR",
+         value: "AUDITOR",
+      },
    ];
 
    const [columnDefs] = useState<ColDef<TypeUsers>[]>([
@@ -389,6 +397,7 @@ const Users = () => {
                "AUTORIZADOR",
                "CAPTURA",
                "DIRECTORCOMPRAS",
+               "AUDITOR",
             ],
             "Selecciona un rol válido",
          ) // Aquí validamos que el valor esté entre los roles permitidos

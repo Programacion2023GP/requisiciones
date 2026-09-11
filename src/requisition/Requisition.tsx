@@ -265,37 +265,40 @@ const RequisicionesAdd = () => {
      () => (
        <>
          <div className="flex flex-row w-full space-x-2">
-           <Tooltip content="Agregar Requisición">
-             <div className="mb-4">
-               <PermissionMenu IdMenu={"RequisicionesAdd"}>
-                 <Button
-                   id="btn-add-requisition"
-                   onClick={async () => {
-                     ObservableDelete("FormRequisicion");
+           {localStorage.getItem("role") !== "AUDITOR" && (
+             // El rol Auditor es solo lectura: no puede crear requisiciones
+             <Tooltip content="Agregar Requisición">
+               <div className="mb-4">
+                 <PermissionMenu IdMenu={"RequisicionesAdd"}>
+                   <Button
+                     id="btn-add-requisition"
+                     onClick={async () => {
+                       ObservableDelete("FormRequisicion");
 
-                     try {
-                       const result = await ObservablePost("FormRequisicion", {
-                         data: {
-                           data: null,
-                           edicion: true,
-                         },
-                       });
-                       console.log(result);
-                     } catch (e) {
-                       console.error(e);
-                     } finally {
-                       setOpen(true);
-                     }
-                   }}
-                   size="medium"
-                   color="blue"
-                   variant="solid"
-                 >
-                   <icons.Tb.TbFileTextSpark size={20} />
-                 </Button>
-               </PermissionMenu>
-             </div>
-           </Tooltip>
+                       try {
+                         const result = await ObservablePost("FormRequisicion", {
+                           data: {
+                             data: null,
+                             edicion: true,
+                           },
+                         });
+                         console.log(result);
+                       } catch (e) {
+                         console.error(e);
+                       } finally {
+                         setOpen(true);
+                       }
+                     }}
+                     size="medium"
+                     color="blue"
+                     variant="solid"
+                   >
+                     <icons.Tb.TbFileTextSpark size={20} />
+                   </Button>
+                 </PermissionMenu>
+               </div>
+             </Tooltip>
+           )}
            <Tooltip content="Refrescar Tabla">
              <div className="">
                <Button

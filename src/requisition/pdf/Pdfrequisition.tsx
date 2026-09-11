@@ -175,12 +175,13 @@ const PdfRequisition: React.FC<PdfRequisitionType> = ({
                  >
                    <PdfLeft products={item} pdfData={data?.data?.pdfData} />
 
-                   {[
-                     "SISTEMAS",
-                     "DIRECTORCOMPRAS",
-                     "AUTORIZADOR",
-                     "REQUISITOR",
-                   ].includes(localStorage.getItem("role") ?? "") && (
+                   {                  [
+                    "SISTEMAS",
+                    "DIRECTORCOMPRAS",
+                    "AUTORIZADOR",
+                    "REQUISITOR",
+                    "AUDITOR",
+                  ].includes(localStorage.getItem("role") ?? "") && (
                      <PdfRight
                        products={item}
                        pdfData={data?.data?.pdfData}
