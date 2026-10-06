@@ -53,9 +53,26 @@ type ChipsProps = {
 const RequisicionesAdd = () => {
    const pageTransitionRef = useRef<PageTransitionRef>(null);
    const [spiner, setSpiner] = useState<boolean>(false);
-   const [filters, setFilters] = useState<string>(
-      `Ejercicio = '${new Date().getFullYear()}'`,
+   // La tabla arranca con el mes en curso para que cargue más rápido
+   const filtroMesActual = () =>
+      `Ejercicio = '${new Date().getFullYear()}' AND MONTH(FechaCaptura) = ${new Date().getMonth() + 1}`;
+   const [filters, setFilters] = useState<string>(filtroMesActual());
+   const [anioSel, setAnioSel] = useState<string>(String(new Date().getFullYear()));
+   const [mesSel, setMesSel] = useState<string>(String(new Date().getMonth() + 1));
+   const nombresMeses = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+   const aniosDisponibles = Array.from(
+      { length: new Date().getFullYear() - 2018 + 1 },
+      (_, i) => String(new Date().getFullYear() - i),
    );
+   const buscarPorPeriodo = (anio: string, mes: string) => {
+      setAnioSel(anio);
+      setMesSel(mes);
+      setReloadTable(false);
+      setTimeout(() => {
+         setFilters(`Ejercicio = '${anio}'${mes ? ` AND MONTH(FechaCaptura) = ${Number(mes)}` : ""}`);
+         setReloadTable(true);
+      }, 300);
+   };
    const [chipsOpen, setChipsOpen] = useState<ChipsProps>({
       rechazada: false,
       captura: false,
@@ -306,7 +323,9 @@ const RequisicionesAdd = () => {
                  onClick={() => {
                    setReloadTable(false);
                    setTimeout(() => {
-                     setFilters(`Ejercicio = '${new Date().getFullYear()}'`);
+                     setFilters(filtroMesActual());
+                     setAnioSel(String(new Date().getFullYear()));
+                     setMesSel(String(new Date().getMonth() + 1));
 
                      setReloadTable(true);
                    }, 300);
@@ -395,9 +414,36 @@ const RequisicionesAdd = () => {
              color="black"
              size="3xl"
            >
-             la tabla empieza consultando el ejercicio del año actual
-             {" " + new Date().getFullYear()}
+             la tabla empieza consultando el mes en curso:
+             {" " + new Date().toLocaleDateString("es-MX", { month: "long", year: "numeric" })}
            </Typography>
+           <div className="flex flex-row flex-wrap justify-center items-end gap-4 w-full mb-4">
+             <div className="flex flex-col">
+               <label className="text-sm font-medium mb-1">Año</label>
+               <select
+                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-[140px]"
+                 value={anioSel}
+                 onChange={(e) => buscarPorPeriodo(e.target.value, mesSel)}
+               >
+                 {aniosDisponibles.map((a) => (
+                   <option key={a} value={a}>{a}</option>
+                 ))}
+               </select>
+             </div>
+             <div className="flex flex-col">
+               <label className="text-sm font-medium mb-1">Mes</label>
+               <select
+                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-[180px]"
+                 value={mesSel}
+                 onChange={(e) => buscarPorPeriodo(anioSel, e.target.value)}
+               >
+                 <option value="">Todos los meses</option>
+                 {nombresMeses.map((m, i) => (
+                   <option key={m} value={String(i + 1)}>{m}</option>
+                 ))}
+               </select>
+             </div>
+           </div>
            <div className="flex flex-row flex-wrap justify-center w-full mb-6 ">
              {chipData.map(({ message, className, key, sql }) => (
                <Chip

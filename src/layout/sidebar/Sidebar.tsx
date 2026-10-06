@@ -135,7 +135,7 @@ data.forEach((item) => {
             ? IconLibraries[menu.Icon as keyof typeof IconLibraries]
             : null;
 
-          if (menu.IdMenu === "MnuCatalogos" && menu.children?.length) {
+          if (["MnuCatalogos", "MnuReportes"].includes(menu.IdMenu) && menu.children?.length) {
             const activeChildren = menu.children.filter(
               (child) => child.EstadoPermiso 
             );

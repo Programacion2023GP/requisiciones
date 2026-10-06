@@ -31,6 +31,11 @@ const YearSelect: React.FC<YearSelectProps> = ({ onChange, setClosed }) => {
     }
     return years;
   };
+  const meses = [
+    { key: "", value: "Todos los meses" },
+    ...["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+      .map((m, i) => ({ key: String(i + 1), value: m })),
+  ];
   const queries = useQueries({
     queries: [
       {
@@ -72,6 +77,14 @@ const YearSelect: React.FC<YearSelectProps> = ({ onChange, setClosed }) => {
       if (values[it] != 0 && values[it] !== "") {
         if (it === "Solicitante") {
           const condition = `${it} LIKE '%${values[it]}%'`;
+          if (!conditionsSet.has(condition)) {
+            sql == null
+              ? (sql = condition)
+              : (sql += ` AND ${condition}`);
+            conditionsSet.add(condition);
+          }
+        } else if (it === "Mes") {
+          const condition = `MONTH(FechaCaptura) = ${Number(values[it])}`;
           if (!conditionsSet.has(condition)) {
             sql == null
               ? (sql = condition)
@@ -152,6 +165,7 @@ const YearSelect: React.FC<YearSelectProps> = ({ onChange, setClosed }) => {
         initialValues={{
           IDRequisicion: 0,
           Ejercicio: "",
+          Mes: "",
           IDDepartamento: 0,
           FechaInicio: "",
           FechaFin: "",
@@ -206,6 +220,13 @@ const YearSelect: React.FC<YearSelectProps> = ({ onChange, setClosed }) => {
               name="Ejercicio"
               label={"Ejercicio"}
               options={generateYearOptions(2018)}
+              idKey={"key"}
+              labelKey={"value"}
+            />
+            <FormikAutocomplete
+              name="Mes"
+              label={"Mes"}
+              options={meses}
               idKey={"key"}
               labelKey={"value"}
             />

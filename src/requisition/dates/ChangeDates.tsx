@@ -24,9 +24,9 @@ const ChangeDatesRequisition = ({ open, setOpen, setReloadTable }: {
     open: boolean, setOpen: () => void, setReloadTable: Dispatch<SetStateAction<boolean>>;
 }) => {
     const [spiner, setSpiner] = useState<boolean>(false);
-        const item = Observable().ObservableGet(
+    const item = useMemo(() => Observable().ObservableGet(
           "RequisitionChangeDates",
-        ) as DataTracing;
+        ) as DataTracing, [open]);
  const parseDate = (ejercicio?: number) =>
    Yup.date()
      .transform((value, originalValue) => {
@@ -109,17 +109,18 @@ const ejercicio = item.data?.Ejercicio ||0;
 const fechaCapturaOriginal = item.data?.FechaCapturaOriginal ? new Date(item.data.FechaCapturaOriginal) : null;
 
 
-const validationSchema = Yup.object().shape({
+const validationSchema = useMemo(() => Yup.object().shape({
   FechaCaptura: parseDate(ejercicio)
     .required("La fecha de captura es obligatoria")
     .test(
-      "rango-15-dias",
-      "La fecha de captura solo puede retroceder hasta 15 días desde su valor original",
+      "rango-1-mes",
+      "La fecha de captura solo puede retroceder hasta 1 mes desde su valor original",
       function (value) {
         if (!value || !fechaCapturaOriginal) return true;
-        const diffMs = fechaCapturaOriginal.getTime() - value.getTime();
-        const diffDias = diffMs / (1000 * 60 * 60 * 24);
-        return diffDias >= 0 && diffDias <= 15;
+        // Límite: mismo día del mes anterior (ej. 15/oct -> 15/sep)
+        const limite = new Date(fechaCapturaOriginal);
+        limite.setMonth(limite.getMonth() - 1);
+        return value >= limite && value <= fechaCapturaOriginal;
       },
     )
     .test(
@@ -182,7 +183,7 @@ const validationSchema = Yup.object().shape({
       return new Date(value) >= new Date(FechaCotizacion);
     },
   ),
-});
+}), [ejercicio, fechaCapturaOriginal]);
 
 
     const mutation = useMutation({

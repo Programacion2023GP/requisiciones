@@ -353,6 +353,16 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
       );
       const centroCosto = departamento?.Centro_Costo ?? 0;
       formik.current?.setFieldValue("Centro_Costo", centroCosto);
+
+      // Solicitante = director del departamento seleccionado
+      if (Number(value) > 0) {
+        GetAxios(`departaments/director/${Number(value)}`)
+          .then((res: any) => {
+            const nombre = res?.data?.[0]?.Nombre_Director || "";
+            formik.current?.setFieldValue("Solicitante", nombre);
+          })
+          .catch(() => {});
+      }
     }
   };
   // Helper para detectar tipo de archivo por extensión o MIME
@@ -478,7 +488,7 @@ const RequisitionForm: React.FC<PropsRequisition> = ({
             return (
               <>
                 {/* --- DEPARTAMENTOS --- */}
-                {localStorage.getItem("role") === "SISTEMAS" ? (
+                {["SISTEMAS", "MASTER"].includes(localStorage.getItem("role") ?? "") ? (
                   <FormikAutocomplete
                     responsive={responsive}
                     loading={groups.isLoading}

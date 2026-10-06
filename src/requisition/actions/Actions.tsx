@@ -690,6 +690,55 @@ const Actions: React.FC<{
                </Tooltip>
              </div>
            </PermissionMenu>
+           {data.Status == "CA" && !isAuditor && (
+             <div className="w-fit">
+               <PermissionMenu IdMenu="DescancelarRequis">
+                 <Tooltip content="Descancelar requisición">
+                   <Button
+                     color="green"
+                     variant="solid"
+                     size="small"
+                     onClick={() => {
+                       const nombres: Record<string, string> = {
+                         CP: "CAPTURA",
+                         AU: "AUTORIZADA",
+                         AS: "ASIGNADO",
+                         CO: "COTIZADO",
+                         OC: "ORDEN DE COMPRA",
+                         SU: "SURTIDA",
+                       };
+                       const destino =
+                         data.StatusAnterior && data.StatusAnterior !== "CA"
+                           ? data.StatusAnterior
+                           : data.UsuarioOC
+                             ? "OC"
+                             : data.UsuarioCO
+                               ? "CO"
+                               : data.UsuarioAS
+                                 ? "AS"
+                                 : data.UsuarioAU
+                                   ? "AU"
+                                   : "CP";
+                       showConfirmationAlert(
+                         `¿Descancelar el folio ${data.IDRequisicion}?`,
+                         `Regresará a ${nombres[destino] ?? destino} y se borrará el motivo de cancelación.`,
+                       ).then((isConfirmed) => {
+                         if (isConfirmed) {
+                           mutation.mutate({
+                             method: "POST",
+                             url: "/requisiciones/descancelar",
+                             data: { id: data.Id },
+                           });
+                         }
+                       });
+                     }}
+                   >
+                     <icons.Tb.TbRestore />
+                   </Button>
+                 </Tooltip>
+               </PermissionMenu>
+             </div>
+           )}
            {data.Status != "CA" && (
              <>
                <div className="w-fit">

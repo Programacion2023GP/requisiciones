@@ -4,6 +4,39 @@
 
 ---
 
+## 🔧 **v3.4.0.2** · *🧱 RC*
+📅 **Fecha:** 6 de octubre de 2026 a las 11:46 a.m.  
+👤 **Autor:**   
+🧭 **Tipo:** Build
+
+_Sin cambios registrados._
+
+---
+
+## ✨ **v3.4.0.1** · *🧱 RC*
+📅 **Fecha:** 11 de septiembre de 2026, 9:19 a.m.  
+👤 **Autor:** luis gutierrez  
+🧭 **Tipo:** Minor
+
+**✨ Mejoras**
+- se agrego el rol auditor
+
+
+
+---
+
+## 🔧 **v3.3.0.3** · *🧱 RC*
+📅 **Fecha:** 1 de septiembre de 2026, 1:38 p.m.  
+👤 **Autor:** n  
+🧭 **Tipo:** Build
+
+**✨ Mejoras**
+- n
+
+
+
+---
+
 ## 🔧 **v3.3.0.2** · *🧱 RC*
 📅 **Fecha:** 4 de agosto de 2026, 9:48 a.m.  
 👤 **Autor:**   
